@@ -1,0 +1,5 @@
+classiq
+numpy
+qiskit
+linear_solvers
+matplotlib
