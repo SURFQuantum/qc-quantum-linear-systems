@@ -1,7 +1,7 @@
 import numpy as np
 from qiskit.quantum_info import Statevector
 from linear_solvers import HHL, NumPyLinearSolver
-
+from qiskit.algorithms.linear_solvers.hhl import HHL
 
 def volterra_a_matrix(size, a):
     """Creates a matrix representing the linear system of the Volterra integral equation x(t) = 1 - INT(x(s)ds).
