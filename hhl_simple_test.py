@@ -1,7 +1,8 @@
 import numpy as np
 from qiskit.quantum_info import Statevector
 from linear_solvers import HHL, NumPyLinearSolver
-from qiskit.algorithms.linear_solvers.hhl import HHL
+# from qiskit.algorithms.linear_solvers.hhl import HHL
+
 
 def volterra_a_matrix(size, a):
     """Creates a matrix representing the linear system of the Volterra integral equation x(t) = 1 - INT(x(s)ds).
@@ -108,4 +109,3 @@ if __name__ == "__main__":
     qc_basis = naive_hhl_solution.state.decompose(reps=5)
     print(f"Comparing depths original {qc_original.depth()} vs. decomposed {qc_basis.depth()}")
     # print(qc_basis)
-

@@ -10,7 +10,7 @@ from classiq.interface.generator.qpe import (
 from classiq.builtin_functions import AmplitudeLoading
 from classiq.interface.generator.amplitude_loading import AmplitudeLoadingImplementation
 from classiq import Model
-from classiq.model import Constraints
+# from classiq.model import Constraints
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -161,12 +161,10 @@ def verification_of_result(circuit, num_shots, matrix_a, vector_b):
 
     total_q = circuit.data.width  # total number of qubits of the whole circuit
 
-    target_pos = (
-            total_q - 1 - res_hhl.output_qubits_map["target"][0]
-    )  # position of control qubit (corrected for endianness)
-    sol_pos = [
-        total_q - 1 - qn for qn in res_hhl.output_qubits_map["solution"]
-    ]  # position of solution (corrected for endianness)
+    target_pos = (total_q - 1 - res_hhl.output_qubits_map["target"][0])
+    # position of control qubit (corrected for endianness)
+    sol_pos = [total_q - 1 - qn for qn in res_hhl.output_qubits_map["solution"]]
+    # position of solution (corrected for endianness)
 
     canonical_list = np.array(list("0" * (total_q)))  # we start with a string of zeros
     canonical_list[
@@ -188,10 +186,7 @@ def verification_of_result(circuit, num_shots, matrix_a, vector_b):
     print(
         "relative distance:  ",
         round(
-            np.linalg.norm(sol_classical - qsol_corrected)
-            / np.linalg.norm(sol_classical)
-            * 100,
-            1,
+            np.linalg.norm(sol_classical - qsol_corrected) / np.linalg.norm(sol_classical) * 100, 1,
         ),
         "%",
     )
@@ -280,9 +275,7 @@ if __name__ == "__main__":
 
     # Step 3 : Eigenvalue Inversion
 
-    w_min = (
-            1 / 2 ** precision
-    )  # for qpe register of size m, this is the minimal value which can be encoded
+    w_min = (1 / 2 ** precision)  # for qpe register of size m, this is the minimal value which can be encoded
     expression = f"{w_min}/(x)"
     al_params = AmplitudeLoading(
         size=precision,
