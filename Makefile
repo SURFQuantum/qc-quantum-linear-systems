@@ -1,6 +1,6 @@
 PYTHON3         = python3
 TEST_DIR        = tests
-SOURCE_DIR     	= .
+SOURCE_DIR     	= quantum-linear-systems
 REQUIREMENTS    = requirements.txt
 MINCOV       	= 90
 
