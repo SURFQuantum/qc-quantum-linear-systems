@@ -1,14 +1,14 @@
 PYTHON3         = python3
 TEST_DIR        = tests
-SOURCE_DIR     	= quantum-linear-systems
+SOURCE_DIR     	= quantum_linear_systems
 REQUIREMENTS    = requirements.txt
 MINCOV       	= 90
 
-#all: install test
+all: install test
 
-#install:
-#	@echo -e "\n*** Installing $(SOURCE_DIR) package locally"
-#	@$(PYTHON3) -m pip install -e .
+install:
+	@echo -e "\n*** Installing $(SOURCE_DIR) package locally"
+	@$(PYTHON3) -m pip install -e .
 
 lint:
 	@echo -e "\n*** Checking that $(SOURCE_DIR) conforms to PEP8 coding style"
@@ -25,8 +25,7 @@ test-cov:
 clean:
 	@find . -name "*.pyc" -delete
 
-verify: clean lint test-cov _verified
-#verify: clean install lint test-cov _verified
+verify: clean install lint test-cov _verified
 
 _verified:
 	@echo "$(SOURCE_DIR) is verified :)"
