@@ -8,8 +8,8 @@ class TestUtils(unittest.TestCase):
     """Test utility functions."""
     def setUp(self):
         """Set up some matrices and vectors for testing."""
-        self.matrix = np.array([[1, 2], [3, 4]])
-        self.vector = np.array([[5], [6]])
+        self.matrix = np.array([[1, 2, 3], [4, 5, 6]])
+        self.vector = np.array([[7], [8]])
 
     def test_make_matrix_hermitian(self):
         hermitian = make_matrix_hermitian(self.matrix)
@@ -17,12 +17,13 @@ class TestUtils(unittest.TestCase):
 
     def test_expand_b_vector(self):
         expanded_vector = expand_b_vector(self.vector, self.matrix)
-        self.assertEqual(expanded_vector.shape, (4, 1))
+        self.assertEqual(expanded_vector.shape, (self.matrix.shape[0] + self.matrix.shape[1], 1))
+        self.assertTrue(np.array_equal(expanded_vector, np.array([[7], [8], [0], [0], [0]])))
 
     def test_extract_x_from_expanded(self):
         expanded_vector = expand_b_vector(self.vector, self.matrix)
         extracted_vector = extract_x_from_expanded(expanded_vector, self.matrix)
-        self.assertEqual(extracted_vector.shape, (2, 1))
+        self.assertEqual(extracted_vector.shape, (self.matrix.shape[1], 1))
 
     def test_extract_hhl_solution_vector_from_state_vector(self):
         hermitian = make_matrix_hermitian(self.matrix)

@@ -5,8 +5,8 @@ import numpy as np
 def make_matrix_hermitian(matrix):
     """Creates a hermitian version of a NxM :obj:np.array A as a  (N+M)x(N+M) block matrix [[0 ,A], [A_dagger, 0]]."""
     shape = matrix.shape
-    upper_zero = np.zeros(shape)
-    lower_zero = np.zeros(shape=(shape[1], shape[0]))
+    upper_zero = np.zeros(shape=(shape[0], shape[0]))
+    lower_zero = np.zeros(shape=(shape[1], shape[1]))
     matrix_dagger = matrix.conj().T
     hermitian_matrix = np.block([[upper_zero, matrix], [matrix_dagger, lower_zero]])
     assert np.array_equal(hermitian_matrix, hermitian_matrix.conj().T)
