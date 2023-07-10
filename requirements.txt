@@ -1,7 +1,7 @@
 flake8
 pytest
 pytest-cov
-classiq
+classiq>=0.24
 numpy
 qiskit
 # linear_solvers from https://github.com/anedumla/quantum_linear_solvers
