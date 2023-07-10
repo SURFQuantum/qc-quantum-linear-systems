@@ -31,36 +31,74 @@ Paulidict = {
 
 # generate all combinations of Pauli strings of size n
 def generate_all_pauli_strings(seq, n):
+    """
+    Generate all combinations of Pauli strings of size n.
+
+    Parameters:
+        seq (str): The string of Pauli operators (I, Z, X, Y).
+        n (int): The size of the output Pauli strings.
+
+    Returns:
+        A generator of all combinations of Pauli strings of size n.
+    """
     for s in product(seq, repeat=n):
         yield "".join(s)
 
 
 # convert a Paulistring of size n to 2**n X 2**n matrix
 def pauli_string_2mat(seq):
-    myPmat = Paulidict[seq[0]]
+    """
+    Convert a Pauli string of size n to a 2**n x 2**n matrix.
+
+    Parameters:
+        seq (str): The string of Pauli operators (I, Z, X, Y).
+
+    Returns:
+        A 2**n x 2**n matrix representation of the Pauli string.
+    """
+    p_matrix = Paulidict[seq[0]]
     for p in seq[1:]:
-        myPmat = np.kron(myPmat, Paulidict[p])
-    return myPmat
+        p_matrix = np.kron(p_matrix, Paulidict[p])
+    return p_matrix
 
 
 # Hilbert-Schmidt-Product of two matrices M1, M2
-def hilbert_schmidt(M1, M2):
-    return (np.dot(M1.conjugate().transpose(), M2)).trace()
+def hilbert_schmidt(m1, m2):
+    """
+    Compute the Hilbert-Schmidt-Product of two matrices M1, M2.
+
+    Parameters:
+        m1 (np.ndarray): The first matrix.
+        m2 (np.ndarray): The second matrix.
+
+    Returns:
+        The Hilbert-Schmidt inner product of the two matrices.
+    """
+    return (np.dot(m1.conjugate().transpose(), m2)).trace()
 
 
 # Naive decomposition, running over all HS products for all Pauli strings
-def lcu_naive(H):
-    assert H.shape[0] == H.shape[1], "matrix is not square"
-    assert H.shape[0] != 0, "matrix is of size 0"
-    assert H.shape[0] & (H.shape[0] - 1) == 0, "matrix size is not 2**n"
+def lcu_naive(hm):
+    """
+    Naive decomposition, running over all HS products for all Pauli strings.
 
-    n = int(np.log2(H.shape[0]))
-    myPualiList = list(generate_all_pauli_strings("IZXY", n))
+    Parameters:
+        hm (np.ndarray): The input Hermitian matrix.
+
+    Returns:
+        A list of tuples, each containing a Pauli string and the corresponding coefficient.
+    """
+    assert hm.shape[0] == hm.shape[1], "matrix is not square"
+    assert hm.shape[0] != 0, "matrix is of size 0"
+    assert hm.shape[0] & (hm.shape[0] - 1) == 0, "matrix size is not 2**n"
+
+    n = int(np.log2(hm.shape[0]))
+    pauli_strings = list(generate_all_pauli_strings("IZXY", n))
 
     mylist = []
 
-    for pstr in myPualiList:
-        co = (1 / 2**n) * hilbert_schmidt(pauli_string_2mat(pstr), H)
+    for pstr in pauli_strings:
+        co = (1 / 2**n) * hilbert_schmidt(pauli_string_2mat(pstr), hm)
         if co != 0:
             mylist = mylist + [(pstr, co)]
 
@@ -68,6 +106,16 @@ def lcu_naive(H):
 
 
 def state_preparation(vector_b, sp_upper):
+    """
+    Prepare the state based on the input vector.
+
+    Parameters:
+        vector_b (np.ndarray): The input vector.
+        sp_upper (float): The upper bound of the L2 error metric for the state preparation.
+
+    Returns:
+        A StatePreparation object with the desired amplitudes and error metric.
+    """
     vector_b = tuple(vector_b)
     # sp_upper = precision of the State Preparation
     return StatePreparation(
@@ -75,6 +123,15 @@ def state_preparation(vector_b, sp_upper):
 
 
 def quantum_phase_estimation(precision):
+    """
+    Perform Quantum Phase Estimation (QPE) with the specified precision.
+
+    Parameters:
+        precision (int): The desired precision for the QPE.
+
+    Returns:
+        A PhaseEstimation object configured with the specified precision.
+    """
     po = PauliOperator(pauli_list=paulis)
     exp_params = Exponentiation(
         pauli_operator=po,
@@ -91,6 +148,18 @@ def quantum_phase_estimation(precision):
 
 
 def verification_of_result(circuit, num_shots, matrix_a, vector_b):
+    """
+    Verify the result of the quantum algorithm by comparing with the classical solution.
+
+    Parameters:
+        circuit (Circuit): The quantum circuit.
+        num_shots (int): The number of times to run the quantum circuit.
+        matrix_a (np.ndarray): The input matrix.
+        vector_b (np.ndarray): The input vector.
+
+    Returns:
+        A tuple containing the classical solution and the solution obtained from the quantum algorithm.
+    """
     res_hhl = Executor(
         backend_preferences=IBMBackendPreferences(backend_name="aer_simulator_statevector"),
         num_shots=num_shots,
@@ -131,6 +200,15 @@ def verification_of_result(circuit, num_shots, matrix_a, vector_b):
 
 
 def define_volterra_problem(n):
+    """
+    Define the Volterra integral equation problem.
+
+    Parameters:
+        n (int): The size of the problem, such that the total size will be 2**n.
+
+    Returns:
+        A tuple containing the problem matrix and vector.
+    """
     # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
     N = 2 ** n
     delta_s = 1 / N
@@ -156,6 +234,12 @@ def define_volterra_problem(n):
 
 
 def define_demo_problem():
+    """
+    Define a demo problem.
+
+    Returns:
+        A tuple containing the problem matrix and vector.
+    """
     mat = np.array(
         [
             [0.28, -0.01, 0.02, -0.1],
@@ -173,10 +257,16 @@ def define_demo_problem():
     return mat, vec
 
 
-def verify_matrix_sym_and_pos_ev(matrix):
-    if not np.allclose(A, A.T, rtol=1e-6, atol=1e-6):
+def verify_matrix_sym_and_pos_ev(mat):
+    """
+    Verify that the input matrix is symmetric and has positive eigenvalues.
+
+    Parameters:
+        mat (np.ndarray): The input matrix.
+    """
+    if not np.allclose(mat, mat.T, rtol=1e-6, atol=1e-6):
         raise Exception("The matrix is not symmetric")
-    w, v = np.linalg.eig(A)
+    w, v = np.linalg.eig(mat)
     for lam in w:
         if lam < 0 or lam > 1:
             raise NotImplementedError(f"Eigenvalues are not in (0,1), lam_min={min(w)}")
