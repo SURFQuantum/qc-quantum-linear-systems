@@ -6,3 +6,4 @@ numpy
 qiskit
 # linear_solvers from https://github.com/anedumla/quantum_linear_solvers
 matplotlib
+PyQt5

@@ -1,7 +1,18 @@
 # quantum-linear-systems
 Quantum algorithms to solve linear systems of equations.
 
-## Classiq SDK
+## Additional Requirements
+### Qiskit Linear Systems
+In addition to the requirements in `requirements.txt` it is also necessary to manually install the 
+[linear solvers](https://github.com/anedumla/quantum_linear_solvers) package, as Qiskit has deprecated the HHL 
+algorithm implementations (see their [algorithms migration guide](https://qiskit.org/documentation/migration_guides/algorithms_migration.html)).
+
+The linear solvers package can be installed by executing:
+```
+pip install git+https://github.com/anedumla/quantum_linear_solvers
+```
+
+### Classiq SDK
 This project makes use of the [classiq](https://www.classiq.io/) SDK.
 To use the `classiq` SKD the user must perform authentication.
 For more info check out the [classiq docs](https://docs.classiq.io/latest/) page.
