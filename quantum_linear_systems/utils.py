@@ -33,4 +33,6 @@ def extract_hhl_solution_vector_from_state_vector(hermitian_matrix, state_vector
     size_of_hermitian_matrix = hermitian_matrix.shape[1]
     number_of_qubits_in_result = int(np.log2(len(state_vector)))
     binary_rep = "1" + (number_of_qubits_in_result-1) * "0"
-    return np.real(state_vector[int(binary_rep, 2):(int(binary_rep, 2) + size_of_hermitian_matrix)])
+    not_normalized_vec = np.real(state_vector[int(binary_rep, 2):(int(binary_rep, 2) + size_of_hermitian_matrix)])
+
+    return not_normalized_vec/np.linalg.norm(not_normalized_vec)

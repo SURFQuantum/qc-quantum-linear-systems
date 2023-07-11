@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 from classiq import Executor
 from classiq.execution import IBMBackendPreferences
 
-from toymodels import volterra_a_matrix
-from utils import make_matrix_hermitian, expand_b_vector
+from quantum_linear_systems.toymodels import volterra_a_matrix
+from quantum_linear_systems.utils import make_matrix_hermitian, expand_b_vector
 
 
 Paulidict = {
@@ -80,7 +80,8 @@ def hilbert_schmidt(m1, m2):
 # Naive decomposition, running over all HS products for all Pauli strings
 def lcu_naive(hm):
     """
-    Naive decomposition, running over all HS products for all Pauli strings.
+    Naive LCU (linear combination of unitary operations) decomposition, running over all HS products for all Pauli
+    strings.
 
     Parameters:
         hm (np.ndarray): The input Hermitian matrix.
@@ -122,7 +123,7 @@ def state_preparation(vector_b, sp_upper):
         amplitudes=vector_b, error_metric={"L2": {"upper_bound": sp_upper}})
 
 
-def quantum_phase_estimation(precision):
+def quantum_phase_estimation(paulis, precision):
     """
     Perform Quantum Phase Estimation (QPE) with the specified precision.
 
@@ -147,7 +148,7 @@ def quantum_phase_estimation(precision):
     )
 
 
-def verification_of_result(circuit, num_shots, matrix_a, vector_b):
+def verification_of_result(circuit, num_shots, matrix_a, vector_b, w_min):
     """
     Verify the result of the quantum algorithm by comparing with the classical solution.
 
@@ -167,10 +168,13 @@ def verification_of_result(circuit, num_shots, matrix_a, vector_b):
 
     total_q = circuit.data.width  # total number of qubits of the whole circuit
 
-    target_pos = (total_q - 1 - res_hhl.output_qubits_map["target"][0])
-    # position of control qubit (corrected for endianness)
-    sol_pos = [total_q - 1 - qn for qn in res_hhl.output_qubits_map["solution"]]
-    # position of solution (corrected for endianness)
+    # target_pos = (total_q - 1 - res_hhl.output_qubits_map["target"][0])
+    # # position of control qubit (corrected for endianness)
+    # sol_pos = [total_q - 1 - qn for qn in res_hhl.output_qubits_map["solution"]]
+    # # position of solution (corrected for endianness)
+    target_pos = res_hhl.output_qubits_map["target"][0]  # position of control qubit
+
+    sol_pos = list(res_hhl.output_qubits_map["solution"])  # position of solution
 
     canonical_list = np.array(list("0" * (total_q)))  # we start with a string of zeros
     canonical_list[
@@ -235,7 +239,7 @@ def define_volterra_problem(n):
 
 def define_demo_problem():
     """
-    Define a demo problem.
+    Define a demo problem. (See https://platform.classiq.io/advanced)
 
     Returns:
         A tuple containing the problem matrix and vector.
@@ -268,22 +272,18 @@ def verify_matrix_sym_and_pos_ev(mat):
         raise Exception("The matrix is not symmetric")
     w, v = np.linalg.eig(mat)
     for lam in w:
-        if lam < 0 or lam > 1:
-            raise NotImplementedError(f"Eigenvalues are not in (0,1), lam_min={min(w)}")
+        if lam < 0:
+            raise Exception("The matrix has negative eigenvalues")
+        # the original classiq workshop checked if the EV are in [0,1)
+        if lam > 1:
+            print("The matrix has eigenvalues larger than 1: ", lam)
 
 
-if __name__ == "__main__":
-    # input params
-    n = 1
-    precision = 4
+def classiq_hhl_implementation(matrix_a, vector_b, precision):
+    # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
+    verify_matrix_sym_and_pos_ev(mat=matrix_a)
 
-    A, b = define_volterra_problem(n)
-    # A, b = define_demo_problem()
-
-    # verifying that the matrix is symmetric and have eigenvalues in [0,1)
-    verify_matrix_sym_and_pos_ev(matrix=A)
-
-    paulis = lcu_naive(A)
+    paulis = lcu_naive(matrix_a)
     # print("Pauli strings list: \n")
     # for p in paulis:
     #     print(p[0], ": ", np.round(p[1], 3))
@@ -291,14 +291,15 @@ if __name__ == "__main__":
     print("\n Number of qubits for matrix representation =", len(paulis[0][0]))
 
     # Step 1: state preparation
-    if np.linalg.norm(b) != 1:
-        print(f"Normalizing A and b by {np.linalg.norm(b)}")
-    b_normalized = b / np.linalg.norm(b)
-    A_normalized = A / np.linalg.norm(b)
+    if np.linalg.norm(vector_b) != 1:
+        print(f"Normalizing A and b by {np.linalg.norm(vector_b)}")
+    b_normalized = vector_b / np.linalg.norm(vector_b)
+    A_normalized = matrix_a / np.linalg.norm(vector_b)
+
     sp = state_preparation(vector_b=b_normalized, sp_upper=0.00)
 
     # Step 2 : Quantum Phase Estimation
-    qpe = quantum_phase_estimation(precision=4)
+    qpe = quantum_phase_estimation(paulis=paulis, precision=precision)
 
     # Step 3 : Eigenvalue Inversion
 
@@ -332,14 +333,28 @@ if __name__ == "__main__":
     model_hhl.set_outputs({"target": al_out["TARGET"], "solution": i_qpe_out["IN"]})
 
     # Synth circuit
-
     circuit_hhl = model_hhl.synthesize()
     # circuit_hhl = model_hhl.synthesize(constraints=Constraints(max_width=10))
-    circuit_hhl.show_interactive()
+
+    return circuit_hhl, A_normalized, b_normalized, w_min
+
+
+if __name__ == "__main__":
+    # input params
+    # n = 2
+    precision = 4
+
+    # A, b = define_volterra_problem(n)
+    A, b = define_demo_problem()
+
+    circuit_hhl, A_normalized, b_normalized, w_min = classiq_hhl_implementation(matrix_a=A, vector_b=b,
+                                                                                precision=precision)
+    circuit_hhl.show()
     print("depth = ", circuit_hhl.transpiled_circuit.depth)
 
     # verify against classical solution
-    csol, qsol = verification_of_result(circuit=circuit_hhl, num_shots=1, matrix_a=A_normalized, vector_b=b_normalized)
+    csol, qsol = verification_of_result(circuit=circuit_hhl, num_shots=1, matrix_a=A_normalized, vector_b=b_normalized,
+                                        w_min=w_min)
 
     matplotlib.use('Qt5Agg')
     plt.plot(csol, "bo", label="classical")

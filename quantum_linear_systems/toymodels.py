@@ -2,6 +2,23 @@
 import numpy as np
 
 
+def qiskit_4qubit_example():
+    """Reproduces the qiskit 4-qubit example from https://learn.qiskit.org/course/ch-applications/
+    solving-linear-systems-of-equations-using-hhl-and-its-qiskit-implementation#example1
+
+    Returns
+    matrix_a =   1  -1/3
+                -1/3 1
+    vector_b = (1,0)
+    solution_x = (1.125, 0.375)
+    """
+    matrix_a = np.array([[1, -1/3], [-1/3, 1]])
+    vector_b = np.array([[1], [0]])
+    solution_x = np.array([[1.125], [0.375]])
+
+    return matrix_a, vector_b, solution_x
+
+
 def volterra_a_matrix(size, a):
     """Creates a matrix representing the linear system of the Volterra integral equation x(t) = 1 - INT(x(s)ds).
     Parameters
