@@ -9,21 +9,28 @@ class TestUtils(unittest.TestCase):
     def setUp(self):
         """Set up some matrices and vectors for testing."""
         self.matrix = np.array([[1, 2, 3], [4, 5, 6]])
+        self.square_matrix = np.array([[1, 2], [4, 5]])
         self.vector = np.array([[7], [8]])
+        self.test_matrices = [self.matrix, self.square_matrix]
 
     def test_make_matrix_hermitian(self):
-        hermitian = make_matrix_hermitian(self.matrix)
-        self.assertTrue(np.array_equal(hermitian, hermitian.conj().T))
+        for mat in self.test_matrices:
+            hermitian = make_matrix_hermitian(mat)
+            self.assertTrue(np.array_equal(hermitian, hermitian.conj().T))
 
     def test_expand_b_vector(self):
-        expanded_vector = expand_b_vector(self.vector, self.matrix)
-        self.assertEqual(expanded_vector.shape, (self.matrix.shape[0] + self.matrix.shape[1], 1))
-        self.assertTrue(np.array_equal(expanded_vector, np.array([[7], [8], [0], [0], [0]])))
+        for mat in self.test_matrices:
+            expanded_vector = expand_b_vector(self.vector, mat)
+            self.assertEqual(expanded_vector.shape, (mat.shape[0] + mat.shape[1], 1))
+            self.assertTrue(np.array_equal(expanded_vector, np.array([[7], [8], *(mat.shape[1] * [[0]])])))
 
     def test_extract_x_from_expanded(self):
         expanded_vector = expand_b_vector(self.vector, self.matrix)
         extracted_vector = extract_x_from_expanded(expanded_vector, self.matrix)
-        self.assertEqual(extracted_vector.shape, (self.matrix.shape[1], 1))
+        self.assertTrue(np.array_equal(extracted_vector, np.zeros(self.matrix.shape[1])))
+        expanded_vector = expand_b_vector(self.vector, self.square_matrix)
+        extracted_vector = extract_x_from_expanded(expanded_vector)
+        self.assertTrue(np.array_equal(extracted_vector, np.zeros(self.square_matrix.shape[1])))
 
     def test_extract_hhl_solution_vector_from_state_vector(self):
         hermitian = make_matrix_hermitian(self.matrix)

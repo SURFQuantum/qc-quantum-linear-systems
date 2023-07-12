@@ -1,5 +1,7 @@
 """Utility functions that can be imported by either implementation."""
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 def make_matrix_hermitian(matrix):
@@ -20,10 +22,13 @@ def expand_b_vector(unexpanded_vector, non_hermitian_matrix):
     return np.block([[unexpanded_vector], [lower_zero]])
 
 
-def extract_x_from_expanded(expanded_solution_vector, non_hermitian_matrix):
+def extract_x_from_expanded(expanded_solution_vector, non_hermitian_matrix=None):
     """The expanded problem returns a vector y=(0 x), this function returns x from input y."""
-    shape = non_hermitian_matrix.shape
-    return expanded_solution_vector[shape[0]:]
+    if non_hermitian_matrix is not None:
+        index = non_hermitian_matrix.shape[0]
+    else:
+        index = int(expanded_solution_vector.flatten().shape[0] / 2)
+    return expanded_solution_vector[index:].flatten()
 
 
 def extract_hhl_solution_vector_from_state_vector(hermitian_matrix, state_vector):
@@ -35,4 +40,16 @@ def extract_hhl_solution_vector_from_state_vector(hermitian_matrix, state_vector
     binary_rep = "1" + (number_of_qubits_in_result-1) * "0"
     not_normalized_vec = np.real(state_vector[int(binary_rep, 2):(int(binary_rep, 2) + size_of_hermitian_matrix)])
 
-    return not_normalized_vec/np.linalg.norm(not_normalized_vec)
+    return not_normalized_vec / np.linalg.norm(not_normalized_vec)
+
+
+def plot_csol_vs_qsol(classical_solution, quantum_solution, title):
+    matplotlib.use('Qt5Agg')
+    plt.plot(classical_solution, "bo", label="classical")
+    plt.plot(quantum_solution, "ro", label="HHL")
+    plt.legend()
+    plt.xlabel("$i$")
+    plt.ylabel("$x_i$")
+    plt.ylim(0, 1)
+    plt.title(title)
+    plt.show()
