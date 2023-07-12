@@ -22,7 +22,7 @@ def expand_b_vector(unexpanded_vector, non_hermitian_matrix):
     return np.block([[unexpanded_vector], [lower_zero]])
 
 
-def extract_x_from_expanded(expanded_solution_vector, non_hermitian_matrix=None):
+def extract_x_from_expanded(expanded_solution_vector: np.array, non_hermitian_matrix: np.array = None):
     """The expanded problem returns a vector y=(0 x), this function returns x from input y."""
     if non_hermitian_matrix is not None:
         index = non_hermitian_matrix.shape[0]
@@ -31,7 +31,7 @@ def extract_x_from_expanded(expanded_solution_vector, non_hermitian_matrix=None)
     return expanded_solution_vector[index:].flatten()
 
 
-def extract_hhl_solution_vector_from_state_vector(hermitian_matrix, state_vector):
+def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, state_vector: np.array):
     """Extract the solution vector x from the full state vector of the HHL problem which also includes 1 aux. qubit and
     multiple work qubits encoding the eigenvalues.
     """

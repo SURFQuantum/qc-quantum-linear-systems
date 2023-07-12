@@ -1,5 +1,8 @@
 """Implementations of toy-models that can be imported by the algorithms."""
 import numpy as np
+from linear_solvers import NumPyLinearSolver
+
+from quantum_linear_systems.utils import make_matrix_hermitian, expand_b_vector
 
 
 def qiskit_4qubit_example():
@@ -16,7 +19,7 @@ def qiskit_4qubit_example():
     vector_b = np.array([[1], [0]])
     solution_x = np.array([[1.125], [0.375]])
 
-    return matrix_a, vector_b, solution_x
+    return matrix_a, vector_b, solution_x, "qiskit_4qubit"
 
 
 def volterra_a_matrix(size, a):
@@ -50,7 +53,44 @@ def volterra_a_matrix(size, a):
     return np.matrix(matrix_a)
 
 
-def integro_differential_a(a_matrix, t_n):
+def volterra_problem(n):
+    """
+    Define the Volterra integral equation problem ready for solving.
+
+    Parameters:
+        n (int): The size of the problem, such that the total size will be 2**n.
+
+    Returns:
+        A tuple containing the problem matrix and vector.
+    """
+    # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
+    N = 2 ** n
+    delta_s = 1 / N
+
+    alpha = delta_s / 2
+
+    vec = np.ones((N, 1))
+
+    # prepare matrix A and vector b to be used for HHL, expanding them to a hermitian form of A --> A_tilde*x=b_tilde
+    mat = volterra_a_matrix(size=N, a=alpha)
+
+    print("A =", mat, "\n")
+    print("b =", vec)
+
+    # expand
+    a_tilde = make_matrix_hermitian(mat)
+    b_tilde = expand_b_vector(vec, mat)
+
+    print("A_tilde =", a_tilde, "\n")
+    print("b_tilde =", b_tilde)
+
+    classical_solution = NumPyLinearSolver().solve(mat, vec).state.flatten()    # qiksit
+    # classical_solution = np.linalg.solve(matrix_a, vector_b)                  # numpy (classiq)
+
+    return a_tilde, b_tilde, classical_solution, "Volterra"
+
+
+def integro_differential_a_matrix(a_matrix, t_n):
     """Build a matrix of arbitrary size representing the integro-differential toy model."""
     delta_t = 1 / t_n
     alpha_n = a_matrix.shape[0]
@@ -77,5 +117,5 @@ if __name__ == "__main__":
     t_n = 4
     a = np.random.random((t_n, t_n))
 
-    result = integro_differential_a(a, t_n)
+    result = integro_differential_a_matrix(a, t_n)
     print(result)

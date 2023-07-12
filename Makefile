@@ -16,7 +16,7 @@ lint:
 
 test:
 	@echo -e "\n*** Running unit tests for $(SOURCE_DIR)"
-	@$(PYTHON3) -m pytest --verbose $(TEST_DIR)
+	@$(PYTHON3) -m pytest --verbose $(TEST_DIR) -p no:warnings
 
 test-cov:
 	@echo -e "\n*** Running unit tests for $(SOURCE_DIR) including coverage"

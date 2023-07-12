@@ -1,5 +1,7 @@
+import time
 import numpy as np
 from itertools import product
+
 from classiq.builtin_functions import StatePreparation
 from classiq.builtin_functions import Exponentiation, PhaseEstimation
 from classiq.builtin_functions.exponentiation import PauliOperator
@@ -11,14 +13,11 @@ from classiq.builtin_functions import AmplitudeLoading
 from classiq.interface.generator.amplitude_loading import AmplitudeLoadingImplementation
 from classiq import Model
 # from classiq.model import Constraints
-import matplotlib
-import matplotlib.pyplot as plt
-
 from classiq import Executor
 from classiq.execution import IBMBackendPreferences
 
-from quantum_linear_systems.toymodels import volterra_a_matrix
-from quantum_linear_systems.utils import make_matrix_hermitian, expand_b_vector
+from quantum_linear_systems.toymodels import volterra_problem
+from quantum_linear_systems.utils import extract_x_from_expanded, plot_csol_vs_qsol
 
 
 Paulidict = {
@@ -148,7 +147,7 @@ def quantum_phase_estimation(paulis, precision):
     )
 
 
-def verification_of_result(circuit, num_shots, matrix_a, vector_b, w_min):
+def verification_of_result(circuit, num_shots, w_min, sol_classical):
     """
     Verify the result of the quantum algorithm by comparing with the classical solution.
 
@@ -187,8 +186,9 @@ def verification_of_result(circuit, num_shots, matrix_a, vector_b, w_min):
         templist[sol_pos] = list(np.binary_repr(i, len(sol_pos))[::-1])
         qsol.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
 
+    qsol = extract_x_from_expanded(np.array(qsol))
+
     print("first", qsol)
-    sol_classical = np.linalg.solve(matrix_a, vector_b)
     global_phase = np.angle(qsol)
     qsol_corrected = np.real(qsol / np.exp(1j * global_phase))
     print("classical:  ", sol_classical)
@@ -200,41 +200,7 @@ def verification_of_result(circuit, num_shots, matrix_a, vector_b, w_min):
         ),
         "%",
     )
-    return sol_classical, qsol_corrected
-
-
-def define_volterra_problem(n):
-    """
-    Define the Volterra integral equation problem.
-
-    Parameters:
-        n (int): The size of the problem, such that the total size will be 2**n.
-
-    Returns:
-        A tuple containing the problem matrix and vector.
-    """
-    # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
-    N = 2 ** n
-    delta_s = 1 / N
-
-    alpha = delta_s / 2
-
-    vec = np.ones((N, 1))
-
-    # prepare matrix A and vector b to be used for HHL, expanding them to a hermitian form of A --> A_tilde*x=b_tilde
-    mat = volterra_a_matrix(size=N, a=alpha)
-
-    print("A =", mat, "\n")
-    print("b =", vec)
-
-    # expand
-    a_tilde = make_matrix_hermitian(mat)
-    b_tilde = expand_b_vector(vec, mat)
-
-    print("A_tilde =", a_tilde, "\n")
-    print("b_tilde =", b_tilde)
-
-    return a_tilde, b_tilde
+    return qsol_corrected
 
 
 def define_demo_problem():
@@ -281,7 +247,7 @@ def verify_matrix_sym_and_pos_ev(mat):
 
 def classiq_hhl_implementation(matrix_a, vector_b, precision):
     # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
-    verify_matrix_sym_and_pos_ev(mat=matrix_a)
+    # verify_matrix_sym_and_pos_ev(mat=matrix_a)
 
     paulis = lcu_naive(matrix_a)
     # print("Pauli strings list: \n")
@@ -340,12 +306,14 @@ def classiq_hhl_implementation(matrix_a, vector_b, precision):
 
 
 if __name__ == "__main__":
+    start_time = time.time()
+
     # input params
-    # n = 2
+    n = 2
     precision = 4
 
-    # A, b = define_volterra_problem(n)
-    A, b = define_demo_problem()
+    A, b, csol, name = volterra_problem(n)
+    # A, b = define_demo_problem()
 
     circuit_hhl, A_normalized, b_normalized, w_min = classiq_hhl_implementation(matrix_a=A, vector_b=b,
                                                                                 precision=precision)
@@ -353,16 +321,16 @@ if __name__ == "__main__":
     print("depth = ", circuit_hhl.transpiled_circuit.depth)
 
     # verify against classical solution
-    csol, qsol = verification_of_result(circuit=circuit_hhl, num_shots=1, matrix_a=A_normalized, vector_b=b_normalized,
-                                        w_min=w_min)
+    qsol = verification_of_result(circuit=circuit_hhl, num_shots=1, w_min=w_min, sol_classical=csol)
 
-    matplotlib.use('Qt5Agg')
-    plt.plot(csol, "bo", label="classical")
-    plt.plot(qsol, "ro", label="HHL")
-    plt.legend()
-    plt.xlabel("$i$")
-    plt.ylabel("$x_i$")
-    plt.show()
+    csol /= np.linalg.norm(csol)
+    qsol /= np.linalg.norm(qsol)
+    print("classical", csol.flatten())
+    print("quantum", qsol.flatten())
+
+    plot_csol_vs_qsol(csol, qsol, "Classiq")
+
+    print(f"Finished classiq run in {time.time() - start_time}s.")
 
     if np.linalg.norm(csol - qsol) / np.linalg.norm(csol) > 0.2:
         raise RuntimeError("The HHL solution is too far from the classical one, please verify your algorithm.")

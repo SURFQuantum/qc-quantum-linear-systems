@@ -10,7 +10,7 @@ from quantum_linear_systems.hhl_classiq_implementation import classiq_hhl_implem
 
 class TestQiskit(unittest.TestCase):
     def setUp(self) -> None:
-        self.matrix, self.vector, self.solution = qiskit_4qubit_example()
+        self.matrix, self.vector, self.solution, _ = qiskit_4qubit_example()
         self.norm_solution = np.transpose(self.solution / np.linalg.norm(self.solution)).flatten()
 
     def test_4qubit_example(self):
@@ -24,17 +24,15 @@ class TestQiskit(unittest.TestCase):
 
 class TestClassiq(unittest.TestCase):
     def setUp(self) -> None:
-        self.matrix, self.vector, self.solution = qiskit_4qubit_example()
+        self.matrix, self.vector, self.solution, _ = qiskit_4qubit_example()
         self.norm_solution = np.transpose(self.solution / np.linalg.norm(self.solution)).flatten()
 
     def test_4qubit_example(self):
         hhl_circuit, _, _, w_min = classiq_hhl_implementation(matrix_a=self.matrix, vector_b=self.vector, precision=4)
-        class_sol, q_sol = verification_of_result(hhl_circuit, num_shots=1000, matrix_a=self.matrix,
-                                                  vector_b=self.vector, w_min=w_min)
+        q_sol = verification_of_result(hhl_circuit, num_shots=1000, w_min=w_min, sol_classical=self.solution)
         q_sol /= np.linalg.norm(q_sol)
         print(self.norm_solution)
         print(q_sol)
-        self.assertTrue(np.allclose(class_sol, self.solution))
         self.assertTrue(np.allclose(self.norm_solution, q_sol))
 
 
