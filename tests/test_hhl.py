@@ -29,7 +29,7 @@ class TestClassiq(unittest.TestCase):
 
     def test_4qubit_example(self):
         hhl_circuit, _, _, w_min = classiq_hhl_implementation(matrix_a=self.matrix, vector_b=self.vector, precision=4)
-        q_sol = verification_of_result(hhl_circuit, num_shots=1000, w_min=w_min, sol_classical=self.solution)
+        q_sol = verification_of_result(hhl_circuit, w_min=w_min, sol_classical=self.solution)
         q_sol /= np.linalg.norm(q_sol)
         print(self.norm_solution)
         print(q_sol)

@@ -1,6 +1,5 @@
 """Implementations of toy-models that can be imported by the algorithms."""
 import numpy as np
-from linear_solvers import NumPyLinearSolver
 
 from quantum_linear_systems.utils import make_matrix_hermitian, expand_b_vector
 
@@ -20,37 +19,6 @@ def qiskit_4qubit_example():
     solution_x = np.array([[1.125], [0.375]])
 
     return matrix_a, vector_b, solution_x, "qiskit_4qubit"
-
-
-def volterra_a_matrix(size, a):
-    """Creates a matrix representing the linear system of the Volterra integral equation x(t) = 1 - INT(x(s)ds).
-    Parameters
-    ----------
-    size : int
-        size of the square matrix to be created.
-    a : float
-        alpha = delta S / 2 parametrization.
-    Returns
-    -------
-    a_matrix : np.matrix
-        size x size square matrix.
-    """
-    matrix_a = np.zeros((size, size))
-    for i in range(size):
-        for j in range(size):
-            if i == j:
-                # diagonal first entry 1, rest (1 + a)
-                if i == 0:
-                    matrix_a[i, j] = 1
-                else:
-                    matrix_a[i, j] = 1 + a
-            elif j == 0:
-                # first column (except first entry which is covered above) is all a
-                matrix_a[i, j] = a
-            elif 0 < j < i:
-                # rest of lower bottom triangle is 2a
-                matrix_a[i, j] = 2 * a
-    return np.matrix(matrix_a)
 
 
 def volterra_problem(n):
@@ -84,10 +52,67 @@ def volterra_problem(n):
     print("A_tilde =", a_tilde, "\n")
     print("b_tilde =", b_tilde)
 
-    classical_solution = NumPyLinearSolver().solve(mat, vec).state.flatten()    # qiksit
-    # classical_solution = np.linalg.solve(matrix_a, vector_b)                  # numpy (classiq)
+    classical_solution = np.linalg.solve(mat, vec)
 
     return a_tilde, b_tilde, classical_solution, "Volterra"
+
+
+def classiq_demo_problem():
+    """
+    Define a demo problem. (See https://platform.classiq.io/advanced)
+
+    Returns:
+        A tuple containing the problem matrix and vector.
+    """
+    mat = np.array(
+        [
+            [0.28, -0.01, 0.02, -0.1],
+            [-0.01, 0.5, -0.22, -0.07],
+            [0.02, -0.22, 0.43, -0.05],
+            [-0.1, -0.07, -0.05, 0.42],
+        ]
+    )
+
+    vec = np.array([1, 2, 4, 3])
+    vec = vec / np.linalg.norm(vec)
+
+    classical_solution = np.linalg.solve(mat, vec)
+    classical_solution /= np.linalg.norm(classical_solution)
+
+    print("A =", mat, "\n")
+    print("b =", vec)
+    return mat, vec, classical_solution, "classiq_demo"
+
+
+def volterra_a_matrix(size, a):
+    """Creates a matrix representing the linear system of the Volterra integral equation x(t) = 1 - INT(x(s)ds).
+    Parameters
+    ----------
+    size : int
+        size of the square matrix to be created.
+    a : float
+        alpha = delta S / 2 parametrization.
+    Returns
+    -------
+    a_matrix : np.matrix
+        size x size square matrix.
+    """
+    matrix_a = np.zeros((size, size))
+    for i in range(size):
+        for j in range(size):
+            if i == j:
+                # diagonal first entry 1, rest (1 + a)
+                if i == 0:
+                    matrix_a[i, j] = 1
+                else:
+                    matrix_a[i, j] = 1 + a
+            elif j == 0:
+                # first column (except first entry which is covered above) is all a
+                matrix_a[i, j] = a
+            elif 0 < j < i:
+                # rest of lower bottom triangle is 2a
+                matrix_a[i, j] = 2 * a
+    return matrix_a
 
 
 def integro_differential_a_matrix(a_matrix, t_n):

@@ -2,21 +2,19 @@ import time
 import numpy as np
 from itertools import product
 
-from classiq.builtin_functions import StatePreparation
-from classiq.builtin_functions import Exponentiation, PhaseEstimation
+from classiq.builtin_functions import StatePreparation, Exponentiation, PhaseEstimation, AmplitudeLoading
 from classiq.builtin_functions.exponentiation import PauliOperator
 from classiq.interface.generator.qpe import (
     ExponentiationScaling,
     ExponentiationSpecification,
 )
-from classiq.builtin_functions import AmplitudeLoading
 from classiq.interface.generator.amplitude_loading import AmplitudeLoadingImplementation
-from classiq import Model
-# from classiq.model import Constraints
-from classiq import Executor
-from classiq.execution import IBMBackendPreferences
+from classiq import Model, execute, synthesize, show, GeneratedCircuit
+from classiq.execution import ExecutionPreferences, IBMBackendPreferences
+from classiq.synthesis import set_execution_preferences
+from classiq.execution import ExecutionDetails
 
-from quantum_linear_systems.toymodels import volterra_problem
+from quantum_linear_systems.toymodels import classiq_demo_problem
 from quantum_linear_systems.utils import extract_x_from_expanded, plot_csol_vs_qsol
 
 
@@ -147,35 +145,32 @@ def quantum_phase_estimation(paulis, precision):
     )
 
 
-def verification_of_result(circuit, num_shots, w_min, sol_classical):
+def verification_of_result(circuit, w_min, sol_classical):
     """
     Verify the result of the quantum algorithm by comparing with the classical solution.
 
     Parameters:
-        circuit (Circuit): The quantum circuit.
-        num_shots (int): The number of times to run the quantum circuit.
-        matrix_a (np.ndarray): The input matrix.
-        vector_b (np.ndarray): The input vector.
+        circuit (str): The quantum circuit.
+        w_min
+        sol_classical (np.ndarray) : classical solution vector
 
     Returns:
         A tuple containing the classical solution and the solution obtained from the quantum algorithm.
     """
-    res_hhl = Executor(
-        backend_preferences=IBMBackendPreferences(backend_name="aer_simulator_statevector"),
-        num_shots=num_shots,
-    ).execute(circuit)
+    results = execute(circuit)
+    res_hhl = ExecutionDetails.parse_obj(results[0].value)
+    circuit = GeneratedCircuit.parse_raw(circuit)
+
+    # qsol_pure= Statevector(circuit).data
+    # qsol_pure = [0] * 4
 
     total_q = circuit.data.width  # total number of qubits of the whole circuit
 
-    # target_pos = (total_q - 1 - res_hhl.output_qubits_map["target"][0])
-    # # position of control qubit (corrected for endianness)
-    # sol_pos = [total_q - 1 - qn for qn in res_hhl.output_qubits_map["solution"]]
-    # # position of solution (corrected for endianness)
     target_pos = res_hhl.output_qubits_map["target"][0]  # position of control qubit
 
     sol_pos = list(res_hhl.output_qubits_map["solution"])  # position of solution
 
-    canonical_list = np.array(list("0" * (total_q)))  # we start with a string of zeros
+    canonical_list = np.array(list("0" * total_q))  # we start with a string of zeros
     canonical_list[
         target_pos
     ] = "1"  # we are interested in strings having 1 on their target qubit
@@ -186,7 +181,8 @@ def verification_of_result(circuit, num_shots, w_min, sol_classical):
         templist[sol_pos] = list(np.binary_repr(i, len(sol_pos))[::-1])
         qsol.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
 
-    qsol = extract_x_from_expanded(np.array(qsol))
+    if len(qsol) > len(sol_classical):
+        qsol = extract_x_from_expanded(np.array(qsol))  # extract the solution from the extended vector
 
     print("first", qsol)
     global_phase = np.angle(qsol)
@@ -201,30 +197,7 @@ def verification_of_result(circuit, num_shots, w_min, sol_classical):
         "%",
     )
     return qsol_corrected
-
-
-def define_demo_problem():
-    """
-    Define a demo problem. (See https://platform.classiq.io/advanced)
-
-    Returns:
-        A tuple containing the problem matrix and vector.
-    """
-    mat = np.array(
-        [
-            [0.28, -0.01, 0.02, -0.1],
-            [-0.01, 0.5, -0.22, -0.07],
-            [0.02, -0.22, 0.43, -0.05],
-            [-0.1, -0.07, -0.05, 0.42],
-        ]
-    )
-
-    vec = np.array([1, 2, 4, 3])
-    vec = vec / np.linalg.norm(vec)
-
-    print("A =", mat, "\n")
-    print("b =", vec)
-    return mat, vec
+    # return qsol_corrected, qsol_pure
 
 
 def verify_matrix_sym_and_pos_ev(mat):
@@ -298,11 +271,24 @@ def classiq_hhl_implementation(matrix_a, vector_b, precision):
 
     model_hhl.set_outputs({"target": al_out["TARGET"], "solution": i_qpe_out["IN"]})
 
-    # Synth circuit
-    circuit_hhl = model_hhl.synthesize()
-    # circuit_hhl = model_hhl.synthesize(constraints=Constraints(max_width=10))
+    # set Execution Preferences
+    backend_preferences = IBMBackendPreferences(
+        backend_service_provider="IBM Quantum", backend_name="aer_simulator_statevector"
+    )
 
-    return circuit_hhl, A_normalized, b_normalized, w_min
+    serialized_hhl_model = model_hhl.get_model()
+
+    serialized_hhl_model = set_execution_preferences(
+        serialized_hhl_model,
+        execution_preferences=ExecutionPreferences(
+            num_shots=1, backend_preferences=backend_preferences
+        ),
+    )
+
+    # Synth circuit
+    qprog_hhl = synthesize(serialized_hhl_model)
+
+    return qprog_hhl, A_normalized, b_normalized, w_min
 
 
 if __name__ == "__main__":
@@ -312,16 +298,18 @@ if __name__ == "__main__":
     n = 2
     precision = 4
 
-    A, b, csol, name = volterra_problem(n)
-    # A, b = define_demo_problem()
+    # A, b, csol, name = volterra_problem(n)
+    A, b, csol, name = classiq_demo_problem()
 
     circuit_hhl, A_normalized, b_normalized, w_min = classiq_hhl_implementation(matrix_a=A, vector_b=b,
                                                                                 precision=precision)
-    circuit_hhl.show()
-    print("depth = ", circuit_hhl.transpiled_circuit.depth)
+    show(circuit_hhl)
+
+    gen_circ = GeneratedCircuit.parse_raw(circuit_hhl)
+    print("depth = ", gen_circ.transpiled_circuit.depth)
 
     # verify against classical solution
-    qsol = verification_of_result(circuit=circuit_hhl, num_shots=1, w_min=w_min, sol_classical=csol)
+    qsol = verification_of_result(circuit=circuit_hhl, w_min=w_min, sol_classical=csol)
 
     csol /= np.linalg.norm(csol)
     qsol /= np.linalg.norm(qsol)
