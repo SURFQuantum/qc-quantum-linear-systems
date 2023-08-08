@@ -1,14 +1,13 @@
 import unittest
-import numpy as np
 
-from quantum_linear_systems.toymodels import qiskit_4qubit_example, volterra_problem, classiq_demo_problem
+from quantum_linear_systems.toymodels import Qiskit4QubitExample, VolterraProblem, ClassiqDemoExample
 
 
 class TestToymodels(unittest.TestCase):
-    def test_output_type(self):
-        for toymodel in [qiskit_4qubit_example(), volterra_problem(1), classiq_demo_problem()]:
-            self.assertTrue(len(toymodel) == 4)
-            self.assertTrue(type(toymodel[0]) == np.ndarray)
-            self.assertTrue(type(toymodel[1]) == np.ndarray)
-            self.assertTrue(type(toymodel[2]) == np.ndarray)
-            self.assertTrue(type(toymodel[3]) == str)
+    def test_init(self):
+        model1 = Qiskit4QubitExample(2)
+        self.assertEqual(model1.problem_size, 1)
+        model2 = VolterraProblem(2)
+        self.assertEqual(model2.problem_size, 2)
+        model3 = ClassiqDemoExample(2)
+        self.assertEqual(model3.problem_size, 2)
