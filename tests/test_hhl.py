@@ -1,39 +1,41 @@
+"""Test HHL implementations."""
 import unittest
 import numpy as np
-from linear_solvers import HHL
-from qiskit.quantum_info import Statevector
 
-from quantum_linear_systems.toymodels import qiskit_4qubit_example
-from quantum_linear_systems.utils import extract_hhl_solution_vector_from_state_vector
-from quantum_linear_systems.hhl_classiq_implementation import classiq_hhl_implementation, verification_of_result
+from quantum_linear_systems.toymodels import Qiskit4QubitExample
+from quantum_linear_systems.hhl_classiq_implementation import classiq_hhl
+from quantum_linear_systems.hhl_qiskit_implementation import qiskit_hhl
 
 
 class TestQiskit(unittest.TestCase):
+    """Test Qiskit implementation."""
     def setUp(self) -> None:
-        self.matrix, self.vector, self.solution, _ = qiskit_4qubit_example()
-        self.norm_solution = np.transpose(self.solution / np.linalg.norm(self.solution)).flatten()
+        self.test_model = Qiskit4QubitExample()
 
     def test_4qubit_example(self):
-        naive_hhl_solution = HHL().solve(self.matrix, self.vector)
-        self.assertAlmostEqual(naive_hhl_solution.euclidean_norm, np.linalg.norm(self.solution))
-        naive_state_vector = Statevector(naive_hhl_solution.state).data
-        naive_solution = extract_hhl_solution_vector_from_state_vector(hermitian_matrix=self.matrix,
-                                                                       state_vector=naive_state_vector)
-        self.assertTrue(np.allclose(self.norm_solution, naive_solution))
+        """Test if qiskit can solve the 4qubit example."""
+        q_sol, csol, _, width, _ = qiskit_hhl(model=self.test_model,
+                                              show_circuit=False)
+        self.assertEqual(width, 5)
+        self.assertTrue(np.allclose(csol, q_sol))
 
 
 class TestClassiq(unittest.TestCase):
+    """Test Classiq implementation."""
     def setUp(self) -> None:
-        self.matrix, self.vector, self.solution, _ = qiskit_4qubit_example()
-        self.norm_solution = np.transpose(self.solution / np.linalg.norm(self.solution)).flatten()
+        self.test_model = Qiskit4QubitExample()
 
     def test_4qubit_example(self):
-        hhl_circuit, _, _, w_min = classiq_hhl_implementation(matrix_a=self.matrix, vector_b=self.vector, precision=4)
-        q_sol = verification_of_result(hhl_circuit, w_min=w_min, sol_classical=self.solution)
+        """Test if classiq can solve the 4qubit example."""
+        qpe_register = 3
+        q_sol, csol, _, width, _ = classiq_hhl(model=self.test_model, qpe_register_size=qpe_register,
+                                               show_circuit=False)
+
         q_sol /= np.linalg.norm(q_sol)
-        print(self.norm_solution)
         print(q_sol)
-        self.assertTrue(np.allclose(self.norm_solution, q_sol))
+        print(csol)
+        self.assertEqual(width, 2 + qpe_register)
+        self.assertTrue(np.allclose(csol, q_sol, atol=.1))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import time
-import numpy as np
 from itertools import product
+
+import numpy as np
 
 from classiq.builtin_functions import StatePreparation, Exponentiation, PhaseEstimation, AmplitudeLoading
 from classiq.builtin_functions.exponentiation import PauliOperator
@@ -14,8 +15,8 @@ from classiq.execution import ExecutionPreferences, IBMBackendPreferences
 from classiq.synthesis import set_execution_preferences
 from classiq.execution import ExecutionDetails
 
-from quantum_linear_systems.toymodels import classiq_demo_problem
-from quantum_linear_systems.utils import extract_x_from_expanded, plot_csol_vs_qsol
+from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample
+from quantum_linear_systems.utils import extract_x_from_expanded, print_results
 
 
 Paulidict = {
@@ -103,7 +104,7 @@ def lcu_naive(hm):
     return mylist
 
 
-def state_preparation(vector_b, sp_upper):
+def state_preparation(vector_b: np.ndarray, sp_upper: float) -> StatePreparation:
     """
     Prepare the state based on the input vector.
 
@@ -120,12 +121,13 @@ def state_preparation(vector_b, sp_upper):
         amplitudes=vector_b, error_metric={"L2": {"upper_bound": sp_upper}})
 
 
-def quantum_phase_estimation(paulis, precision):
+def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstimation:
     """
     Perform Quantum Phase Estimation (QPE) with the specified precision.
 
     Parameters:
-        precision (int): The desired precision for the QPE.
+        paulis (list) : List of pauli matrices.
+        qpe_register_size (int): The desired size of the QPE register.
 
     Returns:
         A PhaseEstimation object configured with the specified precision.
@@ -137,7 +139,7 @@ def quantum_phase_estimation(paulis, precision):
     )
 
     return PhaseEstimation(
-        size=precision,
+        size=qpe_register_size,
         unitary_params=exp_params,
         exponentiation_specification=ExponentiationSpecification(
             scaling=ExponentiationScaling(max_depth=100, max_depth_scaling_factor=2)
@@ -166,9 +168,9 @@ def verification_of_result(circuit, w_min, sol_classical):
 
     total_q = circuit.data.width  # total number of qubits of the whole circuit
 
-    target_pos = res_hhl.output_qubits_map["target"][0]  # position of control qubit
+    target_pos = res_hhl.physical_qubits_map["target"][0]  # position of control qubit
 
-    sol_pos = list(res_hhl.output_qubits_map["solution"])  # position of solution
+    sol_pos = list(res_hhl.physical_qubits_map["solution"])  # position of solution
 
     canonical_list = np.array(list("0" * total_q))  # we start with a string of zeros
     canonical_list[
@@ -197,7 +199,6 @@ def verification_of_result(circuit, w_min, sol_classical):
         "%",
     )
     return qsol_corrected
-    # return qsol_corrected, qsol_pure
 
 
 def verify_matrix_sym_and_pos_ev(mat):
@@ -218,7 +219,7 @@ def verify_matrix_sym_and_pos_ev(mat):
             print("The matrix has eigenvalues larger than 1: ", lam)
 
 
-def classiq_hhl_implementation(matrix_a, vector_b, precision):
+def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int):
     # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
     # verify_matrix_sym_and_pos_ev(mat=matrix_a)
 
@@ -232,28 +233,28 @@ def classiq_hhl_implementation(matrix_a, vector_b, precision):
     # Step 1: state preparation
     if np.linalg.norm(vector_b) != 1:
         print(f"Normalizing A and b by {np.linalg.norm(vector_b)}")
-    b_normalized = vector_b / np.linalg.norm(vector_b)
-    A_normalized = matrix_a / np.linalg.norm(vector_b)
+    vec_b_normalized = vector_b / np.linalg.norm(vector_b)
+    mat_a_normalized = matrix_a / np.linalg.norm(vector_b)
 
-    sp = state_preparation(vector_b=b_normalized, sp_upper=0.00)
+    state_prep = state_preparation(vector_b=vec_b_normalized, sp_upper=0.00)
 
     # Step 2 : Quantum Phase Estimation
-    qpe = quantum_phase_estimation(paulis=paulis, precision=precision)
+    qpe = quantum_phase_estimation(paulis=paulis, qpe_register_size=qpe_register_size)
 
     # Step 3 : Eigenvalue Inversion
 
-    w_min = (1 / 2 ** precision)  # for qpe register of size m, this is the minimal value which can be encoded
+    w_min = (1 / 2 ** qpe_register_size)  # for qpe register of size m, this is the minimal value which can be encoded
     expression = f"{w_min}/(x)"
     al_params = AmplitudeLoading(
-        size=precision,
+        size=qpe_register_size,
         expression=expression,
         implementation=AmplitudeLoadingImplementation.GRAYCODE,
     )
 
-    # Step 4 Inverse QPE
+    # Step 4 Inverse QPE (done when wiring below)
 
     model_hhl = Model()
-    sp_out = model_hhl.StatePreparation(params=sp)
+    sp_out = model_hhl.StatePreparation(params=state_prep)
     qpe_out = model_hhl.PhaseEstimation(params=qpe, in_wires={"IN": sp_out["OUT"]})
     al_out = model_hhl.AmplitudeLoading(
         params=al_params,
@@ -268,6 +269,8 @@ def classiq_hhl_implementation(matrix_a, vector_b, precision):
             "OUT": qpe_out["OUT"],
         },
     )
+
+    model_hhl.sample()
 
     model_hhl.set_outputs({"target": al_out["TARGET"], "solution": i_qpe_out["IN"]})
 
@@ -288,37 +291,41 @@ def classiq_hhl_implementation(matrix_a, vector_b, precision):
     # Synth circuit
     qprog_hhl = synthesize(serialized_hhl_model)
 
-    return qprog_hhl, A_normalized, b_normalized, w_min
+    return qprog_hhl, mat_a_normalized, vec_b_normalized, w_min
+
+
+def classiq_hhl(model: ToyModel, qpe_register_size: int, show_circuit: bool = True):
+    start_time = time.time()
+
+    circuit_hhl, _, _, w_min = classiq_hhl_implementation(matrix_a=model.matrix_a,
+                                                          vector_b=model.vector_b,
+                                                          qpe_register_size=qpe_register_size)
+    if show_circuit:
+        show(circuit_hhl)
+
+    gen_circ = GeneratedCircuit.parse_raw(circuit_hhl)
+    circuit_depth = gen_circ.transpiled_circuit.depth
+    print(gen_circ.analyzer_data.keys())
+    circuit_width = len(gen_circ.analyzer_data["qubits"])
+    print("depth = ", circuit_depth)
+    print("width = ", circuit_width)
+
+    # verify against classical solution
+    quantum_solution = verification_of_result(circuit=circuit_hhl, w_min=w_min, sol_classical=model.classical_solution)
+    # normalize
+    quantum_solution /= np.linalg.norm(quantum_solution)
+
+    return quantum_solution, model.classical_solution, circuit_depth, circuit_width, time.time() - start_time
 
 
 if __name__ == "__main__":
-    start_time = time.time()
 
     # input params
-    n = 2
-    precision = 4
+    n: int = 2
+    precision: int = 4
 
-    # A, b, csol, name = volterra_problem(n)
-    A, b, csol, name = classiq_demo_problem()
+    toymodel = ClassiqDemoExample(problem_size=n)
 
-    circuit_hhl, A_normalized, b_normalized, w_min = classiq_hhl_implementation(matrix_a=A, vector_b=b,
-                                                                                precision=precision)
-    show(circuit_hhl)
+    qsol, csol, depth, width, run_time = classiq_hhl(model=toymodel, qpe_register_size=precision, show_circuit=True)
 
-    gen_circ = GeneratedCircuit.parse_raw(circuit_hhl)
-    print("depth = ", gen_circ.transpiled_circuit.depth)
-
-    # verify against classical solution
-    qsol = verification_of_result(circuit=circuit_hhl, w_min=w_min, sol_classical=csol)
-
-    csol /= np.linalg.norm(csol)
-    qsol /= np.linalg.norm(qsol)
-    print("classical", csol.flatten())
-    print("quantum", qsol.flatten())
-
-    plot_csol_vs_qsol(csol, qsol, "Classiq")
-
-    print(f"Finished classiq run in {time.time() - start_time}s.")
-
-    if np.linalg.norm(csol - qsol) / np.linalg.norm(csol) > 0.2:
-        raise RuntimeError("The HHL solution is too far from the classical one, please verify your algorithm.")
+    print_results(quantum_solution=qsol, classical_solution=csol, run_time=run_time, name=toymodel.name, plot=True)

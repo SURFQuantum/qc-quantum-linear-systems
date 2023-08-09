@@ -22,22 +22,24 @@ class ToyModel:
         classical_solution (numpy.ndarray): The classical solution to the linear system.
         problem_size (int): The size of the problem.
     """
-    def __init__(self, name, matrix, vector, csol, problem_size):
-        if type(name) is not str:
+    def __init__(self, name: str, matrix: np.ndarray, vector: np.ndarray, csol: np.ndarray, problem_size: int):
+        if not isinstance(name, str):
             raise TypeError(f"Name of ToyModel must be of type str not {type(name)}.")
         for param in [matrix, vector, csol]:
-            if type(param) is not np.ndarray:
+            if not isinstance(param, np.ndarray):
                 raise TypeError(f"Matrix, vector and csol of ToyModel must be of type np.ndarray not {type(param)}.")
-        if type(problem_size) is not int:
+        if not isinstance(problem_size, int):
             raise TypeError(f"problem_size of ToyModel must be of type int not {type(problem_size)}.")
         self.name = name
         self.matrix_a = matrix
         self.vector_b = vector
-        self.classical_solution = csol
+        # normalize classical solution
+        csol /= np.linalg.norm(csol)
+        self.classical_solution = csol.flatten()
         self.problem_size = problem_size
 
     @staticmethod
-    def classically_solve(mat, vec):
+    def classically_solve(mat: np.ndarray, vec: np.ndarray) -> np.ndarray:
         """
         Solve a linear system using classical methods.
 
@@ -49,15 +51,14 @@ class ToyModel:
            numpy.ndarray: The solution vector of the linear system.
         """
         solution = np.linalg.solve(mat, vec)
-        # solution /= np.linalg.norm(solution)
-        # todo : decide whether I need norm here?
+        solution /= np.linalg.norm(solution)
         return solution
 
 
 class Qiskit4QubitExample(ToyModel):
     """
-    Reproduces the qiskit 4-qubit example from https://learn.qiskit.org/course/ch-applications/
-    solving-linear-systems-of-equations-using-hhl-and-its-qiskit-implementation#example1
+    Reproduces the qiskit "4-qubit-HHL" example from `https://learn.qiskit.org/course/ch-applications/
+    solving-linear-systems-of-equations-using-hhl-and-its-qiskit-implementation#example1`
 
     matrix_a =   1  -1/3
                 -1/3 1
@@ -67,7 +68,7 @@ class Qiskit4QubitExample(ToyModel):
     Parameters:
         problem_size (int): The size of the problem, such that the total size will be 2**problem_size.
     """
-    def __init__(self, problem_size):
+    def __init__(self, problem_size=1):
         name = "Qiskit4QubitExample"
         matrix_a = np.array([[1, -1 / 3], [-1 / 3, 1]])
         vector_b = np.array([[1], [0]])
@@ -86,16 +87,16 @@ class VolterraProblem(ToyModel):
     def __init__(self, problem_size):
         name = "VolterraProblem"
         # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
-        n = 2 ** problem_size
-        delta_s = 1 / n
+        total_n = 2 ** problem_size
+        delta_s = 1 / total_n
 
         alpha = delta_s / 2
 
-        vec = np.ones((n, 1))
+        vec = np.ones((total_n, 1))
 
         # prepare matrix A and vector b to be used for HHL
         # expanding them to a hermitian form of A --> A_tilde*x=b_tilde
-        mat = self.volterra_a_matrix(size=n, alpha=alpha)
+        mat = self.volterra_a_matrix(size=total_n, alpha=alpha)
 
         print("A =", mat, "\n")
         print("b =", vec)
@@ -148,7 +149,7 @@ class ClassiqDemoExample(ToyModel):
     Define the classiq demo problem. (See https://platform.classiq.io/advanced)
 
     """
-    def __init__(self, problem_size):
+    def __init__(self, problem_size=2):
         name = "ClassiqDemoExample"
         matrix_a = np.array(
             [
@@ -187,8 +188,8 @@ def integro_differential_a_matrix(a_matrix, t_n):
     return np.block(generated_block)
 
 
-def decompose_into_unitaries(matrix):
-    return
+# def decompose_into_unitaries(matrix):
+#     return
 
 
 if __name__ == "__main__":

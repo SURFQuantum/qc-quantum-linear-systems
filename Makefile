@@ -14,6 +14,10 @@ lint:
 	@echo -e "\n*** Checking that $(SOURCE_DIR) conforms to PEP8 coding style"
 	@$(PYTHON3) -m flake8 ${SOURCE_DIR} ${TEST_DIR}
 
+pylint:
+	@echo -e "\n*** Checking $(SOURCE_DIR) with pylint"
+	@$(PYTHON3) -m pylint ${SOURCE_DIR} ${TEST_DIR}
+
 test:
 	@echo -e "\n*** Running unit tests for $(SOURCE_DIR)"
 	@$(PYTHON3) -m pytest --verbose $(TEST_DIR) -p no:warnings

@@ -43,7 +43,15 @@ def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, st
     return not_normalized_vec / np.linalg.norm(not_normalized_vec)
 
 
-def plot_csol_vs_qsol(classical_solution, quantum_solution, title):
+def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str) -> None:
+    """
+    Plot classical and quantum solutions side by side.
+
+    Parameters:
+        classical_solution (numpy.ndarray): Array representing the classical solution.
+        quantum_solution (numpy.ndarray): Array representing the quantum solution.
+        title (str): Title for the plot.
+    """
     matplotlib.use('Qt5Agg')
     plt.plot(classical_solution, "bo", label="classical")
     plt.plot(quantum_solution, "ro", label="HHL")
@@ -53,3 +61,29 @@ def plot_csol_vs_qsol(classical_solution, quantum_solution, title):
     plt.ylim(0, 1)
     plt.title(title)
     plt.show()
+
+
+def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, run_time: float, name: str,
+                  plot: bool = True) -> None:
+    """
+    Print results of classical and quantum solutions and optionally plot them.
+
+    Parameters:
+        quantum_solution (numpy.ndarray): Quantum solution.
+        classical_solution (numpy.ndarray): Classical solution.
+        run_time (float): Time taken for the computation.
+        name (str): Name of the solution.
+        plot (bool, optional): Whether to generate and display a plot. Default is True.
+    """
+    # todo: decide whether or not to work with normalization here
+    classical_solution /= np.linalg.norm(classical_solution)
+    quantum_solution /= np.linalg.norm(quantum_solution)
+    print("classical", classical_solution.flatten())
+    print("quantum", quantum_solution.flatten())
+    if plot:
+        plot_csol_vs_qsol(classical_solution, quantum_solution, f"Classiq solving {name}")
+
+    print(f"Finished classiq run in {run_time}s.")
+
+    if np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) > 0.2:
+        raise RuntimeError("The HHL solution is too far from the classical one, please verify your algorithm.")

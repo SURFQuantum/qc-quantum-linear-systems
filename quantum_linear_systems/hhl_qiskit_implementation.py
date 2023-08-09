@@ -1,58 +1,62 @@
 import time
+
 import numpy as np
 from linear_solvers import HHL
 from qiskit.quantum_info import Statevector
 
-from quantum_linear_systems.toymodels import classiq_demo_problem
+from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample
 from quantum_linear_systems.utils import extract_hhl_solution_vector_from_state_vector, \
-    extract_x_from_expanded, plot_csol_vs_qsol
+    extract_x_from_expanded, print_results
 
 
-def qiskit_hhl_implementation(matrix_a, vector_b, precision=None):
-    naive_hhl_solution = HHL().solve(matrix=matrix_a, vector=vector_b)
+def qiskit_hhl_implementation(matrix_a, vector_b):
+    hhl_implementation = HHL()
+    naive_hhl_solution = hhl_implementation.solve(matrix=matrix_a, vector=vector_b)
 
     hhl_circuit = naive_hhl_solution.state
+    # Get the value of nl
+    qpe_register_size = hhl_circuit.qregs[1].size   # qiskit calculates this itself from the matrix (hhl.py line 391)
 
     naive_state_vec = Statevector(hhl_circuit).data
     hhl_solution_vector = extract_hhl_solution_vector_from_state_vector(hermitian_matrix=matrix_a,
                                                                         state_vector=naive_state_vec)
 
-    return hhl_circuit, hhl_solution_vector
+    return hhl_circuit, hhl_solution_vector, qpe_register_size
+
+
+def qiskit_hhl(model: ToyModel, show_circuit: bool = False):
+    start_time = time.time()
+
+    # solve HHL using qiskit
+    hhl_circuit, hhl_solution_vector, qpe_register_size = qiskit_hhl_implementation(matrix_a=model.matrix_a,
+                                                                                    vector_b=model.vector_b)
+
+    np.set_printoptions(precision=3, suppress=True)
+
+    if show_circuit:
+        hhl_circuit.draw()
+
+    # remove zeros
+    print("x quantum vs classical solution")
+    if len(hhl_solution_vector) > len(model.classical_solution):
+        quantum_solution = extract_x_from_expanded(hhl_solution_vector)
+    else:
+        quantum_solution = hhl_solution_vector
+    # normalize
+    quantum_solution /= np.linalg.norm(quantum_solution)
+
+    qc_basis = hhl_circuit.decompose(reps=5)
+    print(f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}")
+
+    return quantum_solution, model.classical_solution, qc_basis.depth(), hhl_circuit.width(), time.time() - start_time
 
 
 if __name__ == "__main__":
-    start_time = time.time()
     # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
     n = 2
-    # A, b, csol, name = volterra_problem(n)
-    A, b, csol, name = classiq_demo_problem()
+    precision = 4  # todo: how to implement this
+    toymodel = ClassiqDemoExample()
 
-    # solve HHL using qiskit
-    hhl_circuit, hhl_solution_vector = qiskit_hhl_implementation(matrix_a=A, vector_b=b)
+    qsol, csol, depth, width, run_time = qiskit_hhl(model=toymodel, show_circuit=True)
 
-    np.set_printoptions(precision=3, suppress=True)
-    print("HHL solution", hhl_solution_vector)
-
-    # attempt classical solution for comparison
-
-    print('classical state solution:', csol)
-    # remove zeros
-    print("x quantum vs classical solution")
-    if len(hhl_solution_vector) > len(csol):
-        qsol = extract_x_from_expanded(hhl_solution_vector)
-    else:
-        qsol = hhl_solution_vector
-    csol /= np.linalg.norm(csol)
-    qsol /= np.linalg.norm(qsol)
-    print("quantum", qsol)
-    print("classical", csol)
-
-    qc_basis = hhl_circuit.decompose(reps=5)
-
-    plot_csol_vs_qsol(csol, qsol, "Qiskit")
-    print(f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}")
-    # print(qc_basis)
-    print(f"Finished qiskit run in {time.time() - start_time}s.")
-
-    if np.linalg.norm(csol - qsol) / np.linalg.norm(csol) > 0.2:
-        raise RuntimeError("The HHL solution is too far from the classical one, please verify your algorithm.")
+    print_results(quantum_solution=qsol, classical_solution=csol, run_time=run_time, name=toymodel.name, plot=True)
