@@ -43,6 +43,7 @@ def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, st
 
 
 def relative_distance_quantum_classical_solution(quantum_solution: np.ndarray, classical_solution: np.ndarray) -> float:
+    """Calculate relative distance of quantum and classical solutions in percent."""
     return np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) * 100
 
 
@@ -55,21 +56,21 @@ def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarr
         quantum_solution (numpy.ndarray): Array representing the quantum solution.
         title (str): Title for the plot.
     """
-    fig, ax = plt.subplots()
+    _, axis = plt.subplots()
 
-    ax.plot(classical_solution, "bs", label="classical")
-    ax.plot(quantum_solution, "ro", label="HHL")
-    ax.legend()
-    ax.set_xlabel("$i$")
-    ax.set_ylabel("$x_i$")
-    ax.set_ylim(0, 1)
-    ax.set_title(title)
-    ax.grid(True)
+    axis.plot(classical_solution, "bs", label="classical")
+    axis.plot(quantum_solution, "ro", label="HHL")
+    axis.legend()
+    axis.set_xlabel("$i$")
+    axis.set_ylabel("$x_i$")
+    axis.set_ylim(0, 1)
+    axis.set_title(title)
+    axis.grid(True)
     plt.show()
 
 
 def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution_classiq: np.ndarray,
-                              quantum_solution_qiskit: np.ndarray, title: str, ax=None) -> None:
+                              quantum_solution_qiskit: np.ndarray, title: str, axis=None) -> None:
     """
     Plot classical and quantum solutions side by side.
 
@@ -78,20 +79,20 @@ def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution_c
         quantum_solution_classiq (numpy.ndarray): Array representing the quantum solution output by classiq.
         quantum_solution_qiskit (numpy.ndarray): Array representing the quantum solution output by qiskit.
         title (str): Title for the plot.
-        ax (matplotlib.axes._subplots.AxesSubplot): Axes to use for the plot. If None, a new subplot will be created.
+        axis (matplotlib.axes._subplots.AxesSubplot): Axes to use for the plot. If None, a new subplot will be created.
     """
-    if ax is None:
-        fig, ax = plt.subplots()
+    if axis is None:
+        fig, axis = plt.subplots()
 
-    ax.plot(classical_solution, "bs", label="classical")
-    ax.plot(quantum_solution_classiq, "go", label="HHL_classiq")
-    ax.plot(quantum_solution_qiskit, "r^", label="HHL_qiskit")
-    ax.legend()
-    ax.set_xlabel("$i$")
-    ax.set_ylabel("$x_i$")
-    ax.set_ylim(0, 1)
-    ax.set_title(title)
-    ax.grid(True)
+    axis.plot(classical_solution, "bs", label="classical")
+    axis.plot(quantum_solution_classiq, "go", label="HHL_classiq")
+    axis.plot(quantum_solution_qiskit, "r^", label="HHL_qiskit")
+    axis.legend()
+    axis.set_xlabel("$i$")
+    axis.set_ylabel("$x_i$")
+    axis.set_ylim(0, 1)
+    axis.set_title(title)
+    axis.grid(True)
 
 
 def plot_depth_runtime_distance_vs_problem(

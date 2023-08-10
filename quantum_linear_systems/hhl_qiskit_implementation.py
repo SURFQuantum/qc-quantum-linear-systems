@@ -1,3 +1,4 @@
+"""HHL implementation using Qiskit."""
 import time
 
 import numpy as np
@@ -9,7 +10,8 @@ from quantum_linear_systems.utils import extract_hhl_solution_vector_from_state_
     extract_x_from_expanded, print_results
 
 
-def qiskit_hhl_implementation(matrix_a, vector_b):
+def qiskit_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray):
+    """Qiskit HHL implementation based on quantum linear systems package."""
     hhl_implementation = HHL()
     naive_hhl_solution = hhl_implementation.solve(matrix=matrix_a, vector=vector_b)
 
@@ -26,6 +28,7 @@ def qiskit_hhl_implementation(matrix_a, vector_b):
 
 
 def qiskit_hhl(model: ToyModel, show_circuit: bool = False):
+    """Full implementation unified between classiq and qiskit."""
     start_time = time.time()
 
     # solve HHL using qiskit
@@ -53,7 +56,7 @@ def qiskit_hhl(model: ToyModel, show_circuit: bool = False):
 
 if __name__ == "__main__":
     # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
-    n = 2
+    N = 2
 
     toymodel = ClassiqDemoExample()
 

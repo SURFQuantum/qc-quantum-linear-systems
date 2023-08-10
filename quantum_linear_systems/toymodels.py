@@ -170,21 +170,22 @@ class ClassiqDemoExample(ToyModel):
         super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution, problem_size=2)
 
 
-def integro_differential_a_matrix(a_matrix, t_n):
+def integro_differential_a_matrix(a_matrix: np.ndarray, time_discretization_steps: int):
     """Build a matrix of arbitrary size representing the integro-differential toy model."""
-    delta_t = 1 / t_n
+    delta_t = 1 / time_discretization_steps
     alpha_n = a_matrix.shape[0]
     identity_block = np.identity(alpha_n)
     zero_block = np.zeros((alpha_n, alpha_n))
     off_diagonal_block = - np.identity(alpha_n) - delta_t * a_matrix
     generated_block = []
-    for i in range(t_n):
+    for i in range(time_discretization_steps):
         if i == 0:
-            generated_block.append([np.block([identity_block] + [zero_block for _ in range(t_n - 1)])])
+            generated_block.append([np.block([identity_block] + [zero_block for _ in
+                                                                 range(time_discretization_steps - 1)])])
         else:
             generated_block.append([np.block([[zero_block for _ in range(i-1)] +
                                              [off_diagonal_block, identity_block] +
-                                             [zero_block for _ in range(t_n - (i + 1))]])])
+                                             [zero_block for _ in range(time_discretization_steps - (i + 1))]])])
     return np.block(generated_block)
 
 
@@ -194,8 +195,8 @@ def integro_differential_a_matrix(a_matrix, t_n):
 
 if __name__ == "__main__":
     np.set_printoptions(linewidth=200)
-    t_n = 4
-    a = np.random.random((t_n, t_n))
+    T_N = 4
+    a = np.random.random((T_N, T_N))
 
-    result = integro_differential_a_matrix(a, t_n)
+    result = integro_differential_a_matrix(a, T_N)
     print(result)

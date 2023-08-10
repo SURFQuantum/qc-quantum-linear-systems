@@ -1,3 +1,4 @@
+"""HHL implementation using Classiq."""
 import time
 from itertools import product
 
@@ -29,19 +30,19 @@ Paulidict = {
 
 
 # generate all combinations of Pauli strings of size n
-def generate_all_pauli_strings(seq, n):
+def generate_all_pauli_strings(seq, size):
     """
     Generate all combinations of Pauli strings of size n.
 
     Parameters:
         seq (str): The string of Pauli operators (I, Z, X, Y).
-        n (int): The size of the output Pauli strings.
+        size (int): The size of the output Pauli strings.
 
     Returns:
         A generator of all combinations of Pauli strings of size n.
     """
-    for s in product(seq, repeat=n):
-        yield "".join(s)
+    for string in product(seq, repeat=size):
+        yield "".join(string)
 
 
 # convert a Paulistring of size n to 2**n X 2**n matrix
@@ -56,51 +57,51 @@ def pauli_string_2mat(seq):
         A 2**n x 2**n matrix representation of the Pauli string.
     """
     p_matrix = Paulidict[seq[0]]
-    for p in seq[1:]:
-        p_matrix = np.kron(p_matrix, Paulidict[p])
+    for p_string in seq[1:]:
+        p_matrix = np.kron(p_matrix, Paulidict[p_string])
     return p_matrix
 
 
 # Hilbert-Schmidt-Product of two matrices M1, M2
-def hilbert_schmidt(m1, m2):
+def hilbert_schmidt(m_1, m_2):
     """
     Compute the Hilbert-Schmidt-Product of two matrices M1, M2.
 
     Parameters:
-        m1 (np.ndarray): The first matrix.
-        m2 (np.ndarray): The second matrix.
+        m_1 (np.ndarray): The first matrix.
+        m_2 (np.ndarray): The second matrix.
 
     Returns:
         The Hilbert-Schmidt inner product of the two matrices.
     """
-    return (np.dot(m1.conjugate().transpose(), m2)).trace()
+    return (np.dot(m_1.conjugate().transpose(), m_2)).trace()
 
 
 # Naive decomposition, running over all HS products for all Pauli strings
-def lcu_naive(hm):
+def lcu_naive(herm_mat):
     """
     Naive LCU (linear combination of unitary operations) decomposition, running over all HS products for all Pauli
     strings.
 
     Parameters:
-        hm (np.ndarray): The input Hermitian matrix.
+        herm_mat (np.ndarray): The input Hermitian matrix.
 
     Returns:
         A list of tuples, each containing a Pauli string and the corresponding coefficient.
     """
-    assert hm.shape[0] == hm.shape[1], "matrix is not square"
-    assert hm.shape[0] != 0, "matrix is of size 0"
-    assert hm.shape[0] & (hm.shape[0] - 1) == 0, "matrix size is not 2**n"
+    assert herm_mat.shape[0] == herm_mat.shape[1], "matrix is not square"
+    assert herm_mat.shape[0] != 0, "matrix is of size 0"
+    assert herm_mat.shape[0] & (herm_mat.shape[0] - 1) == 0, "matrix size is not 2**n"
 
-    n = int(np.log2(hm.shape[0]))
-    pauli_strings = list(generate_all_pauli_strings("IZXY", n))
+    num_qubits = int(np.log2(herm_mat.shape[0]))
+    pauli_strings = list(generate_all_pauli_strings("IZXY", num_qubits))
 
     mylist = []
 
     for pstr in pauli_strings:
-        co = (1 / 2**n) * hilbert_schmidt(pauli_string_2mat(pstr), hm)
-        if co != 0:
-            mylist = mylist + [(pstr, co)]
+        coeff = (1 / 2**num_qubits) * hilbert_schmidt(pauli_string_2mat(pstr), herm_mat)
+        if coeff != 0:
+            mylist = mylist + [(pstr, coeff)]
 
     return mylist
 
@@ -133,9 +134,8 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
     Returns:
         A PhaseEstimation object configured with the specified precision.
     """
-    po = PauliOperator(pauli_list=paulis)
     exp_params = Exponentiation(
-        pauli_operator=po,
+        pauli_operator=PauliOperator(pauli_list=paulis),
         evolution_coefficient=-2 * np.pi,
     )
 
@@ -178,18 +178,19 @@ def verification_of_result(circuit, w_min, sol_classical):
         target_pos
     ] = "1"  # we are interested in strings having 1 on their target qubit
 
-    qsol = list()
+    quantum_solution = []
     for i in range(2 ** len(sol_pos)):
         templist = canonical_list.copy()
         templist[sol_pos] = list(np.binary_repr(i, len(sol_pos))[::-1])
-        qsol.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
+        quantum_solution.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
 
-    if len(qsol) > len(sol_classical):
-        qsol = extract_x_from_expanded(np.array(qsol))  # extract the solution from the extended vector
+    if len(quantum_solution) > len(sol_classical):
+        # extract the solution from the extended vector
+        quantum_solution = extract_x_from_expanded(np.array(quantum_solution))
 
-    print("first", qsol)
-    global_phase = np.angle(qsol)
-    qsol_corrected = np.real(qsol / np.exp(1j * global_phase))
+    print("first", quantum_solution)
+    global_phase = np.angle(quantum_solution)
+    qsol_corrected = np.real(quantum_solution / np.exp(1j * global_phase))
     print("classical:  ", sol_classical)
     print("HHL:        ", qsol_corrected)
     print(
@@ -211,64 +212,56 @@ def verify_matrix_sym_and_pos_ev(mat):
         mat (np.ndarray): The input matrix.
     """
     if not np.allclose(mat, mat.T, rtol=1e-6, atol=1e-6):
-        raise Exception("The matrix is not symmetric")
-    w, _ = np.linalg.eig(mat)
-    for lam in w:
+        raise ValueError("The matrix is not symmetric")
+    eigenvalues, _ = np.linalg.eig(mat)
+    for lam in eigenvalues:
         if lam < 0:
-            raise Exception("The matrix has negative eigenvalues")
+            raise ValueError("The matrix has negative eigenvalues")
         # the original classiq workshop checked if the EV are in [0,1)
         if lam > 1:
             print("The matrix has eigenvalues larger than 1: ", lam)
 
 
 def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None):
+    """Classiq HHL implementation based on https://docs.classiq.io/latest/tutorials/advanced/hhl/ ."""
     # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
     # verify_matrix_sym_and_pos_ev(mat=matrix_a)
 
-    paulis = lcu_naive(matrix_a)
-    # print("Pauli strings list: \n")
-    # for p in paulis:
-    #     print(p[0], ": ", np.round(p[1], 3))
-
-    print("\n Number of qubits for matrix representation =", len(paulis[0][0]))
-
-    # Step 1: state preparation
     if np.linalg.norm(vector_b) != 1:
         print(f"Normalizing A and b by {np.linalg.norm(vector_b)}")
-    vec_b_normalized = vector_b / np.linalg.norm(vector_b)
-    mat_a_normalized = matrix_a / np.linalg.norm(vector_b)
 
-    state_prep = state_preparation(vector_b=vec_b_normalized, sp_upper=1e-2/3)
-    # Note: value of sp_upper: qiskit hhl.py line 101: epsilon=1e-2, line 120 state prep.: epsilon_s = epsilon / 3
+    matrix_a = matrix_a / np.linalg.norm(vector_b)
+    vector_b = vector_b / np.linalg.norm(vector_b)
 
-    solution_register_size = int(np.log2(len(vec_b_normalized)))
+    solution_register_size = int(np.log2(len(vector_b)))
     if qpe_register_size is None:
         # calculate size of qpe_register from matrix
-        kappa = np.linalg.cond(mat_a_normalized)    # condition number of matrix
+        kappa = np.linalg.cond(matrix_a)    # condition number of matrix
         neg_vals = True     # whether matrix has negative eigenvalues
         qpe_register_size = max(solution_register_size + 1, int(np.ceil(np.log2(kappa + 1)))) + neg_vals
     print(f"Size of solution register is {solution_register_size} , QPE registers is {qpe_register_size}.")
-    # Step 2 : Quantum Phase Estimation
-    qpe = quantum_phase_estimation(paulis=paulis, qpe_register_size=qpe_register_size)
-
-    # Step 3 : Eigenvalue Inversion
-    w_min = (1 / 2 ** qpe_register_size)  # for qpe register of size m, this is the minimal value which can be encoded
-    expression = f"{w_min}/(x)"
-    al_params = AmplitudeLoading(
-        size=qpe_register_size,
-        expression=expression,
-        implementation=AmplitudeLoadingImplementation.GRAYCODE,
-    )
-
-    # Step 4 Inverse QPE (done when wiring below)
 
     model_hhl = Model()
-    sp_out = model_hhl.StatePreparation(params=state_prep)
+    # Step 1: state preparation
+    sp_out = model_hhl.StatePreparation(params=state_preparation(vector_b=vector_b, sp_upper=1e-2/3))
+    # Note: value of sp_upper: qiskit hhl.py line 101: epsilon=1e-2, line 120 state prep.: epsilon_s = epsilon / 3
+
+    # Step 2 : Quantum Phase Estimation
+    qpe = quantum_phase_estimation(paulis=lcu_naive(matrix_a), qpe_register_size=qpe_register_size)
     qpe_out = model_hhl.PhaseEstimation(params=qpe, in_wires={"IN": sp_out["OUT"]})
+
+    # Step 3 : Eigenvalue Inversion
+    w_min = 1 / 2 ** qpe_register_size  # for qpe register of size m, this is the minimal value which can be encoded
     al_out = model_hhl.AmplitudeLoading(
-        params=al_params,
+        params=AmplitudeLoading(
+            size=qpe_register_size,
+            expression=f"{w_min}/(x)",
+            implementation=AmplitudeLoadingImplementation.GRAYCODE,
+        ),
         in_wires={"AMPLITUDE": qpe_out["PHASE_ESTIMATION"]},
     )
+
+    # Step 4 Inverse QPE
     i_qpe_out = model_hhl.PhaseEstimation(
         params=qpe,
         is_inverse=True,
@@ -284,26 +277,24 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     model_hhl.set_outputs({"target": al_out["TARGET"], "solution": i_qpe_out["IN"]})
 
     # set Execution Preferences
-    backend_preferences = IBMBackendPreferences(
-        backend_service_provider="IBM Quantum", backend_name="aer_simulator_statevector"
-    )
-
     serialized_hhl_model = model_hhl.get_model()
-
     serialized_hhl_model = set_execution_preferences(
         serialized_hhl_model,
         execution_preferences=ExecutionPreferences(
-            num_shots=1, backend_preferences=backend_preferences
+            num_shots=1, backend_preferences=IBMBackendPreferences(
+                backend_service_provider="IBM Quantum", backend_name="aer_simulator_statevector"
+            )
         ),
     )
 
     # Synth circuit
     qprog_hhl = synthesize(serialized_hhl_model)
 
-    return qprog_hhl, mat_a_normalized, vec_b_normalized, w_min
+    return qprog_hhl, matrix_a, vector_b, w_min
 
 
 def classiq_hhl(model: ToyModel, qpe_register_size: int = None, show_circuit: bool = True):
+    """Full implementation unified between classiq and qiskit."""
     start_time = time.time()
 
     circuit_hhl, _, _, w_min = classiq_hhl_implementation(matrix_a=model.matrix_a,
