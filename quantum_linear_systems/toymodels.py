@@ -85,7 +85,7 @@ class VolterraProblem(ToyModel):
 
     """
     def __init__(self, problem_size):
-        name = "VolterraProblem"
+        name = f"VolterraProblem(n={problem_size})"
         # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
         total_n = 2 ** problem_size
         delta_s = 1 / total_n

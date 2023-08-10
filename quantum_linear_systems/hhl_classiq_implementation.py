@@ -16,7 +16,8 @@ from classiq.synthesis import set_execution_preferences
 from classiq.execution import ExecutionDetails
 
 from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample
-from quantum_linear_systems.utils import extract_x_from_expanded, print_results
+from quantum_linear_systems.utils import (extract_x_from_expanded, print_results,
+                                          relative_distance_quantum_classical_solution)
 
 
 Paulidict = {
@@ -194,7 +195,8 @@ def verification_of_result(circuit, w_min, sol_classical):
     print(
         "relative distance:  ",
         round(
-            np.linalg.norm(sol_classical - qsol_corrected) / np.linalg.norm(sol_classical) * 100, 1,
+            relative_distance_quantum_classical_solution(quantum_solution=qsol_corrected,
+                                                         classical_solution=sol_classical), 1,
         ),
         "%",
     )
@@ -210,7 +212,7 @@ def verify_matrix_sym_and_pos_ev(mat):
     """
     if not np.allclose(mat, mat.T, rtol=1e-6, atol=1e-6):
         raise Exception("The matrix is not symmetric")
-    w, v = np.linalg.eig(mat)
+    w, _ = np.linalg.eig(mat)
     for lam in w:
         if lam < 0:
             raise Exception("The matrix has negative eigenvalues")
@@ -219,7 +221,7 @@ def verify_matrix_sym_and_pos_ev(mat):
             print("The matrix has eigenvalues larger than 1: ", lam)
 
 
-def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int):
+def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None):
     # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
     # verify_matrix_sym_and_pos_ev(mat=matrix_a)
 
@@ -236,13 +238,20 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     vec_b_normalized = vector_b / np.linalg.norm(vector_b)
     mat_a_normalized = matrix_a / np.linalg.norm(vector_b)
 
-    state_prep = state_preparation(vector_b=vec_b_normalized, sp_upper=0.00)
+    state_prep = state_preparation(vector_b=vec_b_normalized, sp_upper=1e-2/3)
+    # Note: value of sp_upper: qiskit hhl.py line 101: epsilon=1e-2, line 120 state prep.: epsilon_s = epsilon / 3
 
+    solution_register_size = int(np.log2(len(vec_b_normalized)))
+    if qpe_register_size is None:
+        # calculate size of qpe_register from matrix
+        kappa = np.linalg.cond(mat_a_normalized)    # condition number of matrix
+        neg_vals = True     # whether matrix has negative eigenvalues
+        qpe_register_size = max(solution_register_size + 1, int(np.ceil(np.log2(kappa + 1)))) + neg_vals
+    print(f"Size of solution register is {solution_register_size} , QPE registers is {qpe_register_size}.")
     # Step 2 : Quantum Phase Estimation
     qpe = quantum_phase_estimation(paulis=paulis, qpe_register_size=qpe_register_size)
 
     # Step 3 : Eigenvalue Inversion
-
     w_min = (1 / 2 ** qpe_register_size)  # for qpe register of size m, this is the minimal value which can be encoded
     expression = f"{w_min}/(x)"
     al_params = AmplitudeLoading(
@@ -294,7 +303,7 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     return qprog_hhl, mat_a_normalized, vec_b_normalized, w_min
 
 
-def classiq_hhl(model: ToyModel, qpe_register_size: int, show_circuit: bool = True):
+def classiq_hhl(model: ToyModel, qpe_register_size: int = None, show_circuit: bool = True):
     start_time = time.time()
 
     circuit_hhl, _, _, w_min = classiq_hhl_implementation(matrix_a=model.matrix_a,
@@ -319,13 +328,11 @@ def classiq_hhl(model: ToyModel, qpe_register_size: int, show_circuit: bool = Tr
 
 
 if __name__ == "__main__":
-
     # input params
     n: int = 2
-    precision: int = 4
 
     toymodel = ClassiqDemoExample(problem_size=n)
 
-    qsol, csol, depth, width, run_time = classiq_hhl(model=toymodel, qpe_register_size=precision, show_circuit=True)
+    qsol, csol, depth, width, run_time = classiq_hhl(model=toymodel, show_circuit=True)
 
     print_results(quantum_solution=qsol, classical_solution=csol, run_time=run_time, name=toymodel.name, plot=True)

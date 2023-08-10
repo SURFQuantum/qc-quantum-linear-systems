@@ -1,6 +1,5 @@
 """Utility functions that can be imported by either implementation."""
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 
 
@@ -43,24 +42,100 @@ def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, st
     return not_normalized_vec / np.linalg.norm(not_normalized_vec)
 
 
+def relative_distance_quantum_classical_solution(quantum_solution: np.ndarray, classical_solution: np.ndarray) -> float:
+    return np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) * 100
+
+
 def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str) -> None:
     """
-    Plot classical and quantum solutions side by side.
+    Plot classical and quantum solution vectors side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
         quantum_solution (numpy.ndarray): Array representing the quantum solution.
         title (str): Title for the plot.
     """
-    matplotlib.use('Qt5Agg')
-    plt.plot(classical_solution, "bo", label="classical")
-    plt.plot(quantum_solution, "ro", label="HHL")
-    plt.legend()
-    plt.xlabel("$i$")
-    plt.ylabel("$x_i$")
-    plt.ylim(0, 1)
-    plt.title(title)
+    fig, ax = plt.subplots()
+
+    ax.plot(classical_solution, "bs", label="classical")
+    ax.plot(quantum_solution, "ro", label="HHL")
+    ax.legend()
+    ax.set_xlabel("$i$")
+    ax.set_ylabel("$x_i$")
+    ax.set_ylim(0, 1)
+    ax.set_title(title)
+    ax.grid(True)
     plt.show()
+
+
+def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution_classiq: np.ndarray,
+                              quantum_solution_qiskit: np.ndarray, title: str, ax=None) -> None:
+    """
+    Plot classical and quantum solutions side by side.
+
+    Parameters:
+        classical_solution (numpy.ndarray): Array representing the classical solution.
+        quantum_solution_classiq (numpy.ndarray): Array representing the quantum solution output by classiq.
+        quantum_solution_qiskit (numpy.ndarray): Array representing the quantum solution output by qiskit.
+        title (str): Title for the plot.
+        ax (matplotlib.axes._subplots.AxesSubplot): Axes to use for the plot. If None, a new subplot will be created.
+    """
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    ax.plot(classical_solution, "bs", label="classical")
+    ax.plot(quantum_solution_classiq, "go", label="HHL_classiq")
+    ax.plot(quantum_solution_qiskit, "r^", label="HHL_qiskit")
+    ax.legend()
+    ax.set_xlabel("$i$")
+    ax.set_ylabel("$x_i$")
+    ax.set_ylim(0, 1)
+    ax.set_title(title)
+    ax.grid(True)
+
+
+def plot_depth_runtime_distance_vs_problem(
+    depth_classiq: list, depth_qiskit: list, runtime_classiq: list, runtime_qiskit: list, distance_classiq: list,
+        distance_qiskit: list, problems: list, axs: list = None
+) -> None:
+    """
+    Plot depth and runtime of two algorithms side by side for each problem index.
+
+    Parameters:
+        depth_classiq (list): List of circuit depths for classiq for each problem.
+        depth_qiskit (list): List of circuit depths for qiskit for each problem.
+        runtime_classiq (list): List of run_times for classiq for each problem.
+        runtime_qiskit (list): List of run_times for qiskit for each problem.
+        distance_classiq (list): List of relative distances of quantum/classical solutions for classiq for each problem.
+        distance_qiskit (list): List of relative distances of quantum/classical solutions for qiskit for each problem.
+        problems (list): List of problem objects with a 'name' attribute.
+        axs (list): List of axes to use for the plot. If None, a new subplot will be created.
+    """
+    problem_names = [problem.name for problem in problems]
+
+    if axs is None or len(axs) < 3:
+        _, axs = plt.subplots(3, 1, figsize=(10, 6))
+
+    axs[0].plot(problem_names, depth_classiq, "go", label="Classiq")
+    axs[0].plot(problem_names, depth_qiskit, "r^", label="Qiskit")
+    axs[0].legend()
+    axs[0].set_ylabel("Circuit Depth")
+    axs[0].set_title("Circuit Depth Comparison")
+    axs[0].grid(True)
+
+    axs[1].plot(problem_names, runtime_classiq, "go", label="Classiq")
+    axs[1].plot(problem_names, runtime_qiskit, "r^", label="Qiskit")
+    axs[1].legend()
+    axs[1].set_ylabel("Run Time [s]")
+    axs[1].set_title("Run Time Comparison")
+    axs[1].grid(True)
+
+    axs[2].plot(problem_names, distance_classiq, "go", label="Classiq")
+    axs[2].plot(problem_names, distance_qiskit, "r^", label="Qiskit")
+    axs[2].legend()
+    axs[2].set_ylabel("Relative Distance [%]")
+    axs[2].set_title("Rel. Distance of Quantum/Classical Solution")
+    axs[2].grid(True)
 
 
 def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, run_time: float, name: str,
@@ -81,7 +156,7 @@ def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, 
     print("classical", classical_solution.flatten())
     print("quantum", quantum_solution.flatten())
     if plot:
-        plot_csol_vs_qsol(classical_solution, quantum_solution, f"Classiq solving {name}")
+        plot_csol_vs_qsol(classical_solution=classical_solution, quantum_solution=quantum_solution, title=name)
 
     print(f"Finished classiq run in {run_time}s.")
 

@@ -32,8 +32,6 @@ class TestClassiq(unittest.TestCase):
                                                show_circuit=False)
 
         q_sol /= np.linalg.norm(q_sol)
-        print(q_sol)
-        print(csol)
         self.assertEqual(width, 2 + qpe_register)
         self.assertTrue(np.allclose(csol, q_sol, atol=.1))
 

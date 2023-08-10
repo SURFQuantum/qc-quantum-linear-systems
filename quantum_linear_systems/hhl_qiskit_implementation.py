@@ -16,20 +16,20 @@ def qiskit_hhl_implementation(matrix_a, vector_b):
     hhl_circuit = naive_hhl_solution.state
     # Get the value of nl
     qpe_register_size = hhl_circuit.qregs[1].size   # qiskit calculates this itself from the matrix (hhl.py line 391)
+    print(f"Size of solution register is {hhl_circuit.qregs[0].size} , QPE registers is {qpe_register_size}.")
 
     naive_state_vec = Statevector(hhl_circuit).data
     hhl_solution_vector = extract_hhl_solution_vector_from_state_vector(hermitian_matrix=matrix_a,
                                                                         state_vector=naive_state_vec)
 
-    return hhl_circuit, hhl_solution_vector, qpe_register_size
+    return hhl_circuit, hhl_solution_vector
 
 
 def qiskit_hhl(model: ToyModel, show_circuit: bool = False):
     start_time = time.time()
 
     # solve HHL using qiskit
-    hhl_circuit, hhl_solution_vector, qpe_register_size = qiskit_hhl_implementation(matrix_a=model.matrix_a,
-                                                                                    vector_b=model.vector_b)
+    hhl_circuit, hhl_solution_vector = qiskit_hhl_implementation(matrix_a=model.matrix_a, vector_b=model.vector_b)
 
     np.set_printoptions(precision=3, suppress=True)
 
@@ -54,7 +54,7 @@ def qiskit_hhl(model: ToyModel, show_circuit: bool = False):
 if __name__ == "__main__":
     # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
     n = 2
-    precision = 4  # todo: how to implement this
+
     toymodel = ClassiqDemoExample()
 
     qsol, csol, depth, width, run_time = qiskit_hhl(model=toymodel, show_circuit=True)
