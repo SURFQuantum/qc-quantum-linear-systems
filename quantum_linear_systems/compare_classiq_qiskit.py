@@ -77,7 +77,7 @@ if __name__ == "__main__":
             (qsols_c_hhl[i], "go", "hhl_classiq"),
             (qsols_q_hhl[i], "r^", "hhl_qiskit"),
             # (qsols_c_vqls[i], "go", "vqls_classiq"),
-            (qsols_q_vqls[i], "rx", "vqls_qiskit"),
+            (qsols_q_vqls[i], "kx", "vqls_qiskit"),
         ]
         plot_compare_csol_vs_qsol(classical_solution=csols[i], qsols_marker_name=qmn,
                                   title=f"Statevectors: {toymodels[i].name}", axis=axs[i, 0])
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         depth_runtime_distance_c_hhl + ("go", "hhl_classiq"),
         depth_runtime_distance_q_hhl + ("r^", "hhl_qiskit"),
         # depth_runtime_distance_c_vqls + ("go", "vqls_classiq"),
-        depth_runtime_distance_q_vqls + ("rx", "vqls_qiskit"),
+        depth_runtime_distance_q_vqls + ("kx", "vqls_qiskit"),
     ]
     plot_depth_runtime_distance_vs_problem(depth_runtime_distance_marker_name=drdmn, problems=toymodels, axs=axs[:, 1])
 

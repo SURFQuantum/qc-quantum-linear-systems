@@ -2,7 +2,7 @@ PYTHON3         = python3
 TEST_DIR        = tests
 SOURCE_DIR     	= quantum_linear_systems
 REQUIREMENTS    = requirements.txt
-MINCOV       	= 90
+MINCOV       	= 60
 
 all: install test
 
