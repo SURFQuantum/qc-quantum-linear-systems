@@ -4,11 +4,11 @@ from typing import Tuple
 
 import numpy as np
 
-from qiskit.circuit import QuantumCircuit
+from qiskit import QuantumCircuit
 from qiskit.primitives import Estimator, Sampler
 from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
-from qiskit.algorithms.optimizers import COBYLA
 from qiskit.quantum_info import Statevector
+from qiskit_algorithms.optimizers import COBYLA
 
 from vqls_prototype import VQLS, VQLSLog
 
@@ -19,6 +19,9 @@ from quantum_linear_systems.utils import extract_x_from_expanded, print_results
 def qiskit_vqls_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, ansatz: QuantumCircuit
                                ) -> Tuple[QuantumCircuit, np.array]:
     """Qiskit HHL implementation based on https://github.com/QuantumApplicationLab/vqls-prototype ."""
+    # flatten vector such that qiskit doesn't bug out in state preparation
+    if vector_b.ndim == 2:
+        vector_b = vector_b.flatten()
 
     log = VQLSLog([], [])
     estimator = Estimator()
@@ -42,7 +45,7 @@ def qiskit_vqls(model: ToyModel, ansatz: QuantumCircuit, show_circuit: bool = Fa
     """Full implementation unified between classiq and qiskit."""
     start_time = time.time()
 
-    # solve HHL using qiskit
+    # solve VQLS using qiskit
     vqls_circuit, vqls_solution_vector = qiskit_vqls_implementation(matrix_a=model.matrix_a, vector_b=model.vector_b,
                                                                     ansatz=ansatz)
 
@@ -70,14 +73,12 @@ def qiskit_vqls(model: ToyModel, ansatz: QuantumCircuit, show_circuit: bool = Fa
 
 
 if __name__ == "__main__":
-    # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
-    N = 2
+    N = 1
 
     toymodel = ClassiqDemoExample()
 
-    vqls_ansatz = RealAmplitudes(num_qubits=N, entanglement="full", reps=3, insert_barriers=False)
-
-    toymodel = ClassiqDemoExample()
+    vqls_ansatz = RealAmplitudes(num_qubits=int(np.log2(toymodel.matrix_a.shape[0])),
+                                 entanglement="full", reps=3, insert_barriers=False)
 
     qsol, csol, depth, width, run_time = qiskit_vqls(model=toymodel, show_circuit=True, ansatz=vqls_ansatz)
 

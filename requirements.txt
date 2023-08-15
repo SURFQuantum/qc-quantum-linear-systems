@@ -4,6 +4,7 @@ pytest-cov
 classiq>=0.26,<0.27
 numpy
 qiskit
+qiskit-algorithms
 # linear_solvers from https://github.com/anedumla/quantum_linear_solvers
 matplotlib
 PyQt5

@@ -1,9 +1,11 @@
 """Utility functions that can be imported by either implementation."""
+from typing import Tuple, List
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def make_matrix_hermitian(matrix):
+def make_matrix_hermitian(matrix: np.ndarray) -> np.ndarray:
     """Creates a hermitian version of a NxM :obj:np.array A as a  (N+M)x(N+M) block matrix [[0 ,A], [A_dagger, 0]]."""
     shape = matrix.shape
     upper_zero = np.zeros(shape=(shape[0], shape[0]))
@@ -14,14 +16,17 @@ def make_matrix_hermitian(matrix):
     return hermitian_matrix
 
 
-def expand_b_vector(unexpanded_vector, non_hermitian_matrix):
+def expand_b_vector(unexpanded_vector: np.ndarray, non_square_matrix: np.ndarray = None) -> np.ndarray:
     """Expand vector according to the expansion of the matrix to make it hermitian b -> (b 0)."""
-    shape = non_hermitian_matrix.shape
-    lower_zero = np.zeros(shape=(shape[1], 1))
-    return np.block([[unexpanded_vector], [lower_zero]])
+    if non_square_matrix is not None:
+        expand_by = non_square_matrix.shape[1]
+    else:
+        expand_by = unexpanded_vector.shape[0]
+    lower_zero = np.zeros(shape=(expand_by, 1))
+    return np.block([[unexpanded_vector], [lower_zero]]).flatten()
 
 
-def extract_x_from_expanded(expanded_solution_vector: np.array, non_hermitian_matrix: np.array = None):
+def extract_x_from_expanded(expanded_solution_vector: np.array, non_hermitian_matrix: np.array = None) -> np.ndarray:
     """The expanded problem returns a vector y=(0 x), this function returns x from input y."""
     if non_hermitian_matrix is not None:
         index = non_hermitian_matrix.shape[0]
@@ -30,7 +35,7 @@ def extract_x_from_expanded(expanded_solution_vector: np.array, non_hermitian_ma
     return expanded_solution_vector[index:].flatten()
 
 
-def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, state_vector: np.array):
+def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, state_vector: np.array) -> np.ndarray:
     """Extract the solution vector x from the full state vector of the HHL problem which also includes 1 aux. qubit and
     multiple work qubits encoding the eigenvalues.
     """
@@ -69,24 +74,24 @@ def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarr
     plt.show()
 
 
-def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution_classiq: np.ndarray,
-                              quantum_solution_qiskit: np.ndarray, title: str, axis=None) -> None:
+def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, qsols_marker_name: List[Tuple[list, str, str]],
+                              title: str, axis=None) -> None:
     """
     Plot classical and quantum solutions side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
-        quantum_solution_classiq (numpy.ndarray): Array representing the quantum solution output by classiq.
-        quantum_solution_qiskit (numpy.ndarray): Array representing the quantum solution output by qiskit.
+        qsols_marker_name: (List[Tuple[list, str, str]]): List of tuples with first element List of quantum solutions,
+        second element the desired marker type and third element the corresponding label.
         title (str): Title for the plot.
         axis (matplotlib.axes._subplots.AxesSubplot): Axes to use for the plot. If None, a new subplot will be created.
     """
     if axis is None:
-        fig, axis = plt.subplots()
+        _, axis = plt.subplots()
 
     axis.plot(classical_solution, "bs", label="classical")
-    axis.plot(quantum_solution_classiq, "go", label="HHL_classiq")
-    axis.plot(quantum_solution_qiskit, "r^", label="HHL_qiskit")
+    for qmn in qsols_marker_name:
+        axis.plot(qmn[0], qmn[1], label=qmn[2])
     axis.legend()
     axis.set_xlabel("$i$")
     axis.set_ylabel("$x_i$")
@@ -96,19 +101,16 @@ def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution_c
 
 
 def plot_depth_runtime_distance_vs_problem(
-    depth_classiq: list, depth_qiskit: list, runtime_classiq: list, runtime_qiskit: list, distance_classiq: list,
-        distance_qiskit: list, problems: list, axs: list = None
+        depth_runtime_distance_marker_name: List[Tuple[Tuple[list, list, list], str, str]],
+        problems: list,
+        axs: list = None
 ) -> None:
     """
     Plot depth and runtime of two algorithms side by side for each problem index.
 
     Parameters:
-        depth_classiq (list): List of circuit depths for classiq for each problem.
-        depth_qiskit (list): List of circuit depths for qiskit for each problem.
-        runtime_classiq (list): List of run_times for classiq for each problem.
-        runtime_qiskit (list): List of run_times for qiskit for each problem.
-        distance_classiq (list): List of relative distances of quantum/classical solutions for classiq for each problem.
-        distance_qiskit (list): List of relative distances of quantum/classical solutions for qiskit for each problem.
+        depth_runtime_distance_marker_name (list) : List of tuples of the form (depths, run_times, rel_distance,
+        marker, name).
         problems (list): List of problem objects with a 'name' attribute.
         axs (list): List of axes to use for the plot. If None, a new subplot will be created.
     """
@@ -116,23 +118,22 @@ def plot_depth_runtime_distance_vs_problem(
 
     if axs is None or len(axs) < 3:
         _, axs = plt.subplots(3, 1, figsize=(10, 6))
-
-    axs[0].plot(problem_names, depth_classiq, "go", label="Classiq")
-    axs[0].plot(problem_names, depth_qiskit, "r^", label="Qiskit")
+    for drdmn in depth_runtime_distance_marker_name:
+        axs[0].plot(problem_names, drdmn[0], drdmn[3], label=drdmn[4])
     axs[0].legend()
     axs[0].set_ylabel("Circuit Depth")
     axs[0].set_title("Circuit Depth Comparison")
     axs[0].grid(True)
 
-    axs[1].plot(problem_names, runtime_classiq, "go", label="Classiq")
-    axs[1].plot(problem_names, runtime_qiskit, "r^", label="Qiskit")
+    for drdmn in depth_runtime_distance_marker_name:
+        axs[1].plot(problem_names, drdmn[1], drdmn[3], label=drdmn[4])
     axs[1].legend()
     axs[1].set_ylabel("Run Time [s]")
     axs[1].set_title("Run Time Comparison")
     axs[1].grid(True)
 
-    axs[2].plot(problem_names, distance_classiq, "go", label="Classiq")
-    axs[2].plot(problem_names, distance_qiskit, "r^", label="Qiskit")
+    for drdmn in depth_runtime_distance_marker_name:
+        axs[2].plot(problem_names, drdmn[2], drdmn[3], label=drdmn[4])
     axs[2].legend()
     axs[2].set_ylabel("Relative Distance [%]")
     axs[2].set_title("Rel. Distance of Quantum/Classical Solution")
@@ -151,7 +152,6 @@ def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, 
         name (str): Name of the solution.
         plot (bool, optional): Whether to generate and display a plot. Default is True.
     """
-    # todo: decide whether or not to work with normalization here
     classical_solution /= np.linalg.norm(classical_solution)
     quantum_solution /= np.linalg.norm(quantum_solution)
     print("classical", classical_solution.flatten())

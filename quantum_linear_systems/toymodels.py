@@ -71,7 +71,7 @@ class Qiskit4QubitExample(ToyModel):
     def __init__(self, problem_size=1):
         name = "Qiskit4QubitExample"
         matrix_a = np.array([[1, -1 / 3], [-1 / 3, 1]])
-        vector_b = np.array([[1], [0]])
+        vector_b = np.array([1, 0])
         classical_solution = np.array([[1.125], [0.375]])
         super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution, problem_size=1)
 
@@ -103,7 +103,7 @@ class VolterraProblem(ToyModel):
 
         # expand
         a_tilde = make_matrix_hermitian(mat)
-        b_tilde = expand_b_vector(vec, mat)
+        b_tilde = expand_b_vector(vec)
 
         print("A_tilde =", a_tilde, "\n")
         print("b_tilde =", b_tilde)

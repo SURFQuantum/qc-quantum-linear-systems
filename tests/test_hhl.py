@@ -7,8 +7,8 @@ from quantum_linear_systems.hhl_classiq_implementation import classiq_hhl
 from quantum_linear_systems.hhl_qiskit_implementation import qiskit_hhl
 
 
-class TestQiskit(unittest.TestCase):
-    """Test Qiskit implementation."""
+class TestQiskitHHL(unittest.TestCase):
+    """Test Qiskit HHL implementation."""
     def setUp(self) -> None:
         self.test_model = Qiskit4QubitExample()
 
@@ -20,8 +20,8 @@ class TestQiskit(unittest.TestCase):
         self.assertTrue(np.allclose(csol, q_sol))
 
 
-class TestClassiq(unittest.TestCase):
-    """Test Classiq implementation."""
+class TestClassiqHHL(unittest.TestCase):
+    """Test Classiq HHL implementation."""
     def setUp(self) -> None:
         self.test_model = Qiskit4QubitExample()
 
