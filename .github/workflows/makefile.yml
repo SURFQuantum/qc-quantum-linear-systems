@@ -13,6 +13,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    # Add a step to clone and install the dependency repository
+    - name: Install quantum_linear_solvers
+      run: |
+        git clone https://github.com/anedumla/quantum_linear_solvers.git
+        cd quantum_linear_solvers
+        pip install .
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.10
 
     - name: Install dependencies
       run: make install
