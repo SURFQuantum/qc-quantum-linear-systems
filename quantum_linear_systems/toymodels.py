@@ -13,30 +13,31 @@ class ToyModel:
         matrix (numpy.ndarray): The coefficient matrix for the linear system.
         vector (numpy.ndarray): The right-hand side vector for the linear system.
         csol (numpy.ndarray): The classical solution to the linear system.
-        problem_size (int): The size of the problem.
 
     Attributes:
         name (str): The name or identifier for the toy problem.
         matrix_a (numpy.ndarray): The coefficient matrix for the linear system.
         vector_b (numpy.ndarray): The right-hand side vector for the linear system.
         classical_solution (numpy.ndarray): The classical solution to the linear system.
-        problem_size (int): The size of the problem.
+        num_qubits (int): The number of qubits involved.
     """
-    def __init__(self, name: str, matrix: np.ndarray, vector: np.ndarray, csol: np.ndarray, problem_size: int):
+    def __init__(self, name: str, matrix: np.ndarray, vector: np.ndarray, csol: np.ndarray):
         if not isinstance(name, str):
             raise TypeError(f"Name of ToyModel must be of type str not {type(name)}.")
         for param in [matrix, vector, csol]:
             if not isinstance(param, np.ndarray):
                 raise TypeError(f"Matrix, vector and csol of ToyModel must be of type np.ndarray not {type(param)}.")
-        if not isinstance(problem_size, int):
-            raise TypeError(f"problem_size of ToyModel must be of type int not {type(problem_size)}.")
         self.name = name
         self.matrix_a = matrix
         self.vector_b = vector
         # normalize classical solution
         csol /= np.linalg.norm(csol)
         self.classical_solution = csol.flatten()
-        self.problem_size = problem_size
+
+    @property
+    def num_qubits(self):
+        """Return the number of qubits involved in the problem."""
+        return int(np.log2(self.matrix_a.shape[0]))
 
     @staticmethod
     def classically_solve(mat: np.ndarray, vec: np.ndarray) -> np.ndarray:
@@ -64,16 +65,13 @@ class Qiskit4QubitExample(ToyModel):
                 -1/3 1
     vector_b = (1,0)
     classical_solution = (1.125, 0.375)
-
-    Parameters:
-        problem_size (int): The size of the problem, such that the total size will be 2**problem_size.
     """
-    def __init__(self, problem_size=1):
+    def __init__(self):
         name = "Qiskit4QubitExample"
         matrix_a = np.array([[1, -1 / 3], [-1 / 3, 1]])
         vector_b = np.array([1, 0])
         classical_solution = np.array([[1.125], [0.375]])
-        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution, problem_size=1)
+        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
 
 
 class VolterraProblem(ToyModel):
@@ -84,10 +82,10 @@ class VolterraProblem(ToyModel):
         problem_size (int): The size of the problem, such that the total size will be 2**problem_size.
 
     """
-    def __init__(self, problem_size):
-        name = f"VolterraProblem(n={problem_size})"
+    def __init__(self, num_qubits):
+        name = f"VolterraProblem(n={num_qubits})"
         # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
-        total_n = 2 ** problem_size
+        total_n = 2 ** num_qubits
         delta_s = 1 / total_n
 
         alpha = delta_s / 2
@@ -110,7 +108,7 @@ class VolterraProblem(ToyModel):
 
         classical_solution = self.classically_solve(mat, vec)
 
-        super().__init__(name=name, matrix=a_tilde, vector=b_tilde, csol=classical_solution, problem_size=problem_size)
+        super().__init__(name=name, matrix=a_tilde, vector=b_tilde, csol=classical_solution)
 
     @staticmethod
     def volterra_a_matrix(size, alpha):
@@ -149,7 +147,7 @@ class ClassiqDemoExample(ToyModel):
     Define the classiq demo problem. (See https://platform.classiq.io/advanced)
 
     """
-    def __init__(self, problem_size=2):
+    def __init__(self):
         name = "ClassiqDemoExample"
         matrix_a = np.array(
             [
@@ -161,13 +159,34 @@ class ClassiqDemoExample(ToyModel):
         )
 
         vector_b = np.array([1, 2, 4, 3])
-        vector_b = vector_b / np.linalg.norm(vector_b)
 
         classical_solution = self.classically_solve(matrix_a, vector_b)
 
         print("A =", matrix_a, "\n")
         print("b =", vector_b)
-        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution, problem_size=2)
+        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
+
+
+class RandomNQubitProblem(ToyModel):
+    """
+    Define a problem consisting of a random MxM matrix and vector.
+
+    Parameters:
+        num_qubits (int): Number of qubits, such that the total size will be M=2**problem_size. Important: If the
+        matrix is not hermitian and needs to be made hermitian the actual num_qubits will increase by 1 from the input.
+
+    """
+    def __init__(self, num_qubits):
+        name = f"RandomNQubitProblem(N={num_qubits})"
+        matrix_a = np.random.rand(2**num_qubits, 2**num_qubits)
+        matrix_a += matrix_a.T  # make matrix symmetric (don't expand here, to keep problem size to N)
+        vector_b = np.random.rand(2**num_qubits)
+
+        classical_solution = self.classically_solve(matrix_a, vector_b)
+
+        print("A =", matrix_a, "\n")
+        print("b =", vector_b)
+        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
 
 
 def integro_differential_a_matrix(a_matrix: np.ndarray, time_discretization_steps: int):

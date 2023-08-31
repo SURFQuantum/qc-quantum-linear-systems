@@ -143,7 +143,10 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
         size=qpe_register_size,
         unitary_params=exp_params,
         exponentiation_specification=ExponentiationSpecification(
-            scaling=ExponentiationScaling(max_depth=100, max_depth_scaling_factor=2)
+            scaling=ExponentiationScaling(
+                max_depth=250,
+                max_depth_scaling_factor=2
+            )
         ),
     )
 
@@ -181,7 +184,7 @@ def verification_of_result(circuit, w_min, sol_classical):
     quantum_solution = []
     for i in range(2 ** len(sol_pos)):
         templist = canonical_list.copy()
-        templist[sol_pos] = list(np.binary_repr(i, len(sol_pos))[::-1])
+        templist[sol_pos] = list(np.binary_repr(i, len(sol_pos)))
         quantum_solution.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
 
     if len(quantum_solution) > len(sol_classical):
@@ -293,7 +296,7 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     return qprog_hhl, matrix_a, vector_b, w_min
 
 
-def classiq_hhl(model: ToyModel, qpe_register_size: int = None, show_circuit: bool = True):
+def classiq_hhl(model: ToyModel, qpe_register_size: int = None, show_circuit: bool = True, save_qasm=False):
     """Full implementation unified between classiq and qiskit."""
     start_time = time.time()
 
@@ -305,8 +308,11 @@ def classiq_hhl(model: ToyModel, qpe_register_size: int = None, show_circuit: bo
 
     gen_circ = GeneratedCircuit.parse_raw(circuit_hhl)
     circuit_depth = gen_circ.transpiled_circuit.depth
-    print(gen_circ.analyzer_data.keys())
-    circuit_width = len(gen_circ.analyzer_data["qubits"])
+    if save_qasm:
+        qasm_content = gen_circ.transpiled_circuit.qasm
+        with open(f"{model.name}_classiq_hhl.qasm", "w") as qasm_file:
+            qasm_file.write(qasm_content)
+    circuit_width = len(gen_circ.analyzer_data.qubits)
     print("depth = ", circuit_depth)
     print("width = ", circuit_width)
 
@@ -322,8 +328,8 @@ if __name__ == "__main__":
     # input params
     n: int = 2
 
-    toymodel = ClassiqDemoExample(problem_size=n)
+    toymodel = ClassiqDemoExample()
 
-    qsol, csol, depth, width, run_time = classiq_hhl(model=toymodel, show_circuit=True)
+    qsol, csol, depth, width, run_time = classiq_hhl(model=toymodel, show_circuit=True, save_qasm=True)
 
     print_results(quantum_solution=qsol, classical_solution=csol, run_time=run_time, name=toymodel.name, plot=True)

@@ -1,7 +1,7 @@
 flake8
 pytest
 pytest-cov
-classiq>=0.26,<0.27
+classiq>=0.28,<0.29
 numpy
 qiskit
 qiskit-algorithms
