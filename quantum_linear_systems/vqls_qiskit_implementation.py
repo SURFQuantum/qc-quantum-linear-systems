@@ -29,7 +29,7 @@ def qiskit_vqls_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, ansat
     vqls = VQLS(
         estimator,
         ansatz,
-        COBYLA(maxiter=250, disp=True),
+        optimizer=COBYLA(maxiter=250, disp=True),
         sampler=sampler,
         callback=log.update,
     )
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     toymodel = ClassiqDemoExample()
 
-    vqls_ansatz = RealAmplitudes(num_qubits=int(np.log2(toymodel.matrix_a.shape[0])),
+    vqls_ansatz = RealAmplitudes(num_qubits=toymodel.num_qubits,
                                  entanglement="full", reps=3, insert_barriers=False)
 
     qsol, csol, depth, width, run_time = qiskit_vqls(model=toymodel, show_circuit=True, ansatz=vqls_ansatz)

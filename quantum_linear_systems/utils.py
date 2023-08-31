@@ -131,6 +131,7 @@ def plot_depth_runtime_distance_vs_problem(
     axs[1].set_ylabel("Run Time [s]")
     axs[1].set_title("Run Time Comparison")
     axs[1].grid(True)
+    axs[1].set_yscale("log")
 
     for drdmn in depth_runtime_distance_marker_name:
         axs[2].plot(problem_names, drdmn[2], drdmn[3], label=drdmn[4])

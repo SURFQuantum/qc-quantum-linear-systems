@@ -8,9 +8,9 @@ class TestToyModels(unittest.TestCase):
     """Unittest the ToyModels."""
     def test_init(self):
         """Test correct initialization."""
-        model1 = Qiskit4QubitExample(2)
-        self.assertEqual(model1.problem_size, 1)
+        model1 = Qiskit4QubitExample()
+        self.assertEqual(model1.num_qubits, 1)
         model2 = VolterraProblem(2)
-        self.assertEqual(model2.problem_size, 2)
-        model3 = ClassiqDemoExample(2)
-        self.assertEqual(model3.problem_size, 2)
+        self.assertEqual(model2.num_qubits, 2+1)  # volterra needs to be made hermitian so num_qubits grows by 1
+        model3 = ClassiqDemoExample()
+        self.assertEqual(model3.num_qubits, 2)

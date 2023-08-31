@@ -4,7 +4,9 @@ import numpy as np
 from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
 
 
-from quantum_linear_systems.toymodels import Qiskit4QubitExample, ClassiqDemoExample, VolterraProblem
+from quantum_linear_systems.toymodels import (Qiskit4QubitExample,
+                                              ClassiqDemoExample,
+                                              VolterraProblem)
 from quantum_linear_systems.hhl_qiskit_implementation import qiskit_hhl
 from quantum_linear_systems.hhl_classiq_implementation import classiq_hhl
 from quantum_linear_systems.vqls_qiskit_implementation import qiskit_vqls
@@ -54,8 +56,9 @@ def solve_models(solver_function, models, needs_ansatz=False):
 
 
 if __name__ == "__main__":
-    toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(problem_size=2)]
-    # VolterraProblem(problem_size=3)]
+    # toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2),
+    #              VolterraProblem(num_qubits=3)]
+    toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2)]
     # Note classiq can't solve n>=3 here classiq.exceptions.ClassiqAPIError: Error number 73900 occurred.
     # The exponentiation constraints are not satisfiable. Minimal max_depth is 1184.
     # Qiskit has no problem and solves it rather quickly.
