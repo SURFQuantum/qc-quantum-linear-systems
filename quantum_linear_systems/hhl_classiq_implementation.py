@@ -15,7 +15,7 @@ from classiq import Model, execute, synthesize, show, GeneratedCircuit
 from classiq.execution import ExecutionPreferences, IBMBackendPreferences
 from classiq.synthesis import set_execution_preferences
 
-from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample
+from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample, Qiskit4QubitExample
 from quantum_linear_systems.utils import (extract_x_from_expanded, print_results,
                                           relative_distance_quantum_classical_solution,
                                           normalize_quantum_by_classical_solution)
@@ -183,7 +183,7 @@ def verification_of_result(qprog_hhl, w_min, sol_classical):
     """
     results = execute(qprog_hhl)
     res_hhl = results[0].value
-    circuit = GeneratedCircuit.parse_raw(qprog_hhl)
+    circuit = GeneratedCircuit.from_qprog(qprog_hhl)
 
     total_q = circuit.data.width  # total number of qubits of the whole circuit
 
@@ -203,12 +203,15 @@ def verification_of_result(qprog_hhl, w_min, sol_classical):
         quantum_solution.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
 
     if len(quantum_solution) > len(sol_classical):
+        # todo: should not be using the classical solution for anything except verification
         # extract the solution from the extended vector
         quantum_solution = extract_x_from_expanded(np.array(quantum_solution))
 
     print("first", quantum_solution)
     global_phase = np.angle(quantum_solution)
     qsol_corrected = np.real(quantum_solution / np.exp(1j * global_phase))
+    # todo: this is a hack to obtain the multiplication factor of the normalized quantum solution
+    qsol_corrected = normalize_quantum_by_classical_solution(qsol_corrected, sol_classical)
     print("classical:  ", sol_classical)
     print("HHL:        ", qsol_corrected)
     print(
@@ -310,10 +313,9 @@ def classiq_hhl(model: ToyModel, qpe_register_size: int = None, show_circuit: bo
             qasm_file.write(qasm_content)
 
     # verify against classical solution
+    # todo: split this in extract_solution_vector and verify_solution_vector
     quantum_solution = verification_of_result(qprog_hhl=circuit_hhl, w_min=w_min,
                                               sol_classical=model.classical_solution)
-    # normalize
-    quantum_solution = normalize_quantum_by_classical_solution(quantum_solution, model.classical_solution)
 
     # todo: this actually might not the real runtime here, but includes the waiting time
     return quantum_solution, model.classical_solution, circuit_depth, circuit_width, time.time() - start_time
@@ -324,6 +326,7 @@ if __name__ == "__main__":
     N: int = 2
 
     toymodel = ClassiqDemoExample()
+    toymodel = Qiskit4QubitExample()
 
     qsol, csol, depth, width, run_time = classiq_hhl(model=toymodel, show_circuit=True, save_qasm=True)
 

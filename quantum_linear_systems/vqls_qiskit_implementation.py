@@ -62,12 +62,12 @@ def qiskit_vqls(model: ToyModel, ansatz: QuantumCircuit, show_circuit: bool = Fa
     else:
         quantum_solution = vqls_solution_vector
 
-    # normalize quantum solution by classical
-    quantum_solution = normalize_quantum_by_classical_solution(quantum_solution, model.classical_solution)
-
     # ensure we have the positive vector
     if np.sum(quantum_solution) < 0:
         quantum_solution = -quantum_solution
+
+    # todo: hack to have quantum and classical solution have the same norm
+    quantum_solution = normalize_quantum_by_classical_solution(quantum_solution, model.classical_solution)
 
     qc_basis = vqls_circuit.decompose(reps=5)
     print(f"Comparing depths original {vqls_circuit.depth()} vs. decomposed {qc_basis.depth()}")
