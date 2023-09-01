@@ -162,3 +162,5 @@ cython_debug/
 # manual addition
 quantum_linear_solvers
 vqls-prototype
+*.png
+*.qasm
