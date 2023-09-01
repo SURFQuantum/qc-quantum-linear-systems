@@ -19,7 +19,6 @@ class ToyModel:
         matrix_a (numpy.ndarray): The coefficient matrix for the linear system.
         vector_b (numpy.ndarray): The right-hand side vector for the linear system.
         classical_solution (numpy.ndarray): The classical solution to the linear system.
-        num_qubits (int): The number of qubits involved.
     """
     def __init__(self, name: str, matrix: np.ndarray, vector: np.ndarray, csol: np.ndarray):
         if not isinstance(name, str):
@@ -32,10 +31,22 @@ class ToyModel:
         self.vector_b = vector
         self.classical_solution = csol.flatten()
 
+        self.normalize_model()
+
+        print("A =", self.matrix_a, "\n")
+        print("b =", self.vector_b)
+
     @property
     def num_qubits(self):
         """Return the number of qubits involved in the problem."""
         return int(np.log2(self.matrix_a.shape[0]))
+
+    def normalize_model(self):
+        """Normalize the whole problem to valid quantum states."""
+        norm_b = np.linalg.norm(self.vector_b)
+        self.matrix_a = self.matrix_a / norm_b
+        self.classical_solution = self.classical_solution / norm_b
+        self.vector_b = self.vector_b / norm_b
 
     @staticmethod
     def classically_solve(mat: np.ndarray, vec: np.ndarray) -> np.ndarray:
@@ -87,20 +98,11 @@ class VolterraProblem(ToyModel):
         alpha = delta_s / 2
 
         vec = np.ones((total_n, 1))
-
-        # prepare matrix A and vector b to be used for HHL
-        # expanding them to a hermitian form of A --> A_tilde*x=b_tilde
         mat = self.volterra_a_matrix(size=total_n, alpha=alpha)
 
-        print("A =", mat, "\n")
-        print("b =", vec)
-
-        # expand
+        # expanding them to a hermitian form of A --> A_tilde*x=b_tilde
         a_tilde = make_matrix_hermitian(mat)
         b_tilde = expand_b_vector(vec)
-
-        print("A_tilde =", a_tilde, "\n")
-        print("b_tilde =", b_tilde)
 
         classical_solution = self.classically_solve(mat, vec)
 
@@ -159,8 +161,6 @@ class ClassiqDemoExample(ToyModel):
 
         classical_solution = self.classically_solve(matrix_a, vector_b)
 
-        print("A =", matrix_a, "\n")
-        print("b =", vector_b)
         super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
 
 

@@ -44,7 +44,7 @@ def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, st
     binary_rep = "1" + (number_of_qubits_in_result-1) * "0"
     not_normalized_vec = np.real(state_vector[int(binary_rep, 2):(int(binary_rep, 2) + size_of_hermitian_matrix)])
 
-    return not_normalized_vec
+    return not_normalized_vec / np.linalg.norm(not_normalized_vec)
 
 
 def normalize_quantum_by_classical_solution(quantum_solution: np.ndarray, classical_solution: np.ndarray) -> np.ndarray:

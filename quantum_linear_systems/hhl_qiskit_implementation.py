@@ -5,11 +5,10 @@ import numpy as np
 from linear_solvers import HHL
 from qiskit.quantum_info import Statevector
 
-from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample
+from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample, Qiskit4QubitExample
 from quantum_linear_systems.utils import (extract_hhl_solution_vector_from_state_vector,
                                           extract_x_from_expanded,
-                                          print_results,
-                                          normalize_quantum_by_classical_solution)
+                                          print_results)
 
 
 def qiskit_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray):
@@ -25,6 +24,8 @@ def qiskit_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray):
     naive_state_vec = Statevector(hhl_circuit).data
     hhl_solution_vector = extract_hhl_solution_vector_from_state_vector(hermitian_matrix=matrix_a,
                                                                         state_vector=naive_state_vec)
+    # scale normalized solution vector to norm of final state
+    hhl_solution_vector = naive_hhl_solution.euclidean_norm * hhl_solution_vector
 
     return hhl_circuit, hhl_solution_vector
 
@@ -48,8 +49,6 @@ def qiskit_hhl(model: ToyModel, show_circuit: bool = False):
         quantum_solution = extract_x_from_expanded(hhl_solution_vector)
     else:
         quantum_solution = hhl_solution_vector
-    # normalize
-    quantum_solution = normalize_quantum_by_classical_solution(quantum_solution, model.classical_solution)
 
     qc_basis = hhl_circuit.decompose(reps=5)
     print(f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}")
@@ -62,6 +61,7 @@ if __name__ == "__main__":
     N = 2
 
     toymodel = ClassiqDemoExample()
+    toymodel = Qiskit4QubitExample()
 
     qsol, csol, depth, width, run_time = qiskit_hhl(model=toymodel, show_circuit=True)
 
