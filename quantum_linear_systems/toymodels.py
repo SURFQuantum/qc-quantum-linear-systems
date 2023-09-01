@@ -30,8 +30,6 @@ class ToyModel:
         self.name = name
         self.matrix_a = matrix
         self.vector_b = vector
-        # normalize classical solution
-        csol /= np.linalg.norm(csol)
         self.classical_solution = csol.flatten()
 
     @property
@@ -51,9 +49,7 @@ class ToyModel:
         Returns:
            numpy.ndarray: The solution vector of the linear system.
         """
-        solution = np.linalg.solve(mat, vec)
-        solution /= np.linalg.norm(solution)
-        return solution
+        return np.linalg.solve(mat, vec)
 
 
 class Qiskit4QubitExample(ToyModel):
@@ -79,7 +75,7 @@ class VolterraProblem(ToyModel):
     Define the Volterra integral equation problem ready for solving.
 
     Parameters:
-        problem_size (int): The size of the problem, such that the total size will be 2**problem_size.
+        num_qubits (int): The size of the problem, such that the total size will be 2**num_qubits.
 
     """
     def __init__(self, num_qubits):
@@ -159,6 +155,7 @@ class ClassiqDemoExample(ToyModel):
         )
 
         vector_b = np.array([1, 2, 4, 3])
+        vector_b = vector_b / np.linalg.norm(vector_b)
 
         classical_solution = self.classically_solve(matrix_a, vector_b)
 

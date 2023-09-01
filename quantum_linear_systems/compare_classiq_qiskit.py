@@ -1,4 +1,5 @@
 """Compare the Classiq and Qiskit implementations on different use-cases and plot the results."""
+from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
@@ -38,7 +39,7 @@ def solve_models(solver_function, models, needs_ansatz=False):
     quantum_solutions, classical_solutions, run_times, depths, rel_distances = [], [], [], [], []
 
     for model in models:
-        print(f"Solving {model.name}")
+        print(datetime.now().strftime("%H:%M:%S"))
         if not needs_ansatz:
             qsol, csol, depth, _, run_time = solver_function(model=model, show_circuit=False)
         else:
@@ -93,4 +94,5 @@ if __name__ == "__main__":
     plot_depth_runtime_distance_vs_problem(depth_runtime_distance_marker_name=drdmn, problems=toymodels, axs=axs[:, 1])
 
     plt.tight_layout()
+    plt.savefig(f'comparison_plot_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png', dpi=300)
     plt.show()

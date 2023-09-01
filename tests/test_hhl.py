@@ -31,7 +31,6 @@ class TestClassiqHHL(unittest.TestCase):
         q_sol, csol, _, width, _ = classiq_hhl(model=self.test_model, qpe_register_size=qpe_register,
                                                show_circuit=False)
 
-        q_sol /= np.linalg.norm(q_sol)
         self.assertEqual(width, 2 + qpe_register)
         self.assertTrue(np.allclose(csol, q_sol, atol=.1))
 
