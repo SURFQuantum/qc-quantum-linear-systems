@@ -13,7 +13,7 @@ from qiskit_algorithms.optimizers import COBYLA
 from vqls_prototype import VQLS, VQLSLog
 
 from quantum_linear_systems.toymodels import ClassiqDemoExample, ToyModel
-from quantum_linear_systems.utils import extract_x_from_expanded, print_results
+from quantum_linear_systems.utils import extract_x_from_expanded, print_results, normalize_quantum_by_classical_solution
 
 
 def qiskit_vqls_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, ansatz: QuantumCircuit
@@ -43,6 +43,7 @@ def qiskit_vqls_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, ansat
 
 def qiskit_vqls(model: ToyModel, ansatz: QuantumCircuit, show_circuit: bool = False):
     """Full implementation unified between classiq and qiskit."""
+    print(f"Qiskit VQLS solving {model.name}.")
     start_time = time.time()
 
     # solve VQLS using qiskit
@@ -60,8 +61,10 @@ def qiskit_vqls(model: ToyModel, ansatz: QuantumCircuit, show_circuit: bool = Fa
         quantum_solution = extract_x_from_expanded(vqls_solution_vector)
     else:
         quantum_solution = vqls_solution_vector
-    # normalize
-    quantum_solution /= np.linalg.norm(quantum_solution)
+
+    # normalize quantum solution by classical
+    quantum_solution = normalize_quantum_by_classical_solution(quantum_solution, model.classical_solution)
+
     # ensure we have the positive vector
     if np.sum(quantum_solution) < 0:
         quantum_solution = -quantum_solution
