@@ -1,7 +1,9 @@
 """Implementations of toy-models that can be imported by the algorithms."""
 import numpy as np
 
-from quantum_linear_systems.utils import make_matrix_hermitian, expand_b_vector
+from quantum_linear_systems.utils import (make_matrix_hermitian, expand_b_vector, generate_random_vector,
+                                          vector_uniformity_entropy, generate_s_sparse_matrix,
+                                          is_matrix_well_conditioned)
 
 
 class ToyModel:
@@ -181,8 +183,6 @@ class RandomNQubitProblem(ToyModel):
 
         classical_solution = self.classically_solve(matrix_a, vector_b)
 
-        print("A =", matrix_a, "\n")
-        print("b =", vector_b)
         super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
 
 
@@ -207,6 +207,61 @@ def integro_differential_a_matrix(a_matrix: np.ndarray, time_discretization_step
 
 # def decompose_into_unitaries(matrix):
 #     return
+
+class ScalingTestModel(ToyModel):
+    """ToyModel to test how algorithms scale with different properties of the input matrix and vector.
+
+    Considerations:
+        1. if b is not close to uniform state preparation may be costly
+        2. matrix A needs to be s-sparce then exp(iAt) can be calculated in time O(log(N) s**2 t)
+        3. matrix needs to be well conditioned
+
+    Parameters:
+    matrix_size (int): The size of the matrix (number of rows and columns).
+    matrix_s (float): The s-sparsity of the matrix (the matrix has at most s non-zero entries in any row or column).
+    matrix_well_conditioned (bool): Whether the matrix singular values lie between the reciprocal of its
+        condition number and 1.
+    vector_uniformity (float): Uniformity of the random vector b. Float between 0 (non-uniform, sampled from normal
+        distribution) and 1 (completely uniform).
+    max_num_iterations (int): (optional) Maximum number of attempts to find a matrix that is well-conditioned. Defaults
+        to 10.
+    """
+    def __init__(self, matrix_size: int = 4, matrix_s: int = 0, matrix_well_conditioned: bool = True,
+                 vector_uniformity: float = 1., max_num_iterations: int = 10):
+
+        vector_b = generate_random_vector(size=matrix_size, uniformity_level=vector_uniformity)
+        vector_b = vector_b / np.linalg.norm(vector_b)
+        print(f"Entropy of random vector_b before expansion is {vector_uniformity_entropy(vector_b)}.")
+
+        vector_b = expand_b_vector(vector_b)
+        print(f"Entropy of random vector_b after expansion is {vector_uniformity_entropy(vector_b)}.")
+
+        # todo: if we make the matrix hermitian by expanding...
+        #  what is the effect on the uniformity of b and therefore the algorithm?
+
+        matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s=matrix_s)
+        matrix_a = make_matrix_hermitian(matrix_a)
+        is_well_conditioned = is_matrix_well_conditioned(matrix_a)
+        iterations = 1
+
+        while matrix_well_conditioned != is_well_conditioned:
+
+            matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s=matrix_s)
+            matrix_a = make_matrix_hermitian(matrix_a)
+            is_well_conditioned = is_matrix_well_conditioned(matrix_a)
+            iterations += 1
+            if iterations == max_num_iterations:
+                raise ValueError(f"Could not generate matrix where matrix_well_conditioned={matrix_well_conditioned} "
+                                 f"within {iterations} iterations.")
+            # todo: if we make matrix hermitian: that should not change s-sparsity of matrix,
+            #  but might change well-conditioned-ness of matrix?
+
+        classical_solution = self.classically_solve(matrix_a, vector_b)
+
+        matrix_condition_number = np.linalg.cond(matrix_a)
+        vector_b_entropy = vector_uniformity_entropy(vector_b)
+        name = f"TestNxN_n={matrix_size}_s={matrix_s}_c={matrix_condition_number}_e={vector_b_entropy}"
+        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
 
 
 if __name__ == "__main__":

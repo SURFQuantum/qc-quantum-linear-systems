@@ -1,8 +1,5 @@
 """Utility functions that can be imported by either implementation."""
-from typing import Tuple, List
-
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def make_matrix_hermitian(matrix: np.ndarray) -> np.ndarray:
@@ -57,115 +54,167 @@ def relative_distance_quantum_classical_solution(quantum_solution: np.ndarray, c
     return np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) * 100
 
 
-def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str) -> None:
+def generate_random_vector(size, uniformity_level):
     """
-    Plot classical and quantum solution vectors side by side.
+    Generate a random vector of a given size while varying the level of uniformity.
 
     Parameters:
-        classical_solution (numpy.ndarray): Array representing the classical solution.
-        quantum_solution (numpy.ndarray): Array representing the quantum solution.
-        title (str): Title for the plot.
+    size (int): The size of the vector to be generated.
+    uniformity_level (float): A value between 0 and 1 that controls the level of uniformity.
+        - 0: Completely non-uniform (sampled from normal distribution).
+        - 1: Completely uniform (sampled from uniform distribution).
+        - Values in between: A mixture of uniform and non-uniform elements.
+
+    Returns:
+    numpy.ndarray: A random vector of the specified size with varying uniformity.
+
+    Example:
+    >>> generate_random_vector(10, 0.2)
+    array([ 0.23465278, -0.34781082,  0.        ,  0.        ,  0.        ,
+            0.        ,  0.94386038,  0.        ,  0.        ,  0.        ])
+
+    >>> generate_random_vector(5, 1.0)
+    array([0.53812673, 0.16123648, 0.97176192, 0.46867161, 0.86048439])
+
+    >>> generate_random_vector(8, 0.8)
+    array([ 0.        ,  0.        ,  0.68090503,  0.10261092, -0.37432812,
+            0.        ,  0.        ,  0.        ])
     """
-    _, axis = plt.subplots()
+    if uniformity_level < 0 or uniformity_level > 1:
+        raise ValueError("uniformity_level should be between 0 and 1")
 
-    axis.plot(classical_solution, "bs", label="classical")
-    axis.plot(quantum_solution, "ro", label="HHL")
-    axis.legend()
-    axis.set_xlabel("$i$")
-    axis.set_ylabel("$x_i$")
-    axis.set_ylim(0, 1)
-    axis.set_title(title)
-    axis.grid(True)
-    plt.show()
+    # Generate random values based on uniformity_level
+    if uniformity_level == 0:
+        # Completely non-uniform (e.g., Gaussian distribution)
+        random_vector = np.random.randn(size)
+    elif uniformity_level == 1:
+        # Completely uniform (e.g., uniform distribution)
+        random_vector = np.random.rand(size)
+    else:
+        # Generate a mixture of uniform and non-uniform values
+        num_uniform = int(size * uniformity_level)
+        num_non_uniform = size - num_uniform
+
+        # Generate a partially uniform part (e.g., uniform distribution)
+        uniform_part = np.random.rand(num_uniform)
+
+        # Generate a partially non-uniform part (e.g., Gaussian distribution)
+        non_uniform_part = np.random.randn(num_non_uniform)
+
+        # Concatenate the two parts
+        random_vector = np.concatenate((uniform_part, non_uniform_part))
+
+        # Shuffle the vector to mix the uniform and non-uniform parts
+        np.random.shuffle(random_vector)
+
+    return random_vector
 
 
-def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, qsols_marker_name: List[Tuple[list, str, str]],
-                              title: str, axis=None) -> None:
+def vector_uniformity_entropy(vector):
     """
-    Plot classical and quantum solutions side by side.
+    Calculate the entropy of a vector to measure its uniformity.
 
     Parameters:
-        classical_solution (numpy.ndarray): Array representing the classical solution.
-        qsols_marker_name: (List[Tuple[list, str, str]]): List of tuples with first element List of quantum solutions,
-        second element the desired marker type and third element the corresponding label.
-        title (str): Title for the plot.
-        axis (matplotlib.axes._subplots.AxesSubplot): Axes to use for the plot. If None, a new subplot will be created.
+    vector (numpy.ndarray): The input vector for which the uniformity is to be measured.
+
+    Returns:
+    float: The entropy of the vector. Lower values indicate greater uniformity.
     """
-    if axis is None:
-        _, axis = plt.subplots()
+    # Ensure the input vector is a NumPy array
+    vector = np.array(vector)
 
-    axis.plot(classical_solution, "bs", label="classical")
-    for qmn in qsols_marker_name:
-        axis.plot(qmn[0], qmn[1], label=qmn[2])
-    axis.legend()
-    axis.set_xlabel("$i$")
-    axis.set_ylabel("$x_i$")
-    axis.set_ylim(0, 1)
-    axis.set_title(title)
-    axis.grid(True)
+    # Normalize the vector to sum to 1 (assuming it represents a probability distribution)
+    normalized_vector = vector / np.sum(vector)
+
+    # Calculate entropy
+    entropy = -np.sum(
+        normalized_vector * np.log2(normalized_vector + 1e-10))  # Adding a small epsilon for numerical stability
+
+    return entropy
 
 
-def plot_depth_runtime_distance_vs_problem(
-        depth_runtime_distance_marker_name: List[Tuple[Tuple[list, list, list], str, str]],
-        problems: list,
-        axs: list = None
-) -> None:
+def generate_s_sparse_matrix(matrix_size, s):
     """
-    Plot depth and runtime of two algorithms side by side for each problem index.
+    Generate a random s-sparse matrix of a given size.
 
     Parameters:
-        depth_runtime_distance_marker_name (list) : List of tuples of the form (depths, run_times, rel_distance,
-        marker, name).
-        problems (list): List of problem objects with a 'name' attribute.
-        axs (list): List of axes to use for the plot. If None, a new subplot will be created.
+    matrix_size (int): The size of the square matrix. It determines the number of rows and columns.
+    s (int): The maximum number of non-zero entries allowed in any row or column.
+
+    Returns:
+    numpy.ndarray: A random s-sparse matrix of size matrix_size x matrix_size.
+
+    Definition of s-sparse:
+    A matrix is s-sparse if it has at most 's' non-zero entries in any row or column.
+
+    Example:
+    >>> generate_s_sparse_matrix(5, 2)
+    array([[0.        , 0.28197835, 0.1216284 , 0.        , 0.26790398],
+           [0.        , 0.        , 0.6133386 , 0.        , 0.        ],
+           [0.93237137, 0.        , 0.        , 0.44796184, 0.        ],
+           [0.        , 0.        , 0.        , 0.89026758, 0.        ],
+           [0.        , 0.17753217, 0.        , 0.        , 0.43770629]])
     """
-    problem_names = [problem.name for problem in problems]
+    if s <= 0:
+        raise ValueError("s must be a positive integer")
 
-    if axs is None or len(axs) < 3:
-        _, axs = plt.subplots(3, 1, figsize=(10, 6))
-    for drdmn in depth_runtime_distance_marker_name:
-        axs[0].plot(problem_names, drdmn[0], drdmn[3], label=drdmn[4])
-    axs[0].legend()
-    axs[0].set_ylabel("Circuit Depth")
-    axs[0].set_title("Circuit Depth Comparison")
-    axs[0].grid(True)
+    if matrix_size <= 0:
+        raise ValueError("matrix_size must be a positive integer")
 
-    for drdmn in depth_runtime_distance_marker_name:
-        axs[1].plot(problem_names, drdmn[1], drdmn[3], label=drdmn[4])
-    axs[1].legend()
-    axs[1].set_ylabel("Run Time [s]")
-    axs[1].set_title("Run Time Comparison")
-    axs[1].grid(True)
-    axs[1].set_yscale("log")
+    if s > matrix_size:
+        raise ValueError("s cannot be greater than matrix_size")
 
-    for drdmn in depth_runtime_distance_marker_name:
-        axs[2].plot(problem_names, drdmn[2], drdmn[3], label=drdmn[4])
-    axs[2].legend()
-    axs[2].set_ylabel("Relative Distance [%]")
-    axs[2].set_title("Rel. Distance of Quantum/Classical Solution")
-    axs[2].grid(True)
+    # Initialize an empty matrix with all zeros
+    matrix = np.zeros((matrix_size, matrix_size), dtype=float)
+
+    # Generate random non-zero values in the matrix
+    for i in range(matrix_size):
+        # Randomly choose 's' unique column indices for non-zero entries
+        non_zero_columns = np.random.choice(matrix_size, s, replace=False)
+
+        # Randomly assign non-zero values to these columns
+        non_zero_values = np.random.rand(s)  # You can adjust this distribution as needed
+
+        # Set the selected columns to the non-zero values
+        matrix[i, non_zero_columns] = non_zero_values
+
+    return matrix
 
 
-def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, run_time: float, name: str,
-                  plot: bool = True) -> None:
+def is_matrix_well_conditioned(matrix, tolerance=1e-6):
     """
-    Print results of classical and quantum solutions and optionally plot them.
+    Check if a matrix is well-conditioned based on its singular values.
 
     Parameters:
-        quantum_solution (numpy.ndarray): Quantum solution.
-        classical_solution (numpy.ndarray): Classical solution.
-        run_time (float): Time taken for the computation.
-        name (str): Name of the solution.
-        plot (bool, optional): Whether to generate and display a plot. Default is True.
+    matrix (numpy.ndarray): The matrix to be checked for well-conditioning.
+    tolerance (float, optional): A small positive number to handle numerical precision.
+        Default is 1e-6.
+
+    Returns:
+    bool: True if the matrix is well-conditioned, False otherwise.
+
+    Definition of well-conditioned:
+    A matrix is well-conditioned when its singular values lie between the reciprocal
+    of its condition number and 1, considering a small tolerance for numerical precision.
+
+    Example:
+    >>> A = np.array([[2.0, 1.0], [1.0, 2.0]])
+    >>> is_matrix_well_conditioned(A)
+    True
+
+    >>> B = np.array([[1e-6, 0], [0, 1e6]])
+    >>> is_matrix_well_conditioned(B)
+    False
     """
-    classical_solution /= np.linalg.norm(classical_solution)
-    quantum_solution /= np.linalg.norm(quantum_solution)
-    print("classical", classical_solution.flatten())
-    print("quantum", quantum_solution.flatten())
-    if plot:
-        plot_csol_vs_qsol(classical_solution=classical_solution, quantum_solution=quantum_solution, title=name)
+    # Compute the singular values of the matrix
+    singular_values = np.linalg.svd(matrix, compute_uv=False)
 
-    print(f"Finished classiq run in {run_time}s.")
+    # Calculate the condition number
+    condition_number = singular_values[0] / singular_values[-1]
 
-    if np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) > 0.2:
-        raise RuntimeError("The HHL solution is too far from the classical one, please verify your algorithm.")
+    # Define the lower and upper bounds for singular values
+    lower_bound = 1.0 / (condition_number + tolerance)
+    upper_bound = 1.0 + tolerance
+
+    # Check if all singular values are within the bounds
+    return all(lower_bound <= singular_values) and all(singular_values <= upper_bound)
