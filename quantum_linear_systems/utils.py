@@ -66,7 +66,7 @@ def generate_random_vector(size, uniformity_level):
         - Values in between: A mixture of uniform and non-uniform elements.
 
     Returns:
-    numpy.ndarray: A random vector of the specified size with varying uniformity.
+    numpy.ndarray: A random vector of the specified size with varying uniformity which is normalized to 1.
 
     Example:
     >>> generate_random_vector(10, 0.2)
@@ -107,7 +107,7 @@ def generate_random_vector(size, uniformity_level):
         # Shuffle the vector to mix the uniform and non-uniform parts
         np.random.shuffle(random_vector)
 
-    return random_vector
+    return random_vector / np.linalg.norm(random_vector)
 
 
 def vector_uniformity_entropy(vector):
@@ -181,41 +181,61 @@ def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
     return matrix
 
 
-def is_matrix_well_conditioned(matrix, tolerance=1e-6):
+def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.):
     """
-    Check if a matrix is well-conditioned based on its singular values.
+        Check if a matrix is well-conditioned based on a threshold.
 
-    Parameters:
-    matrix (numpy.ndarray): The matrix to be checked for well-conditioning.
-    tolerance (float, optional): A small positive number to handle numerical precision.
-        Default is 1e-6.
+        Parameters:
+        matrix (numpy.ndarray): The matrix to be checked for well-conditioning.
+        threshold (float, optional): Threshold to define well-conditioned-ness. Defaults to 10.
 
-    Returns:
-    bool: True if the matrix is well-conditioned, False otherwise.
+        Returns:
+        bool: True if the matrix is well-conditioned, False otherwise.
 
-    Definition of well-conditioned:
-    A matrix is well-conditioned when its singular values lie between the reciprocal
-    of its condition number and 1, considering a small tolerance for numerical precision.
+        Definition of well-conditioned:
+        A matrix is well-conditioned when its condition number is sufficiently close to 1.
 
-    Example:
-    >>> A = np.array([[2.0, 1.0], [1.0, 2.0]])
-    >>> is_matrix_well_conditioned(A)
-    True
+        """
+    return np.linalg.cond(matrix) <= threshold
 
-    >>> B = np.array([[1e-6, 0], [0, 1e6]])
-    >>> is_matrix_well_conditioned(B)
-    False
-    """
-    # Compute the singular values of the matrix
-    singular_values = np.linalg.svd(matrix, compute_uv=False)
 
-    # Calculate the condition number
-    # condition_number = singular_values[0] / singular_values[-1]
-    condition_number = np.linalg.cond(matrix)
-
-    # Define the lower and upper bounds for singular values
-    lower_bound = 1.0 / (condition_number + tolerance)
-    upper_bound = 1.0 + tolerance
-
-    # Check if all singular values are within the bounds
-    return all(lower_bound <= singular_values) and all(singular_values <= upper_bound)
+# def is_matrix_well_conditioned(matrix, tolerance=1e-6):
+#     """
+#     Check if a matrix is well-conditioned based on its singular values.
+#
+#     Parameters:
+#     matrix (numpy.ndarray): The matrix to be checked for well-conditioning.
+#     tolerance (float, optional): A small positive number to handle numerical precision.
+#         Default is 1e-6.
+#
+#     Returns:
+#     bool: True if the matrix is well-conditioned, False otherwise.
+#
+#     Definition of well-conditioned:
+#     A matrix is well-conditioned when its singular values lie between the reciprocal
+#     of its condition number and 1, considering a small tolerance for numerical precision.
+#
+#     Example:
+#     >>> A = np.array([[2.0, 1.0], [1.0, 2.0]])
+#     >>> is_matrix_well_conditioned(A)
+#     True
+#
+#     >>> B = np.array([[1e-6, 0], [0, 1e6]])
+#     >>> is_matrix_well_conditioned(B)
+#     False
+#     """
+#     # Compute the singular values of the matrix
+#     # singular_values = np.linalg.svd(matrix, compute_uv=False)
+#
+#     # Calculate the condition number
+#     # condition_number = singular_values[0] / singular_values[-1]
+#     condition_number = np.linalg.cond(matrix)
+#
+#     # Define the lower and upper bounds for singular values
+#     # lower_bound = 1.0 / (condition_number + tolerance)
+#     # upper_bound = 1.0 + tolerance
+#     # print(f"Lower bound {lower_bound}, upper bound {upper_bound}")
+#
+#     # Check if all singular values are within the bounds
+#     # return all(lower_bound <= singular_values) and all(singular_values <= upper_bound)
+#     return condition_number <= 10
