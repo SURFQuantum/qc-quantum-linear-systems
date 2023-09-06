@@ -23,13 +23,21 @@ def expand_b_vector(unexpanded_vector: np.ndarray, non_square_matrix: np.ndarray
     return np.block([[unexpanded_vector], [lower_zero]]).flatten()
 
 
-def extract_x_from_expanded(expanded_solution_vector: np.array, non_hermitian_matrix: np.array = None) -> np.ndarray:
+def extract_x_from_expanded(expanded_solution_vector: np.array) -> np.ndarray:
     """The expanded problem returns a vector y=(0 x), this function returns x from input y."""
-    if non_hermitian_matrix is not None:
-        index = non_hermitian_matrix.shape[0]
+    if isinstance(expanded_solution_vector, list):
+        expanded_solution_vector = np.array(expanded_solution_vector)
+    assert isinstance(expanded_solution_vector, np.ndarray)
+    # Find the index where the first non-zero element appears in the second half
+    index = 0
+    while index < (len(expanded_solution_vector) // 2) and expanded_solution_vector[index] == 0:
+        index += 1
+
+    # If index reached the end of the vector, the second half contains only zeros
+    if index == (len(expanded_solution_vector) // 2):
+        return expanded_solution_vector[len(expanded_solution_vector) // 2:].flatten()
     else:
-        index = int(expanded_solution_vector.flatten().shape[0] / 2)
-    return expanded_solution_vector[index:].flatten()
+        return expanded_solution_vector.flatten()
 
 
 def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, state_vector: np.array) -> np.ndarray:
