@@ -86,20 +86,20 @@ def generate_random_vector(size, uniformity_level):
     # Generate random values based on uniformity_level
     if uniformity_level == 0:
         # Completely non-uniform (e.g., Gaussian distribution)
-        random_vector = np.random.randn(size)
+        random_vector = np.random.randn(size, 1)
     elif uniformity_level == 1:
         # Completely uniform (e.g., uniform distribution)
-        random_vector = np.random.rand(size)
+        random_vector = np.random.rand(size, 1)
     else:
         # Generate a mixture of uniform and non-uniform values
         num_uniform = int(size * uniformity_level)
         num_non_uniform = size - num_uniform
 
         # Generate a partially uniform part (e.g., uniform distribution)
-        uniform_part = np.random.rand(num_uniform)
+        uniform_part = np.random.rand(num_uniform, 1)
 
         # Generate a partially non-uniform part (e.g., Gaussian distribution)
-        non_uniform_part = np.random.randn(num_non_uniform)
+        non_uniform_part = np.random.randn(num_non_uniform, 1)
 
         # Concatenate the two parts
         random_vector = np.concatenate((uniform_part, non_uniform_part))
@@ -133,13 +133,13 @@ def vector_uniformity_entropy(vector):
     return entropy
 
 
-def generate_s_sparse_matrix(matrix_size, s):
+def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
     """
     Generate a random s-sparse matrix of a given size.
 
     Parameters:
     matrix_size (int): The size of the square matrix. It determines the number of rows and columns.
-    s (int): The maximum number of non-zero entries allowed in any row or column.
+    s_non_zero_entries (int): The maximum number of non-zero entries allowed in any row or column.
 
     Returns:
     numpy.ndarray: A random s-sparse matrix of size matrix_size x matrix_size.
@@ -155,13 +155,13 @@ def generate_s_sparse_matrix(matrix_size, s):
            [0.        , 0.        , 0.        , 0.89026758, 0.        ],
            [0.        , 0.17753217, 0.        , 0.        , 0.43770629]])
     """
-    if s <= 0:
+    if s_non_zero_entries <= 0:
         raise ValueError("s must be a positive integer")
 
     if matrix_size <= 0:
         raise ValueError("matrix_size must be a positive integer")
 
-    if s > matrix_size:
+    if s_non_zero_entries > matrix_size:
         raise ValueError("s cannot be greater than matrix_size")
 
     # Initialize an empty matrix with all zeros
@@ -170,10 +170,10 @@ def generate_s_sparse_matrix(matrix_size, s):
     # Generate random non-zero values in the matrix
     for i in range(matrix_size):
         # Randomly choose 's' unique column indices for non-zero entries
-        non_zero_columns = np.random.choice(matrix_size, s, replace=False)
+        non_zero_columns = np.random.choice(matrix_size, s_non_zero_entries, replace=False)
 
         # Randomly assign non-zero values to these columns
-        non_zero_values = np.random.rand(s)  # You can adjust this distribution as needed
+        non_zero_values = np.random.rand(s_non_zero_entries)  # You can adjust this distribution as needed
 
         # Set the selected columns to the non-zero values
         matrix[i, non_zero_columns] = non_zero_values
@@ -210,7 +210,8 @@ def is_matrix_well_conditioned(matrix, tolerance=1e-6):
     singular_values = np.linalg.svd(matrix, compute_uv=False)
 
     # Calculate the condition number
-    condition_number = singular_values[0] / singular_values[-1]
+    # condition_number = singular_values[0] / singular_values[-1]
+    condition_number = np.linalg.cond(matrix)
 
     # Define the lower and upper bounds for singular values
     lower_bound = 1.0 / (condition_number + tolerance)

@@ -310,7 +310,7 @@ def classiq_hhl(model: ToyModel, qpe_register_size: int = None, show_circuit: bo
 
     if save_qasm:
         qasm_content = gen_circ.transpiled_circuit.qasm
-        with open(f"{model.name}_classiq_hhl.qasm", "w") as qasm_file:
+        with open(f"{model.name}_classiq_hhl.qasm", "w", encoding="utf-8") as qasm_file:
             qasm_file.write(qasm_content)
 
     # verify against classical solution

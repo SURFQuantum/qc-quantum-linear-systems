@@ -226,36 +226,41 @@ class ScalingTestModel(ToyModel):
     max_num_iterations (int): (optional) Maximum number of attempts to find a matrix that is well-conditioned. Defaults
         to 10.
     """
-    def __init__(self, matrix_size: int = 4, matrix_s: int = 0, matrix_well_conditioned: bool = True,
-                 vector_uniformity: float = 1., max_num_iterations: int = 10):
+    def __init__(self, matrix_size: int = 4, matrix_s: int = 2, matrix_well_conditioned: bool = True,
+                 vector_uniformity: float = 1., max_num_iterations: int = 100):
 
         vector_b = generate_random_vector(size=matrix_size, uniformity_level=vector_uniformity)
         vector_b = vector_b / np.linalg.norm(vector_b)
-        print(f"Entropy of random vector_b before expansion is {vector_uniformity_entropy(vector_b)}.")
-
+        entropy_before = vector_uniformity_entropy(vector_b)
         vector_b = expand_b_vector(vector_b)
-        print(f"Entropy of random vector_b after expansion is {vector_uniformity_entropy(vector_b)}.")
-
+        entropy_after = vector_uniformity_entropy(vector_b)
+        print(entropy_before, entropy_after, vector_b)
+        assert np.isclose(entropy_before, entropy_after)
         # todo: if we make the matrix hermitian by expanding...
         #  what is the effect on the uniformity of b and therefore the algorithm?
 
-        matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s=matrix_s)
+        matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s_non_zero_entries=matrix_s)
         matrix_a = make_matrix_hermitian(matrix_a)
         is_well_conditioned = is_matrix_well_conditioned(matrix_a)
         iterations = 1
+        print("matrix_condition_number = ", np.linalg.cond(matrix_a))
 
         while matrix_well_conditioned != is_well_conditioned:
 
-            matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s=matrix_s)
+            matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s_non_zero_entries=matrix_s)
             matrix_a = make_matrix_hermitian(matrix_a)
             is_well_conditioned = is_matrix_well_conditioned(matrix_a)
             iterations += 1
+            print("matrix_condition_number = ", np.linalg.cond(matrix_a))
             if iterations == max_num_iterations:
                 raise ValueError(f"Could not generate matrix where matrix_well_conditioned={matrix_well_conditioned} "
                                  f"within {iterations} iterations.")
             # todo: if we make matrix hermitian: that should not change s-sparsity of matrix,
             #  but might change well-conditioned-ness of matrix?
-
+        print("Succeeded in finding a matrix.")
+        print(matrix_a)
+        # todo : this somehow always seems to output a singular matrix!
+        # todo : investigate what happens with singular matrices in HHL/VQLS?
         classical_solution = self.classically_solve(matrix_a, vector_b)
 
         matrix_condition_number = np.linalg.cond(matrix_a)
