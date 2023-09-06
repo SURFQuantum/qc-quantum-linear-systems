@@ -7,8 +7,8 @@ from qiskit.quantum_info import Statevector
 
 from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample, Qiskit4QubitExample
 from quantum_linear_systems.utils import (extract_hhl_solution_vector_from_state_vector,
-                                          extract_x_from_expanded,
-                                          print_results)
+                                          extract_x_from_expanded)
+from quantum_linear_systems.plotting import print_results
 
 
 def qiskit_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray):

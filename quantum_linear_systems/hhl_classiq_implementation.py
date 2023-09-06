@@ -16,9 +16,10 @@ from classiq.execution import ExecutionPreferences, IBMBackendPreferences
 from classiq.synthesis import set_execution_preferences
 
 from quantum_linear_systems.toymodels import ToyModel, ClassiqDemoExample, Qiskit4QubitExample
-from quantum_linear_systems.utils import (extract_x_from_expanded, print_results,
+from quantum_linear_systems.utils import (extract_x_from_expanded,
                                           relative_distance_quantum_classical_solution,
                                           normalize_quantum_by_classical_solution)
+from quantum_linear_systems.plotting import print_results
 
 
 Paulidict = {

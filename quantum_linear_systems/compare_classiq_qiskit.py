@@ -11,9 +11,8 @@ from quantum_linear_systems.toymodels import (Qiskit4QubitExample,
 from quantum_linear_systems.hhl_qiskit_implementation import qiskit_hhl
 from quantum_linear_systems.hhl_classiq_implementation import classiq_hhl
 from quantum_linear_systems.vqls_qiskit_implementation import qiskit_vqls
-from quantum_linear_systems.utils import (plot_compare_csol_vs_qsol,
-                                          plot_depth_runtime_distance_vs_problem,
-                                          relative_distance_quantum_classical_solution)
+from quantum_linear_systems.utils import relative_distance_quantum_classical_solution
+from quantum_linear_systems.plotting import plot_compare_csol_vs_qsol, plot_depth_runtime_distance_vs_problem
 
 
 def solve_models(solver_function, models, needs_ansatz=False):

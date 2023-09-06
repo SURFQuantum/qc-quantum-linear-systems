@@ -13,7 +13,8 @@ from qiskit_algorithms.optimizers import COBYLA
 from vqls_prototype import VQLS, VQLSLog
 
 from quantum_linear_systems.toymodels import ClassiqDemoExample, ToyModel
-from quantum_linear_systems.utils import extract_x_from_expanded, print_results, normalize_quantum_by_classical_solution
+from quantum_linear_systems.utils import extract_x_from_expanded, normalize_quantum_by_classical_solution
+from quantum_linear_systems.plotting import print_results
 
 
 def qiskit_vqls_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, ansatz: QuantumCircuit
