@@ -58,10 +58,7 @@ def qiskit_vqls(model: ToyModel, ansatz: QuantumCircuit, show_circuit: bool = Fa
 
     # remove zeros
     print("x quantum vs classical solution")
-    if len(vqls_solution_vector) > len(model.classical_solution):
-        quantum_solution = extract_x_from_expanded(vqls_solution_vector)
-    else:
-        quantum_solution = vqls_solution_vector
+    quantum_solution = extract_x_from_expanded(vqls_solution_vector)
 
     # ensure we have the positive vector
     if np.sum(quantum_solution) < 0:

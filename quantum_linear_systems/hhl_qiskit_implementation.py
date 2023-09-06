@@ -45,12 +45,9 @@ def qiskit_hhl(model: ToyModel, show_circuit: bool = False):
 
     # remove zeros
     print("x quantum vs classical solution")
-    if len(hhl_solution_vector) > len(model.classical_solution):
-        quantum_solution = extract_x_from_expanded(hhl_solution_vector)
-    else:
-        quantum_solution = hhl_solution_vector
+    quantum_solution = extract_x_from_expanded(hhl_solution_vector)
 
-    qc_basis = hhl_circuit.decompose(reps=5)
+    qc_basis = hhl_circuit.decompose(reps=10)
     print(f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}")
 
     return quantum_solution, model.classical_solution, qc_basis.depth(), hhl_circuit.width(), time.time() - start_time

@@ -30,8 +30,12 @@ class TestUtils(unittest.TestCase):
     def test_extract_x_from_expanded(self):
         """Test whether x is correctly extracted from an expanded vector (0 x)."""
         expanded_vector = expand_b_vector(self.vector)
-        extracted_vector = extract_x_from_expanded(expanded_vector, self.matrix)
-        self.assertTrue(np.array_equal(extracted_vector, np.zeros(self.matrix.shape[0])))
+        extracted_vector = extract_x_from_expanded(expanded_vector)
+        # didn't extract because wrong half 0
+        self.assertTrue(np.array_equal(extracted_vector, expanded_vector))
+        # now actually extracting
+        extracted_vector = extract_x_from_expanded([0, 0, 1, 1])
+        self.assertTrue(np.array_equal(extracted_vector, [1, 1]))
         expanded_vector = expand_b_vector(self.vector)
         extracted_vector = extract_x_from_expanded(expanded_vector)
         self.assertTrue(np.array_equal(extracted_vector, np.zeros(self.square_matrix.shape[0])))
