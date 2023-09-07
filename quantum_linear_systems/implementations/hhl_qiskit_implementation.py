@@ -7,11 +7,11 @@ from qiskit.quantum_info import Statevector
 
 from quantum_linear_systems.toymodels import ClassiqDemoExample
 from quantum_linear_systems.utils import (extract_hhl_solution_vector_from_state_vector,
-                                          extract_x_from_expanded)
+                                          extract_x_from_expanded, is_expanded)
 from quantum_linear_systems.plotting import print_results
 
 
-def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
+def solve_hhl_qiskit(matrix_a, vector_b, csol=None, show_circuit: bool = False):
     """Solve linear system Ax=b using HHL implemented in qiskit based on the quantum linear solvers package.
 
     See: https://github.com/anedumla/quantum_linear_solvers.git
@@ -34,13 +34,13 @@ def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
     # scale normalized solution vector to norm of final state
     hhl_solution_vector = naive_hhl_solution.euclidean_norm * hhl_solution_vector
 
-
     if show_circuit:
         hhl_circuit.draw()
 
     # remove zeros
     print("x quantum vs classical solution")
-    quantum_solution = extract_x_from_expanded(hhl_solution_vector)
+    if is_expanded(matrix_a, vector_b):
+        hhl_solution_vector = extract_x_from_expanded(hhl_solution_vector)
 
     qc_basis = hhl_circuit.decompose(reps=10)
     print(f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}")
@@ -48,7 +48,7 @@ def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
     # todo : fix
     qasm_content = qc_basis.qasm()
 
-    return quantum_solution, qasm_content, qc_basis.depth(), hhl_circuit.width(), time.time() - start_time
+    return hhl_solution_vector, qasm_content, qc_basis.depth(), hhl_circuit.width(), time.time() - start_time
 
 
 if __name__ == "__main__":

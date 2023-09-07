@@ -23,23 +23,37 @@ def expand_b_vector(unexpanded_vector: np.ndarray, non_square_matrix: np.ndarray
     return np.block([[unexpanded_vector], [lower_zero]]).flatten()
 
 
-def extract_x_from_expanded(expanded_solution_vector: np.array) -> np.ndarray:
+def is_expanded(matrix_a: np.ndarray, vector_b: np.ndarray):
+    """Check if a vector is expanded, meaning that the second half of the vector contains only zeros."""
+
+    def has_corners_zero(matrix: np.ndarray):
+        # Check if the matrix is square (i.e., number of rows == number of columns)
+        if matrix.shape[0] != matrix.shape[1]:
+            raise ValueError("Matrix not square")
+
+        # Check if the top-left and bottom-right corners are both 0
+        quarter_size = matrix.shape[0] // 2
+        top_left_quarter = matrix[:quarter_size, :quarter_size]
+        bottom_right_quarter = matrix[quarter_size:, quarter_size:]
+
+        if np.any(top_left_quarter != 0) or np.any(bottom_right_quarter != 0):
+            return False
+
+        return True
+
+    vector_expanded = all(element == 0 for element in vector_b[len(vector_b) // 2:])
+    matrix_expanded = has_corners_zero(matrix_a)
+
+    return vector_expanded and matrix_expanded
+
+
+def extract_x_from_expanded(expanded_solution_vector: np.ndarray) -> np.ndarray:
     """The expanded problem returns a vector y=(0 x), this function returns x from input y."""
     if isinstance(expanded_solution_vector, list):
         expanded_solution_vector = np.array(expanded_solution_vector)
     assert isinstance(expanded_solution_vector, np.ndarray)
-    # Find the index where the first non-zero element appears in the second half
-    index = 0
-    while index < (len(expanded_solution_vector) // 2) and expanded_solution_vector[index] == 0:
-        index += 1
 
-    # If index reached the end of the vector, the second half contains only zeros
-    if index == (len(expanded_solution_vector) // 2):
-        vector_x = expanded_solution_vector[len(expanded_solution_vector) // 2:].flatten()
-    else:
-        vector_x = expanded_solution_vector.flatten()
-
-    return vector_x
+    return expanded_solution_vector[len(expanded_solution_vector) // 2:].flatten()
 
 
 def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, state_vector: np.array) -> np.ndarray:

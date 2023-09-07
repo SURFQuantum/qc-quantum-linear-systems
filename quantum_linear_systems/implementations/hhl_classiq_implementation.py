@@ -19,6 +19,7 @@ from quantum_linear_systems.toymodels import ClassiqDemoExample
 from quantum_linear_systems.utils import (
     extract_x_from_expanded,
     normalize_quantum_by_classical_solution,
+    is_expanded
 )
 from quantum_linear_systems.plotting import print_results
 
@@ -164,7 +165,7 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
         unitary_params=exp_params,
         exponentiation_specification=ExponentiationSpecification(
             scaling=ExponentiationScaling(
-                max_depth=100,
+                max_depth=150,
                 # todo: why not precision
                 # scaling=2
             )
@@ -172,7 +173,7 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
     )
 
 
-def extract_solution(qprog_hhl, w_min, sol_classical):
+def extract_solution(qprog_hhl, w_min, sol_classical, vec_b_expanded):
     results = execute(qprog_hhl)
     res_hhl = results[0].value
     circuit = GeneratedCircuit.from_qprog(qprog_hhl)
@@ -194,17 +195,18 @@ def extract_solution(qprog_hhl, w_min, sol_classical):
         templist[sol_pos] = list(np.binary_repr(i, len(sol_pos)))
         quantum_solution.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
     quantum_solution = np.array(quantum_solution)
+    print("euclidian norm", np.linalg.norm(quantum_solution))
 
-    print("first", quantum_solution)
     global_phase = np.angle(quantum_solution)
     qsol_corrected = np.real(quantum_solution / np.exp(1j * global_phase))
     # normalize
-
     # todo: this is a hack to obtain the multiplication factor of the normalized quantum solution
     qsol_corrected = normalize_quantum_by_classical_solution(qsol_corrected, sol_classical)
 
-    quantum_solution = extract_x_from_expanded(qsol_corrected)
-    return quantum_solution
+    if vec_b_expanded:
+        qsol_corrected = extract_x_from_expanded(qsol_corrected)
+
+    return qsol_corrected
 
 
 def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None):
@@ -272,9 +274,10 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     return qprog_hhl, matrix_a, vector_b, w_min
 
 
-def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, classical_solution: np.ndarray,
+def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, csol: np.ndarray,
                       qpe_register_size: int = None, show_circuit: bool = True):
     """Full implementation unified between classiq and qiskit."""
+    np.set_printoptions(precision=3, suppress=True)
     start_time = time.time()
 
     circuit_hhl, _, _, w_min = classiq_hhl_implementation(matrix_a=matrix_a,
@@ -292,7 +295,8 @@ def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, classical_solu
     qasm_content = gen_circ.transpiled_circuit.qasm
 
     # extract solution vector
-    quantum_solution = extract_solution(qprog_hhl=circuit_hhl, w_min=w_min, sol_classical=classical_solution)
+    quantum_solution = extract_solution(qprog_hhl=circuit_hhl, w_min=w_min, sol_classical=csol,
+                                        vec_b_expanded=is_expanded(matrix_a, vector_b))
 
     # todo: this actually might not the real runtime here, but includes the waiting time
     return quantum_solution, qasm_content, circuit_depth, circuit_width, time.time() - start_time
@@ -305,8 +309,7 @@ if __name__ == "__main__":
     model = ClassiqDemoExample()
 
     qsol, _, depth, width, run_time = solve_hhl_classiq(matrix_a=model.matrix_a, vector_b=model.vector_b,
-                                                        classical_solution=model.classical_solution,
-                                                        show_circuit=True)
+                                                        csol=model.classical_solution, show_circuit=True)
 
     print_results(quantum_solution=qsol, classical_solution=model.classical_solution, run_time=run_time,
                   name=model.name, plot=True)

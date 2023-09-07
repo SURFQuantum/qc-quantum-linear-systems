@@ -31,15 +31,12 @@ class TestUtils(unittest.TestCase):
         """Test whether x is correctly extracted from an expanded vector (0 x)."""
         expanded_vector = expand_b_vector(self.vector)
         extracted_vector = extract_x_from_expanded(expanded_vector)
-        # didn't extract because wrong half 0
-        self.assertTrue(np.array_equal(extracted_vector, expanded_vector))
-        # now actually extracting
-        extracted_vector = extract_x_from_expanded([0, 0, 1, 1])
-        self.assertTrue(np.array_equal(extracted_vector, [1, 1]))
+        self.assertTrue(np.array_equal(extracted_vector, np.zeros(len(self.vector))))
+        extracted_vector = extract_x_from_expanded(np.array([0, 0, 1, 1]))
+        self.assertTrue(np.array_equal(extracted_vector, np.array([1, 1])))
         expanded_vector = expand_b_vector(self.vector)
         extracted_vector = extract_x_from_expanded(expanded_vector)
-        # didn't extract because wrong half 0
-        self.assertTrue(np.array_equal(extracted_vector, expanded_vector))
+        self.assertTrue(np.array_equal(extracted_vector, np.zeros(len(self.vector))))
 
     def test_extract_hhl_solution_vector_from_state_vector(self):
         """Test whether the solution vector is correctly extracted."""
