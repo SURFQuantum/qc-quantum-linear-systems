@@ -17,6 +17,6 @@ class TestQiskitVQLS(unittest.TestCase):
         """Test if qiskit can solve the 4qubit example."""
         q_sol, _, _, width, _ = solve_vqls_qiskit(self.test_model.matrix_a, self.test_model.vector_b,
                                                   ansatz=self.test_ansatz, show_circuit=False,
-                                                  cnorm=np.linalg.norm(self.test_model.classical_solution))
+                                                  csol=self.test_model.classical_solution)
         self.assertEqual(width, 1)
         self.assertTrue(np.allclose(self.test_model.classical_solution, q_sol, atol=1e-3))

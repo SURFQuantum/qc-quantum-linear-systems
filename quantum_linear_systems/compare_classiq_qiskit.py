@@ -7,7 +7,10 @@ from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
 
 from quantum_linear_systems.toymodels import (Qiskit4QubitExample,
                                               ClassiqDemoExample,
-                                              VolterraProblem)
+                                              VolterraProblem,
+                                              SimpleHamiltonianModel,
+                                              SimpleHamiltonianModelLarger,
+                                              )
 from quantum_linear_systems.implementations.hhl_qiskit_implementation import solve_hhl_qiskit
 from quantum_linear_systems.implementations.hhl_classiq_implementation import solve_hhl_classiq
 from quantum_linear_systems.implementations.vqls_qiskit_implementation import solve_vqls_qiskit
@@ -40,15 +43,22 @@ def solve_models(solver_function, models, needs_ansatz=False):
     for model in models:
         print(datetime.now().strftime("%H:%M:%S"))
         if not needs_ansatz:
-            qsol, _, depth, _, run_time = solver_function(model=model, show_circuit=False)
+            qsol, _, depth, _, run_time = solver_function(matrix_a=model.matrix_a, vector_b=model.vector_b,
+                                                          csol=model.classical_solution,
+                                                          show_circuit=False)
         else:
             ansatz = RealAmplitudes(num_qubits=int(np.log2(model.matrix_a.shape[0])),
                                     entanglement="full", reps=3, insert_barriers=False)
-            qsol, _, depth, _, run_time = solver_function(model=model, ansatz=ansatz, show_circuit=False)
+            qsol, _, depth, _, run_time = solver_function(matrix_a=model.matrix_a, vector_b=model.vector_b,
+                                                          ansatz=ansatz, show_circuit=False,
+                                                          csol=model.classical_solution)
+        # todo: once all normalizations are fixed this should be unnecessary
+        qsol = qsol / np.linalg.norm(qsol)
+        csol = model.classical_solution / np.linalg.norm(model.classical_solution)
         rel_dis = relative_distance_quantum_classical_solution(quantum_solution=qsol,
-                                                               classical_solution=model.classical_solution)
+                                                               classical_solution=csol)
         quantum_solutions.append(qsol)
-        classical_solutions.append(model.classical_solution)
+        classical_solutions.append(csol)
         run_times.append(run_time)
         depths.append(depth)
         rel_distances.append(rel_dis)
@@ -59,15 +69,17 @@ def solve_models(solver_function, models, needs_ansatz=False):
 if __name__ == "__main__":
     # toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2),
     #              VolterraProblem(num_qubits=3)]
-    toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2)]
+    toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2), SimpleHamiltonianModel(),
+                 SimpleHamiltonianModelLarger()]
     # Note classiq can't solve n>=3 here classiq.exceptions.ClassiqAPIError: Error number 73900 occurred.
     # The exponentiation constraints are not satisfiable. Minimal max_depth is 1184.
     # Qiskit has no problem and solves it rather quickly.
 
+    # classiq first because if something fails its classiq
+    qsols_c_hhl, _, depth_runtime_distance_c_hhl = solve_models(solver_function=solve_hhl_classiq, models=toymodels)
     qsols_q_hhl, csols, depth_runtime_distance_q_hhl = solve_models(solver_function=solve_hhl_qiskit, models=toymodels)
     qsols_q_vqls, _, depth_runtime_distance_q_vqls = solve_models(solver_function=solve_vqls_qiskit, models=toymodels,
                                                                   needs_ansatz=True)
-    qsols_c_hhl, _, depth_runtime_distance_c_hhl = solve_models(solver_function=solve_hhl_classiq, models=toymodels)
     # qsols_c_vqls, _, depth_runtime_distance_c_vqls = (
     #     solve_models(solver_function=classiq_vqls, models=toymodels, ansatz=vqls_ansatz))
 

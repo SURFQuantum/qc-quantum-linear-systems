@@ -12,11 +12,11 @@ from qiskit_algorithms.optimizers import COBYLA
 from vqls_prototype import VQLS, VQLSLog
 
 from quantum_linear_systems.toymodels import ClassiqDemoExample
-from quantum_linear_systems.utils import extract_x_from_expanded
+from quantum_linear_systems.utils import extract_x_from_expanded, is_expanded
 from quantum_linear_systems.plotting import print_results
 
 
-def solve_vqls_qiskit(matrix_a: np.ndarray, vector_b: np.ndarray, ansatz: QuantumCircuit, cnorm: float,
+def solve_vqls_qiskit(matrix_a: np.ndarray, vector_b: np.ndarray, ansatz: QuantumCircuit, csol: np.ndarray,
                       show_circuit: bool = False):
     """Qiskit HHL implementation based on https://github.com/QuantumApplicationLab/vqls-prototype ."""
     # flatten vector such that qiskit doesn't bug out in state preparation
@@ -40,21 +40,22 @@ def solve_vqls_qiskit(matrix_a: np.ndarray, vector_b: np.ndarray, ansatz: Quantu
     vqls_circuit = res.state
     vqls_solution_vector = np.real(Statevector(res.state).data)
 
-    if show_circuit:
-        vqls_circuit.draw()
-
     # remove zeros
     print("x quantum vs classical solution")
-    quantum_solution = extract_x_from_expanded(vqls_solution_vector)
+    if is_expanded(matrix_a, vector_b):
+        vqls_solution_vector = extract_x_from_expanded(vqls_solution_vector)
 
     # ensure we have the positive vector
-    if np.sum(quantum_solution) < 0:
-        quantum_solution = -quantum_solution
+    if np.sum(vqls_solution_vector) < 0:
+        vqls_solution_vector = -vqls_solution_vector
 
     # todo: hack to have quantum and classical solution have the same norm
-    quantum_solution = quantum_solution * cnorm
+    quantum_solution = vqls_solution_vector * np.linalg.norm(csol)
 
     qc_basis = vqls_circuit.decompose(reps=10)
+
+    if show_circuit:
+        print(qc_basis)
 
     # todo: fix, make sure this is the right circuit
     qasm_content = vqls_circuit.qasm()
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 
     qsol, _, depth, width, run_time = solve_vqls_qiskit(matrix_a=model.matrix_a, vector_b=model.vector_b,
                                                         show_circuit=True, ansatz=vqls_ansatz,
-                                                        cnorm=np.linalg.norm(model.classical_solution))
+                                                        csol=model.classical_solution)
 
     print_results(quantum_solution=qsol, classical_solution=model.classical_solution,
                   run_time=run_time, name=model.name, plot=True)
