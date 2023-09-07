@@ -38,7 +38,8 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(np.array_equal(extracted_vector, [1, 1]))
         expanded_vector = expand_b_vector(self.vector)
         extracted_vector = extract_x_from_expanded(expanded_vector)
-        self.assertTrue(np.array_equal(extracted_vector, np.zeros(self.square_matrix.shape[0])))
+        # didn't extract because wrong half 0
+        self.assertTrue(np.array_equal(extracted_vector, expanded_vector))
 
     def test_extract_hhl_solution_vector_from_state_vector(self):
         """Test whether the solution vector is correctly extracted."""

@@ -35,9 +35,11 @@ def extract_x_from_expanded(expanded_solution_vector: np.array) -> np.ndarray:
 
     # If index reached the end of the vector, the second half contains only zeros
     if index == (len(expanded_solution_vector) // 2):
-        return expanded_solution_vector[len(expanded_solution_vector) // 2:].flatten()
+        vector_x = expanded_solution_vector[len(expanded_solution_vector) // 2:].flatten()
     else:
-        return expanded_solution_vector.flatten()
+        vector_x = expanded_solution_vector.flatten()
+
+    return vector_x
 
 
 def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, state_vector: np.array) -> np.ndarray:

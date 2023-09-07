@@ -5,6 +5,9 @@ from quantum_linear_systems.utils import (make_matrix_hermitian, expand_b_vector
                                           vector_uniformity_entropy, generate_s_sparse_matrix,
                                           is_matrix_well_conditioned)
 
+# from TrackHHL.trackhhl.hamiltonians.simple_hamiltonian import SimpleHamiltonian
+# from TrackHHL.trackhhl.toy.simple_generator import SimpleDetectorGeometry, SimpleGenerator
+
 
 class ToyModel:
     """
@@ -263,6 +266,27 @@ class ScalingTestModel(ToyModel):
         vector_b_entropy = vector_uniformity_entropy(vector_b)
         name = f"TestNxN_n={matrix_size}_s={matrix_s}_c={matrix_condition_number}_e={vector_b_entropy}"
         super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
+
+
+# class SimpleHamiltonianModel(ToyModel):
+#     def __init__(self):
+#         # Generate a test event
+#         N_DETECTORS = 3
+#         N_PARTICLES = 2
+#         detector = SimpleDetectorGeometry([i for i in range(N_DETECTORS)], [10000 for i in range(N_DETECTORS)],
+#                                           [10000 for i in range(N_DETECTORS)], [i + 1 for i in range(N_DETECTORS)])
+#         generator = SimpleGenerator(detector, theta_max=np.pi / 3)
+#
+#         event = generator.generate_event(N_PARTICLES)
+#         # Initialise Hamiltonian
+#         EPSILON = 1e-5
+#         GAMMA = 2.0
+#         DELTA = 1.0
+#
+#         ham = SimpleHamiltonian(EPSILON, GAMMA, DELTA)
+#         ham.construct_hamiltonian(event)
+#         model = ToyModel(name="test", matrix=ham.A.todense(), vector=ham.b,
+#                          csol=np.linalg.solve(ham.A.todense(), ham.b))
 
 
 if __name__ == "__main__":
