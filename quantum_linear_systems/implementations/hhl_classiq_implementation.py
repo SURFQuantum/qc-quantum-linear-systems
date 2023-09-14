@@ -16,10 +16,6 @@ from classiq.execution import ExecutionPreferences, IBMBackendPreferences
 from classiq.synthesis import set_execution_preferences
 
 from quantum_linear_systems.toymodels import ClassiqDemoExample
-from quantum_linear_systems.utils import (
-    # extract_x_from_expanded,
-    is_expanded
-)
 from quantum_linear_systems.plotting import print_results
 from quantum_linear_systems.implementations.vqls_qiskit_implementation import postprocess_solution
 
@@ -173,7 +169,7 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
     )
 
 
-def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b_expanded: np.ndarray,
+def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b: np.ndarray,
                      smallest_ev: float) -> np.ndarray:
     """Extract the solution vector from the synthesized quantum program."""
     res_hhl = execute(qprog_hhl)[0].value
@@ -203,7 +199,7 @@ def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b_expand
     # normalize
     # todo: this is a hack to obtain the multiplication factor of the normalized quantum solution
     # qsol_corrected = normalize_quantum_by_classical_solution(qsol_corrected, sol_classical)
-    qsol_corrected = postprocess_solution(matrix_a=matrix_a, vector_b=vec_b_expanded, solution_x=qsol_corrected)
+    qsol_corrected = postprocess_solution(matrix_a=matrix_a, vector_b=vec_b, solution_x=qsol_corrected)
 
     # Note: this is currently included in postprocess_solution
     # if vec_b_expanded:
@@ -278,7 +274,7 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
 
 
 def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None,
-                      show_circuit: bool = True):
+                      show_circuit: bool = False):
     """Full implementation unified between classiq and qiskit."""
     np.set_printoptions(precision=3, suppress=True)
     start_time = time.time()
@@ -300,7 +296,7 @@ def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_s
     # extract solution vector
     smallest_eigenval = min(np.linalg.eigvals(matrix_a))
     quantum_solution = extract_solution(qprog_hhl=circuit_hhl, w_min=w_min, matrix_a=matrix_a,
-                                        vec_b_expanded=is_expanded(matrix_a, vector_b), smallest_ev=smallest_eigenval)
+                                        vec_b=vector_b, smallest_ev=smallest_eigenval)
 
     # todo: this actually might not the real runtime here, but includes the waiting time
     return quantum_solution, qasm_content, circuit_depth, circuit_width, time.time() - start_time

@@ -164,5 +164,6 @@ quantum_linear_solvers
 vqls-prototype
 *.png
 *.qasm
+*.csv
 quantum_linear_systems/implementations/vqls_classiq_implementation.py
 TrackHHL
