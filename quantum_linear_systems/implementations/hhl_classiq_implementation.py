@@ -17,11 +17,11 @@ from classiq.synthesis import set_execution_preferences
 
 from quantum_linear_systems.toymodels import ClassiqDemoExample
 from quantum_linear_systems.utils import (
-    extract_x_from_expanded,
-    normalize_quantum_by_classical_solution,
+    # extract_x_from_expanded,
     is_expanded
 )
 from quantum_linear_systems.plotting import print_results
+from quantum_linear_systems.implementations.vqls_qiskit_implementation import postprocess_solution
 
 
 Paulidict = {
@@ -173,12 +173,12 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
     )
 
 
-def extract_solution(qprog_hhl, w_min, sol_classical, vec_b_expanded):
-    results = execute(qprog_hhl)
-    res_hhl = results[0].value
-    circuit = GeneratedCircuit.from_qprog(qprog_hhl)
+def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b_expanded: np.ndarray,
+                     smallest_ev: float) -> np.ndarray:
+    """Extract the solution vector from the synthesized quantum program."""
+    res_hhl = execute(qprog_hhl)[0].value
 
-    total_q = circuit.data.width  # total number of qubits of the whole circuit
+    total_q = GeneratedCircuit.from_qprog(qprog_hhl).data.width  # total number of qubits of the whole circuit
 
     target_pos = res_hhl.physical_qubits_map["target"][0]  # position of control qubit
 
@@ -195,16 +195,19 @@ def extract_solution(qprog_hhl, w_min, sol_classical, vec_b_expanded):
         templist[sol_pos] = list(np.binary_repr(i, len(sol_pos)))
         quantum_solution.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
     quantum_solution = np.array(quantum_solution)
-    print("euclidian norm", np.linalg.norm(quantum_solution))
+    print("euclidian norm", np.linalg.norm(quantum_solution), np.linalg.norm(quantum_solution)/smallest_ev)
+    # print("state_vector", res_hhl.state_vector)
 
     global_phase = np.angle(quantum_solution)
     qsol_corrected = np.real(quantum_solution / np.exp(1j * global_phase))
     # normalize
     # todo: this is a hack to obtain the multiplication factor of the normalized quantum solution
-    qsol_corrected = normalize_quantum_by_classical_solution(qsol_corrected, sol_classical)
+    # qsol_corrected = normalize_quantum_by_classical_solution(qsol_corrected, sol_classical)
+    qsol_corrected = postprocess_solution(matrix_a=matrix_a, vector_b=vec_b_expanded, solution_x=qsol_corrected)
 
-    if vec_b_expanded:
-        qsol_corrected = extract_x_from_expanded(qsol_corrected)
+    # Note: this is currently included in postprocess_solution
+    # if vec_b_expanded:
+    #     qsol_corrected = extract_x_from_expanded(qsol_corrected)
 
     return qsol_corrected
 
@@ -274,8 +277,8 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     return qprog_hhl, matrix_a, vector_b, w_min
 
 
-def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, csol: np.ndarray,
-                      qpe_register_size: int = None, show_circuit: bool = True):
+def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None,
+                      show_circuit: bool = True):
     """Full implementation unified between classiq and qiskit."""
     np.set_printoptions(precision=3, suppress=True)
     start_time = time.time()
@@ -295,8 +298,9 @@ def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, csol: np.ndarr
     qasm_content = gen_circ.transpiled_circuit.qasm
 
     # extract solution vector
-    quantum_solution = extract_solution(qprog_hhl=circuit_hhl, w_min=w_min, sol_classical=csol,
-                                        vec_b_expanded=is_expanded(matrix_a, vector_b))
+    smallest_eigenval = min(np.linalg.eigvals(matrix_a))
+    quantum_solution = extract_solution(qprog_hhl=circuit_hhl, w_min=w_min, matrix_a=matrix_a,
+                                        vec_b_expanded=is_expanded(matrix_a, vector_b), smallest_ev=smallest_eigenval)
 
     # todo: this actually might not the real runtime here, but includes the waiting time
     return quantum_solution, qasm_content, circuit_depth, circuit_width, time.time() - start_time
@@ -309,7 +313,7 @@ if __name__ == "__main__":
     model = ClassiqDemoExample()
 
     qsol, _, depth, width, run_time = solve_hhl_classiq(matrix_a=model.matrix_a, vector_b=model.vector_b,
-                                                        csol=model.classical_solution, show_circuit=True)
+                                                        show_circuit=True)
 
     print_results(quantum_solution=qsol, classical_solution=model.classical_solution, run_time=run_time,
                   name=model.name, plot=True)
