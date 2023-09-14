@@ -28,8 +28,7 @@ class TestClassiqHHL(unittest.TestCase):
         """Test if classiq can solve the 4qubit example."""
         qpe_register = 3
         q_sol, _, _, width, _ = solve_hhl_classiq(self.test_model.matrix_a, self.test_model.vector_b,
-                                                  qpe_register_size=qpe_register, show_circuit=False,
-                                                  csol=self.test_model.classical_solution)
+                                                  qpe_register_size=qpe_register, show_circuit=False)
 
         self.assertEqual(width, 2 + qpe_register)
         print(self.test_model.classical_solution, q_sol)

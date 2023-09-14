@@ -2,32 +2,24 @@
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
-from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
-
 
 from quantum_linear_systems.toymodels import (Qiskit4QubitExample,
                                               ClassiqDemoExample,
                                               VolterraProblem,
                                               SimpleHamiltonianModel,
-                                              SimpleHamiltonianModelLarger,
                                               )
-from quantum_linear_systems.implementations.hhl_qiskit_implementation import solve_hhl_qiskit
-from quantum_linear_systems.implementations.hhl_classiq_implementation import solve_hhl_classiq
-from quantum_linear_systems.implementations.vqls_qiskit_implementation import solve_vqls_qiskit
+from quantum_linear_systems.quantum_linear_solver import QuantumLinearSolver
 from quantum_linear_systems.utils import relative_distance_quantum_classical_solution
 from quantum_linear_systems.plotting import plot_compare_csol_vs_qsol, plot_depth_runtime_distance_vs_problem
 
 
-def solve_models(solver_function, models, needs_ansatz=False):
+def solve_models(models, method):
     """
     Solve a set of quantum models using the given solver function.
 
     Parameters:
-        solver_function (callable): A function that solves a quantum model and returns
-            the quantum and classical solutions, along with other relevant information.
         models (list): A list of quantum models to be solved.
-        needs_ansatz (bool, optional): Whether the solver function requires an ansatz as input.
-            Default is False.
+        method (str): Which method to use for solving the model.
 
     Returns:
         tuple: A tuple containing the following elements:
@@ -42,25 +34,19 @@ def solve_models(solver_function, models, needs_ansatz=False):
 
     for model in models:
         print(datetime.now().strftime("%H:%M:%S"))
-        if not needs_ansatz:
-            qsol, _, depth, _, run_time = solver_function(matrix_a=model.matrix_a, vector_b=model.vector_b,
-                                                          csol=model.classical_solution,
-                                                          show_circuit=False)
-        else:
-            ansatz = RealAmplitudes(num_qubits=int(np.log2(model.matrix_a.shape[0])),
-                                    entanglement="full", reps=3, insert_barriers=False)
-            qsol, _, depth, _, run_time = solver_function(matrix_a=model.matrix_a, vector_b=model.vector_b,
-                                                          ansatz=ansatz, show_circuit=False,
-                                                          csol=model.classical_solution)
-        # todo: once all normalizations are fixed this should be unnecessary
+        print(f"Solving {model.name} using {method}.")
+        qls = QuantumLinearSolver()
+        qsol = qls.solve(matrix_a=model.matrix_a, vector_b=model.vector_b, method=method, file_basename=None)
+
+        # todo: once all normalizations are fixed this should be unnecessary, for plotting its still cool probably
         qsol = qsol / np.linalg.norm(qsol)
         csol = model.classical_solution / np.linalg.norm(model.classical_solution)
         rel_dis = relative_distance_quantum_classical_solution(quantum_solution=qsol,
                                                                classical_solution=csol)
         quantum_solutions.append(qsol)
         classical_solutions.append(csol)
-        run_times.append(run_time)
-        depths.append(depth)
+        run_times.append(qls.run_time)
+        depths.append(qls.circuit_depth)
         rel_distances.append(rel_dis)
 
     return quantum_solutions, classical_solutions, (depths, run_times, rel_distances)
@@ -69,17 +55,18 @@ def solve_models(solver_function, models, needs_ansatz=False):
 if __name__ == "__main__":
     # toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2),
     #              VolterraProblem(num_qubits=3)]
-    toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2), SimpleHamiltonianModel(),
-                 SimpleHamiltonianModelLarger()]
+    toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2),
+                 SimpleHamiltonianModel(3, 2),
+                 SimpleHamiltonianModel(3, 3)]
+
     # Note classiq can't solve n>=3 here classiq.exceptions.ClassiqAPIError: Error number 73900 occurred.
     # The exponentiation constraints are not satisfiable. Minimal max_depth is 1184.
     # Qiskit has no problem and solves it rather quickly.
 
     # classiq first because if something fails its classiq
-    qsols_c_hhl, _, depth_runtime_distance_c_hhl = solve_models(solver_function=solve_hhl_classiq, models=toymodels)
-    qsols_q_hhl, csols, depth_runtime_distance_q_hhl = solve_models(solver_function=solve_hhl_qiskit, models=toymodels)
-    qsols_q_vqls, _, depth_runtime_distance_q_vqls = solve_models(solver_function=solve_vqls_qiskit, models=toymodels,
-                                                                  needs_ansatz=True)
+    # qsols_c_hhl, _, depth_runtime_distance_c_hhl = solve_models(solver_function=solve_hhl_classiq, models=toymodels)
+    qsols_q_hhl, csols, depth_runtime_distance_q_hhl = solve_models(models=toymodels, method="hhl_qiskit")
+    qsols_q_vqls, _, depth_runtime_distance_q_vqls = solve_models(models=toymodels, method="vqls_qiskit")
     # qsols_c_vqls, _, depth_runtime_distance_c_vqls = (
     #     solve_models(solver_function=classiq_vqls, models=toymodels, ansatz=vqls_ansatz))
 
@@ -90,7 +77,7 @@ if __name__ == "__main__":
 
     for i in range(N_PROBLEMS):
         qmn = [
-            (qsols_c_hhl[i], "go", "hhl_classiq"),
+            # (qsols_c_hhl[i], "go", "hhl_classiq"),
             (qsols_q_hhl[i], "r^", "hhl_qiskit"),
             # (qsols_c_vqls[i], "go", "vqls_classiq"),
             (qsols_q_vqls[i], "kx", "vqls_qiskit"),
@@ -98,7 +85,7 @@ if __name__ == "__main__":
         plot_compare_csol_vs_qsol(classical_solution=csols[i], qsols_marker_name=qmn,
                                   title=f"Statevectors: {toymodels[i].name}", axis=axs[i, 0])
     drdmn = [
-        depth_runtime_distance_c_hhl + ("go", "hhl_classiq"),
+        # depth_runtime_distance_c_hhl + ("go", "hhl_classiq"),
         depth_runtime_distance_q_hhl + ("r^", "hhl_qiskit"),
         # depth_runtime_distance_c_vqls + ("go", "vqls_classiq"),
         depth_runtime_distance_q_vqls + ("kx", "vqls_qiskit"),

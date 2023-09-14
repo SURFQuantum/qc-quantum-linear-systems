@@ -11,7 +11,7 @@ from quantum_linear_systems.utils import (extract_hhl_solution_vector_from_state
 from quantum_linear_systems.plotting import print_results
 
 
-def solve_hhl_qiskit(matrix_a, vector_b, csol=None, show_circuit: bool = False):
+def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
     """Solve linear system Ax=b using HHL implemented in qiskit based on the quantum linear solvers package.
 
     See: https://github.com/anedumla/quantum_linear_solvers.git
@@ -45,7 +45,6 @@ def solve_hhl_qiskit(matrix_a, vector_b, csol=None, show_circuit: bool = False):
     qc_basis = hhl_circuit.decompose(reps=10)
     print(f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}")
 
-    # todo : fix
     qasm_content = qc_basis.qasm()
 
     return hhl_solution_vector, qasm_content, qc_basis.depth(), hhl_circuit.width(), time.time() - start_time

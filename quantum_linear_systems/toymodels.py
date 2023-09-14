@@ -269,46 +269,22 @@ class ScalingTestModel(ToyModel):
 
 
 class SimpleHamiltonianModel(ToyModel):
-    def __init__(self):
+    """Toymodel for HEP particle tracing by Davide, taken from `https://github.com/dnicotra/TrackHHL`."""
+    def __init__(self, num_detectors=3, num_particles=2):
+        # Davide used 3,2 for "small" and 3,3 for "large"
         # Generate a test event
-        N_DETECTORS = 3
-        N_PARTICLES = 2
-        detector = SimpleDetectorGeometry([i for i in range(N_DETECTORS)], [10000 for _ in range(N_DETECTORS)],
-                                          [10000 for _ in range(N_DETECTORS)], [i + 1 for i in range(N_DETECTORS)])
-        generator = SimpleGenerator(detector, theta_max=np.pi / 3)
-
-        event = generator.generate_event(N_PARTICLES)
-        # Initialise Hamiltonian
-        EPSILON = 1e-5
-        GAMMA = 2.0
-        DELTA = 1.0
-
-        ham = SimpleHamiltonian(EPSILON, GAMMA, DELTA)
-        ham.construct_hamiltonian(event)
-
-        matrix_a = ham.A.todense() / np.linalg.norm(ham.b)
-        vector_b = ham.b / np.linalg.norm(ham.b)
-        csol = np.linalg.solve(matrix_a, vector_b)
-        super().__init__(name="HEPSimpleHamiltonian", matrix=matrix_a, vector=vector_b, csol=csol)
-
-
-class SimpleHamiltonianModelLarger(ToyModel):
-    def __init__(self):
-        # Generate a test event
-        N_DETECTORS = 3
-        N_PARTICLES = 3
-        detector = SimpleDetectorGeometry([i for i in range(N_DETECTORS)], [10000 for _ in range(N_DETECTORS)],
-                                          [10000 for _ in range(N_DETECTORS)], [i+1 for i in range(N_DETECTORS)])
+        detector = SimpleDetectorGeometry(list(range(num_detectors)), [10000 for _ in range(num_detectors)],
+                                          [10000 for _ in range(num_detectors)], [i+1 for i in range(num_detectors)])
         generator = SimpleGenerator(detector, theta_max=np.pi/3)
 
-        event = generator.generate_event(N_PARTICLES)
+        event = generator.generate_event(num_particles)
 
         # Initialise Hamiltonian
-        EPSILON = 1e-5
-        GAMMA = 2.0
-        DELTA = 1.0
+        epsilon = 1e-5
+        gamma = 2.0
+        delta = 1.0
 
-        ham = SimpleHamiltonian(EPSILON, GAMMA, DELTA)
+        ham = SimpleHamiltonian(epsilon, gamma, delta)
         ham.construct_hamiltonian(event)
 
         matrix_a = ham.A.todense() / np.linalg.norm(ham.b)

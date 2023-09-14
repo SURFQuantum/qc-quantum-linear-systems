@@ -7,6 +7,13 @@ from quantum_linear_systems.implementations.vqls_qiskit_implementation import so
 
 
 class QuantumLinearSolver:
+    """Quantum Linear Solver class to solve problems of the shape Ax=b.
+
+    Currently, supports the following solvers:
+    * "hhl_qiskit"
+    * "hhl_classiq"
+    * "vqls_qiskit"
+    """
     def __init__(self):
         """
         Initialize the QuantumLinearSolver.
@@ -40,11 +47,11 @@ class QuantumLinearSolver:
 
     def normalize_model(self):
         """Normalize the whole problem to valid quantum states."""
-        norm_b = np.linalg.norm(self.b)
+        norm_b = np.linalg.norm(self.vector_b)
         self.matrix_a = self.matrix_a / norm_b
         self.vector_b = self.vector_b / norm_b
 
-    def solve(self, matrix_a: np.ndarray, vector_b: np.ndarray, method: str, file_basename: str, **kwargs)\
+    def solve(self, matrix_a: np.ndarray, vector_b: np.ndarray, method: str, file_basename: str = None, **kwargs)\
             -> np.ndarray:
         """
         Solve the linear system Ax = b using the specified method.
@@ -54,7 +61,7 @@ class QuantumLinearSolver:
             vector_b (numpy.ndarray): Right-hand side vector of shape (n,).
             method (str): The method to use for solving the linear system.
                 Options: 'hhl_qiskit', 'hhl_classiq', 'vqls_qiskit'
-            file_basename (str) : Name of the problem (for file saving/printing). E.g. 'VolterraProblem'.
+            file_basename (str, optional) : Name of the problem (for file saving/printing). E.g. 'VolterraProblem'.
 
         Returns:
             numpy.ndarray: The solution vector x.
@@ -63,7 +70,7 @@ class QuantumLinearSolver:
         # currently all implemented solvers share these requirements
         self.check_matrix_square_hermitian()
 
-        # self.normalize_model()
+        # self.normalize_model() # this should be in the respective solver method if it is needed
 
         # solve
         if method == 'hhl_qiskit':
@@ -76,11 +83,12 @@ class QuantumLinearSolver:
             self.solution, self.qasm_circuit, self.circuit_depth, self.circuit_width, self.run_time = (
                 solve_vqls_qiskit(matrix_a=matrix_a, vector_b=vector_b, **kwargs))
         else:
-            raise ValueError(f"Unsupported method: {method}")
+            raise NotImplementedError(f"Unsupported method: {method}")
 
         return self.solution
 
     def save_qasm(self):
+        """Save the qasm circuit as a file."""
         with open(f"{self.name}_{self.method}.qasm", "w", encoding="utf-8") as qasm_file:
             qasm_file.write(self.qasm_circuit)
 
