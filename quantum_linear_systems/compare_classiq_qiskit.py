@@ -34,6 +34,7 @@ def solve_models(models, method, save_file):
     Parameters:
         models (list): A list of quantum models to be solved.
         method (str): Which method to use for solving the model.
+        save_file (str) : Name of the save file.
 
     Returns:
         tuple: A tuple containing the following elements:
@@ -76,26 +77,27 @@ def compare_qls_and_plot(
         filebasename: str = "comparison"
 ) -> None:
     """Compare different implementations of quantum linear solvers and plot the results"""
-    filename = f"{filebasename}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    filename = f"{filebasename}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    csv_file = f"{filename}.csv"
     headers = ['model_name', 'solver', 'quantum_solution', 'classical_solution', 'circuit_depth',
                'run_time', 'relative_distance']
 
-    with open(filename, mode='w', newline='', encoding="utf-8") as file:
+    with open(csv_file, mode='w', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
 
     if classiq:
         # classiq first because if something fails its classiq
-        qsols_c_hhl, csols, drd_c_hhl = solve_models(models=models, method="hhl_classiq", save_file=filename)
-        # qsols_c_vqls, _, drd_c_vqls = solve_models(models=models, method="vqls_classiq", save_file=filename)
+        qsols_c_hhl, csols, drd_c_hhl = solve_models(models=models, method="hhl_classiq", save_file=csv_file)
+        # qsols_c_vqls, _, drd_c_vqls = solve_models(models=models, method="vqls_classiq", save_file=csv_file)
     if qiskit:
-        qsols_q_hhl, csols, drd_q_hhl = solve_models(models=models, method="hhl_qiskit", save_file=filename)
-        qsols_q_vqls, _, drd_q_vqls = solve_models(models=models, method="vqls_qiskit", save_file=filename)
+        qsols_q_hhl, csols, drd_q_hhl = solve_models(models=models, method="hhl_qiskit", save_file=csv_file)
+        qsols_q_vqls, _, drd_q_vqls = solve_models(models=models, method="vqls_qiskit", save_file=csv_file)
 
     n_problems = len(models)
 
     # Create subplots for each problem
-    _, axs = plt.subplots(n_problems, 2, figsize=(12, 6 * n_problems))
+    fig, axs = plt.subplots(n_problems, 2, figsize=(12, 6 * n_problems))
 
     for i in range(n_problems):
         qmn = []
@@ -119,7 +121,7 @@ def compare_qls_and_plot(
     plot_depth_runtime_distance_vs_problem(depth_runtime_distance_marker_name=drdmn, problems=models, axs=axs[:, 1])
 
     plt.tight_layout()
-    plt.savefig(f'comparison_plot_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png', dpi=300)
+    plt.savefig(f'plots/{filename}.png', dpi=300)
     plt.show()
 
 
@@ -127,20 +129,23 @@ if __name__ == "__main__":
     # matrix test:
 
     toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2)]
-    # VolterraProblem(num_qubits=3)]
     # toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2),
     #              SimpleHamiltonianModel(3, 2),
     #              SimpleHamiltonianModel(3, 3)]
-
     # Note classiq can't solve n>=3 here classiq.exceptions.ClassiqAPIError: Error number 73900 occurred.
     # The exponentiation constraints are not satisfiable. Minimal max_depth is 1184.
     # Qiskit has no problem and solves it rather quickly.
 
     compare_qls_and_plot(models=toymodels, qiskit=True, classiq=True)
+    exit()
+    MAX_SIZE = 8
 
     matrix_size_models = []
-    for n in range(2, 8):
+    for n in [2, 4, 8]:
         matrix_size_models.append(ScalingTestModel(matrix_size=n))
+    compare_qls_and_plot(models=matrix_size_models, qiskit=True, classiq=False, filebasename="size_analysis")
+
     matrix_sparsity_models = []
-    for s in range(1, 9):
-        matrix_sparsity_models.append(ScalingTestModel(matrix_size=8, matrix_s=s))
+    for s in range(1, MAX_SIZE + 1, 2):
+        matrix_sparsity_models.append(ScalingTestModel(matrix_size=MAX_SIZE, matrix_s=s))
+    compare_qls_and_plot(models=matrix_sparsity_models, qiskit=True, classiq=False, filebasename="sparsity_analysis")

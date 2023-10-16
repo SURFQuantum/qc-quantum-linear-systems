@@ -75,6 +75,9 @@ def normalize_quantum_by_classical_solution(quantum_solution: np.ndarray, classi
 
 def relative_distance_quantum_classical_solution(quantum_solution: np.ndarray, classical_solution: np.ndarray) -> float:
     """Calculate relative distance of quantum and classical solutions in percent."""
+    if quantum_solution.shape != classical_solution.shape:
+        raise ValueError(f"Can't compute relative distance. Shape of quantum solution {quantum_solution.shape} "
+                         f"different from classical {classical_solution.shape}.")
     return np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) * 100
 
 

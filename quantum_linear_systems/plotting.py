@@ -114,7 +114,7 @@ def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, 
     if plot:
         plot_csol_vs_qsol(classical_solution=classical_solution, quantum_solution=quantum_solution, title=name)
 
-    print(f"Finished classiq run in {run_time}s.")
+    print(f"Finished run in {run_time}s.")
 
     if np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) > 0.2:
         raise RuntimeError("The HHL solution is too far from the classical one, please verify your algorithm.")

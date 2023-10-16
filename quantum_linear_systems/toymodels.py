@@ -3,7 +3,7 @@ import numpy as np
 
 from quantum_linear_systems.utils import (make_matrix_hermitian, expand_b_vector, generate_random_vector,
                                           vector_uniformity_entropy, generate_s_sparse_matrix,
-                                          is_matrix_well_conditioned)
+                                          is_matrix_well_conditioned, extract_x_from_expanded)
 
 from TrackHHL.trackhhl.hamiltonians.simple_hamiltonian import SimpleHamiltonian, upscale_pow2
 from TrackHHL.trackhhl.toy.simple_generator import SimpleDetectorGeometry, SimpleGenerator
@@ -243,7 +243,7 @@ class ScalingTestModel(ToyModel):
 
         if matrix_well_conditioned:
             # for well conditioned we want the matrix to be close to 1
-            threshold = 10
+            threshold = 10 * matrix_size    # Note: small condition numbers are much more difficult for large matrices
         else:
             # for ill conditioned we want the matrix to be a lot larger than 1
             threshold = 1000
@@ -261,14 +261,15 @@ class ScalingTestModel(ToyModel):
 
         print("Succeeded in finding a matrix.")
         classical_solution = self.classically_solve(matrix_a, vector_b)
+        classical_solution = extract_x_from_expanded(classical_solution)
 
         matrix_condition_number = np.linalg.cond(matrix_a)
         vector_b_entropy = vector_uniformity_entropy(vector_b)
-        name = f"TestNxN_n={matrix_size}_s={matrix_s}_c={matrix_condition_number}_e={vector_b_entropy}"
+        name = f"TestNxN_n={matrix_size}_s={matrix_s}_c={matrix_condition_number:.1f}_e={vector_b_entropy:.1f}"
         super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
 
 
-class SimpleHamiltonianModel(ToyModel):
+class HEPTrackReconstruction(ToyModel):
     """Toymodel for HEP particle tracing by Davide, taken from `https://github.com/dnicotra/TrackHHL`."""
     def __init__(self, num_detectors=3, num_particles=2):
         # Davide used 3,2 for "small" and 3,3 for "large"
