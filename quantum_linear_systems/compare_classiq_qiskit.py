@@ -1,20 +1,20 @@
 """Compare the Classiq and Qiskit implementations on different use-cases and plot the results."""
-from typing import List
-from datetime import datetime
-
 import csv
-import numpy as np
-import matplotlib.pyplot as plt
+from datetime import datetime
+from typing import List
 
-from quantum_linear_systems.toymodels import (Qiskit4QubitExample,
-                                              ClassiqDemoExample,
-                                              VolterraProblem,
-                                              ToyModel,
-                                              ScalingTestModel
-                                              )
+import matplotlib.pyplot as plt
+import numpy as np
+
+from quantum_linear_systems.plotting import plot_compare_csol_vs_qsol
+from quantum_linear_systems.plotting import plot_depth_runtime_distance_vs_problem
 from quantum_linear_systems.quantum_linear_solver import QuantumLinearSolver
+from quantum_linear_systems.toymodels import ClassiqDemoExample
+from quantum_linear_systems.toymodels import Qiskit4QubitExample
+from quantum_linear_systems.toymodels import ScalingTestModel
+from quantum_linear_systems.toymodels import ToyModel
+from quantum_linear_systems.toymodels import VolterraProblem
 from quantum_linear_systems.utils import relative_distance_quantum_classical_solution
-from quantum_linear_systems.plotting import plot_compare_csol_vs_qsol, plot_depth_runtime_distance_vs_problem
 
 
 def append_to_csv(filename, data):

@@ -2,18 +2,20 @@
 import time
 
 import numpy as np
-
 from qiskit import QuantumCircuit
-from qiskit.primitives import Estimator, Sampler
 from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
+from qiskit.primitives import Estimator
+from qiskit.primitives import Sampler
 from qiskit.quantum_info import Statevector
 from qiskit_algorithms.optimizers import COBYLA
+from vqls_prototype import VQLS
+from vqls_prototype import VQLSLog
 
-from vqls_prototype import VQLS, VQLSLog
-
-from quantum_linear_systems.toymodels import ClassiqDemoExample, HEPTrackReconstruction
-from quantum_linear_systems.utils import extract_x_from_expanded, is_expanded
 from quantum_linear_systems.plotting import print_results
+from quantum_linear_systems.toymodels import ClassiqDemoExample
+from quantum_linear_systems.toymodels import HEPTrackReconstruction
+from quantum_linear_systems.utils import extract_x_from_expanded
+from quantum_linear_systems.utils import is_expanded
 
 
 def solve_vqls_qiskit(

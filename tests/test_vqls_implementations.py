@@ -1,10 +1,12 @@
 """Test VQLS implementations."""
 import unittest
+
 import numpy as np
 from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
 
+from quantum_linear_systems.implementations.vqls_qiskit_implementation import postprocess_solution
+from quantum_linear_systems.implementations.vqls_qiskit_implementation import solve_vqls_qiskit
 from quantum_linear_systems.toymodels import Qiskit4QubitExample
-from quantum_linear_systems.implementations.vqls_qiskit_implementation import solve_vqls_qiskit, postprocess_solution
 
 
 class TestQiskitVQLS(unittest.TestCase):

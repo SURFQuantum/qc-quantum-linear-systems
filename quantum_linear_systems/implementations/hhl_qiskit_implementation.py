@@ -5,10 +5,11 @@ import numpy as np
 from linear_solvers import HHL
 from qiskit.quantum_info import Statevector
 
-from quantum_linear_systems.toymodels import ClassiqDemoExample
-from quantum_linear_systems.utils import (extract_hhl_solution_vector_from_state_vector,
-                                          extract_x_from_expanded, is_expanded)
 from quantum_linear_systems.plotting import print_results
+from quantum_linear_systems.toymodels import ClassiqDemoExample
+from quantum_linear_systems.utils import extract_hhl_solution_vector_from_state_vector
+from quantum_linear_systems.utils import extract_x_from_expanded
+from quantum_linear_systems.utils import is_expanded
 
 
 def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):

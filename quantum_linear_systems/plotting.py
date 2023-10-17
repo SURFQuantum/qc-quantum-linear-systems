@@ -1,9 +1,9 @@
 """Plotting functions that can be imported by either implementation."""
+from typing import List
+from typing import Tuple
 
-from typing import Tuple, List
-
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str) -> None:

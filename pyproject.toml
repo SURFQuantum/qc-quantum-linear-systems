@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "qc-quantum-linear-systems"
+version = "0.1.0"
+description = "Quantum algorithms to solve linear systems of equations."
+authors = ["dmark04 <dmark04@web.de>"]
+license = "Apache 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10, <3.12"
+classiq = "^0.29.2"
+qiskit = "^0.44.2"
+qiskit-algorithms = "^0.2.1"
+matplotlib = "^3.8.0"
+numpy = "^1.26.1"
+quantum-linear-solvers = {git = "https://github.com/anedumla/quantum_linear_solvers.git", rev = "08bf4f6673308568b5654e5d3fde9f8df5d887d7"}
+
+
+[tool.poetry.group.test.dependencies]
+pre-commit = "^3.5.0"
+pytest-cov = "^4.1.0"
+pytest = "^7.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,20 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-case-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-toml
+      - id: check-symlinks
+      - id: check-yaml
+      - id: detect-private-key
+      - id: forbid-new-submodules
+  - repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.12.0
+    hooks:
+      - id: reorder-python-imports
