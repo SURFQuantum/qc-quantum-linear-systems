@@ -1,8 +1,8 @@
 """LinearSolver class."""
 import numpy as np
 
-from quantum_linear_systems.implementations.hhl_qiskit_implementation import solve_hhl_qiskit
 from quantum_linear_systems.implementations.hhl_classiq_implementation import solve_hhl_classiq
+from quantum_linear_systems.implementations.hhl_qiskit_implementation import solve_hhl_qiskit
 from quantum_linear_systems.implementations.vqls_qiskit_implementation import solve_vqls_qiskit
 
 

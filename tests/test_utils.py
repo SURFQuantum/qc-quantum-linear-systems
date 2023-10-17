@@ -1,8 +1,12 @@
 """Test utility functions."""
 import unittest
+
 import numpy as np
-from quantum_linear_systems.utils import make_matrix_hermitian, expand_b_vector, extract_x_from_expanded, \
-    extract_hhl_solution_vector_from_state_vector
+
+from quantum_linear_systems.utils import expand_b_vector
+from quantum_linear_systems.utils import extract_hhl_solution_vector_from_state_vector
+from quantum_linear_systems.utils import extract_x_from_expanded
+from quantum_linear_systems.utils import make_matrix_hermitian
 
 
 class TestUtils(unittest.TestCase):

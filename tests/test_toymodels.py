@@ -1,7 +1,10 @@
 """Test ToyModel implementations."""
 import unittest
 
-from quantum_linear_systems.toymodels import Qiskit4QubitExample, VolterraProblem, ClassiqDemoExample, ScalingTestModel
+from quantum_linear_systems.toymodels import ClassiqDemoExample
+from quantum_linear_systems.toymodels import Qiskit4QubitExample
+from quantum_linear_systems.toymodels import ScalingTestModel
+from quantum_linear_systems.toymodels import VolterraProblem
 
 
 class TestToyModels(unittest.TestCase):
