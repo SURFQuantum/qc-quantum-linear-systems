@@ -2,6 +2,7 @@
 import unittest
 
 import numpy as np
+import pytest
 
 from quantum_linear_systems.implementations.hhl_classiq_implementation import solve_hhl_classiq
 from quantum_linear_systems.implementations.hhl_qiskit_implementation import solve_hhl_qiskit
@@ -25,6 +26,7 @@ class TestClassiqHHL(unittest.TestCase):
     def setUp(self) -> None:
         self.test_model = Qiskit4QubitExample()
 
+    @pytest.mark.requires_auth
     def test_4qubit_example(self):
         """Test if classiq can solve the 4qubit example."""
         qpe_register = 3

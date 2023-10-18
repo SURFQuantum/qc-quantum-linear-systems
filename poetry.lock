@@ -830,12 +830,12 @@ urllib3 = ">=1.26.0,<2.0.0"
 
 [[package]]
 name = "ibm-platform-services"
-version = "0.44.1"
+version = "0.45.0"
 description = "Python client library for IBM Cloud Platform Services"
 optional = false
 python-versions = "*"
 files = [
-    {file = "ibm-platform-services-0.44.1.tar.gz", hash = "sha256:1dcfcad92ed38357935b0109b83a8ceb83fd0b771b42bd4e491d7c15cef9b590"},
+    {file = "ibm-platform-services-0.45.0.tar.gz", hash = "sha256:b82d690eb39b22892de3126f9c710e5e0b0a23c235791af7e3249883525f6ab1"},
 ]
 
 [package.dependencies]
@@ -2546,9 +2546,9 @@ qiskit-terra = ">=0.21"
 
 [package.source]
 type = "git"
-url = "https://github.com/anedumla/quantum_linear_solvers.git"
-reference = "08bf4f6673308568b5654e5d3fde9f8df5d887d7"
-resolved_reference = "08bf4f6673308568b5654e5d3fde9f8df5d887d7"
+url = "https://github.com/dmark04/quantum_linear_solvers"
+reference = "HEAD"
+resolved_reference = "952cd0cafb3b6775b3c718bebcbee00d00f5dd89"
 
 [[package]]
 name = "requests"
@@ -3008,13 +3008,13 @@ develop = false
 [package.dependencies]
 mplhep = "^0.3.30"
 qiskit = "^0.44.2"
-quantum-linear-solvers = {git = "https://github.com/anedumla/quantum_linear_solvers.git", rev = "08bf4f6673308568b5654e5d3fde9f8df5d887d7"}
+quantum-linear-solvers = {git = "https://github.com/dmark04/quantum_linear_solvers", rev = "952cd0cafb3b6775b3c718bebcbee00d00f5dd89"}
 
 [package.source]
 type = "git"
 url = "https://github.com/dmark04/TrackHHL"
 reference = "HEAD"
-resolved_reference = "dc3333607c9b1e317194ec25f24bcff94fd0639d"
+resolved_reference = "e16dfbea91eada1e0efddf57cc2c92a31ebe1d82"
 
 [[package]]
 name = "traitlets"
@@ -3246,4 +3246,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.12"
-content-hash = "7613f06765b24c326ffb5b8ba1d5f6746e903f8b97e425b85fd389d6ebcb5d24"
+content-hash = "c12647a21752690ce40824b8958e59a512619b4317237380620f93a8b48e0459"

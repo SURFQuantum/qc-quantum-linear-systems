@@ -13,7 +13,7 @@ qiskit = "^0.44.2"
 qiskit-algorithms = "^0.2.1"
 matplotlib = "^3.8.0"
 numpy = "^1.26.1"
-quantum-linear-solvers = {git = "https://github.com/anedumla/quantum_linear_solvers.git", rev = "08bf4f6673308568b5654e5d3fde9f8df5d887d7"}
+quantum-linear-solvers = {git = "https://github.com/dmark04/quantum_linear_solvers"}
 vqls-prototype = {git = "https://github.com/QuantumApplicationLab/vqls-prototype", rev = "2853fb07e416fd766ac13e34dedb6b949342c5e2"}
 trackhhl = {git = "https://github.com/dmark04/TrackHHL"}
 
