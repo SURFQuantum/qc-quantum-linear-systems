@@ -1,34 +1,77 @@
-name: Poetry CI
+name: linting and tests
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
-  build:
-
+  pre-commit:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.0
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10"]
+        os: [ubuntu-latest]
+        poetry-version: ["1.6.1"]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
       with:
-        python-version: 3.10
-
-    - name: Install Poetry
+        fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+        ref: ${{ github.head_ref }}
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+      # see details (matrix, python-version, python-version-file, etc.)
+      # https://github.com/actions/setup-python
+    - name: Install poetry
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: ${{ matrix.poetry-version }}
+    - name: Setup a local virtual environment (if no poetry.toml file)
       run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Install dependencies
+        poetry config virtualenvs.create true --local
+        poetry config virtualenvs.in-project true --local
+    - uses: actions/cache@v3
+      name: Define a cache for the virtual environment based on the dependencies lock file
+      with:
+        path: ./.venv
+        key: venv-${{ hashFiles('poetry.lock') }}
+    - name: Install the project dependencies
       run: poetry install
+    - name: Run the automated tests (ignore deprecation errors )
+      run: poetry run pytest -W ignore::DeprecationWarning --cov-report xml --cov=quantum_linear_systems tests/
+    - name: Get Coverage
+      uses: orgoro/coverage@v3.1
+      with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Coverage Badge
+      uses: tj-actions/coverage-badge-py@v2
 
-    - name: Run pre-commit hooks
-      run: poetry run pre-commit run --all-files
+    - name: Verify Changed files
+      uses: tj-actions/verify-changed-files@v16
+      id: verify-changed-files
+      with:
+        files: coverage.svg
 
-    - name: Run tests
-      run: poetry run pytest --verbose --cov=quantum_linear_systems tests
+    - name: Commit files
+      if: steps.verify-changed-files.outputs.files_changed == 'true'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add coverage.svg
+        git commit -m "Updated coverage.svg"
+
+    - name: Push changes
+      if: steps.verify-changed-files.outputs.files_changed == 'true'
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.head_ref }}
+        force: true
