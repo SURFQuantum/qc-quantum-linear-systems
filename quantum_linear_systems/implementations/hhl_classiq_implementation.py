@@ -3,21 +3,26 @@ import time
 from itertools import product
 
 import numpy as np
-
-from classiq.builtin_functions import StatePreparation, Exponentiation, PhaseEstimation, AmplitudeLoading
+from classiq import execute
+from classiq import GeneratedCircuit
+from classiq import Model
+from classiq import show
+from classiq import synthesize
+from classiq.builtin_functions import AmplitudeLoading
+from classiq.builtin_functions import Exponentiation
+from classiq.builtin_functions import PhaseEstimation
+from classiq.builtin_functions import StatePreparation
 from classiq.builtin_functions.exponentiation import PauliOperator
-from classiq.interface.generator.qpe import (
-    ExponentiationScaling,
-    ExponentiationSpecification,
-)
+from classiq.execution import ExecutionPreferences
+from classiq.execution import IBMBackendPreferences
 from classiq.interface.generator.amplitude_loading import AmplitudeLoadingImplementation
-from classiq import Model, execute, synthesize, show, GeneratedCircuit
-from classiq.execution import ExecutionPreferences, IBMBackendPreferences
+from classiq.interface.generator.qpe import ExponentiationScaling
+from classiq.interface.generator.qpe import ExponentiationSpecification
 from classiq.synthesis import set_execution_preferences
 
-from quantum_linear_systems.toymodels import ClassiqDemoExample
-from quantum_linear_systems.plotting import print_results
 from quantum_linear_systems.implementations.vqls_qiskit_implementation import postprocess_solution
+from quantum_linear_systems.plotting import print_results
+from quantum_linear_systems.toymodels import ClassiqDemoExample
 
 
 Paulidict = {
@@ -170,9 +175,9 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
 
 
 def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b: np.ndarray,
-                     smallest_ev: float) -> np.ndarray:
+                     smallest_ev: float, qpe_register_size: int) -> np.ndarray:
     """Extract the solution vector from the synthesized quantum program."""
-    res_hhl = execute(qprog_hhl)[0].value
+    res_hhl = execute(qprog_hhl).result()[0].value
 
     total_q = GeneratedCircuit.from_qprog(qprog_hhl).data.width  # total number of qubits of the whole circuit
 
@@ -180,17 +185,20 @@ def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b: np.nd
 
     sol_pos = list(res_hhl.physical_qubits_map["solution"])  # position of solution
 
-    canonical_list = np.array(list("0" * total_q))  # we start with a string of zeros
-    canonical_list[
-        target_pos
-    ] = "1"  # we are interested in strings having 1 on their target qubit
-
-    quantum_solution = []
-    for i in range(2 ** len(sol_pos)):
-        templist = canonical_list.copy()
-        templist[sol_pos] = list(np.binary_repr(i, len(sol_pos)))
-        quantum_solution.append(np.round(complex(res_hhl.state_vector["".join(templist)]) / w_min, 5))
-    quantum_solution = np.array(quantum_solution)
+    phase_pos = [
+        total_q - k - 1 for k in range(total_q) if k not in sol_pos + [target_pos]
+    ]  # finds the position of the “phase” register, and
+    # flips for endianness as we will use the indices to read directly from the string
+    qsol = [
+        np.round(parsed_state.amplitude / w_min, 5)
+        for solution in range(2 ** int(np.log2(matrix_a.shape[0])))
+        for parsed_state in res_hhl.parsed_state_vector
+        if (parsed_state["target"] == 1.0 and
+            parsed_state["solution"] == solution and
+            # this takes the entries where the “phase” register is at state zero
+            [parsed_state.bitstring[k] for k in phase_pos] == ["0"] * qpe_register_size)
+    ]
+    quantum_solution = np.array(qsol)
     print("euclidian norm", np.linalg.norm(quantum_solution), np.linalg.norm(quantum_solution)/smallest_ev)
     # print("state_vector", res_hhl.state_vector)
 
@@ -296,7 +304,8 @@ def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_s
     # extract solution vector
     smallest_eigenval = min(np.linalg.eigvals(matrix_a))
     quantum_solution = extract_solution(qprog_hhl=circuit_hhl, w_min=w_min, matrix_a=matrix_a,
-                                        vec_b=vector_b, smallest_ev=smallest_eigenval)
+                                        vec_b=vector_b, smallest_ev=smallest_eigenval,
+                                        qpe_register_size=qpe_register_size)
 
     # todo: this actually might not the real runtime here, but includes the waiting time
     return quantum_solution, qasm_content, circuit_depth, circuit_width, time.time() - start_time
