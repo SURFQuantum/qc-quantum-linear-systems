@@ -2547,7 +2547,7 @@ qiskit-terra = ">=0.21"
 [package.source]
 type = "git"
 url = "https://github.com/dmark04/quantum_linear_solvers"
-reference = "HEAD"
+reference = "952cd0cafb3b6775b3c718bebcbee00d00f5dd89"
 resolved_reference = "952cd0cafb3b6775b3c718bebcbee00d00f5dd89"
 
 [[package]]
@@ -3246,4 +3246,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.12"
-content-hash = "c12647a21752690ce40824b8958e59a512619b4317237380620f93a8b48e0459"
+content-hash = "7c4d0bc205ab561a3d0002f33d2eb651c0a057475a15bd939e93f229ccff32a4"
