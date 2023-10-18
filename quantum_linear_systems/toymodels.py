@@ -1,5 +1,9 @@
 """Implementations of toy-models that can be imported by the algorithms."""
 import numpy as np
+from trackhhl.hamiltonians.simple_hamiltonian import SimpleHamiltonian
+from trackhhl.hamiltonians.simple_hamiltonian import upscale_pow2
+from trackhhl.toy.simple_generator import SimpleDetectorGeometry
+from trackhhl.toy.simple_generator import SimpleGenerator
 
 from quantum_linear_systems.utils import expand_b_vector
 from quantum_linear_systems.utils import extract_x_from_expanded
@@ -8,10 +12,6 @@ from quantum_linear_systems.utils import generate_s_sparse_matrix
 from quantum_linear_systems.utils import is_matrix_well_conditioned
 from quantum_linear_systems.utils import make_matrix_hermitian
 from quantum_linear_systems.utils import vector_uniformity_entropy
-from TrackHHL.trackhhl.hamiltonians.simple_hamiltonian import SimpleHamiltonian
-from TrackHHL.trackhhl.hamiltonians.simple_hamiltonian import upscale_pow2
-from TrackHHL.trackhhl.toy.simple_generator import SimpleDetectorGeometry
-from TrackHHL.trackhhl.toy.simple_generator import SimpleGenerator
 
 
 class ToyModel:
