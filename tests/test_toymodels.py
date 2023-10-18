@@ -9,12 +9,15 @@ from quantum_linear_systems.toymodels import VolterraProblem
 
 class TestToyModels(unittest.TestCase):
     """Unittest the ToyModels."""
-    def test_default_values(self):
+
+    def test_default_values(self) -> None:
         """Test correct initialization."""
         model1 = Qiskit4QubitExample()
         self.assertEqual(model1.num_qubits, 1)
         model2 = VolterraProblem(2)
-        self.assertEqual(model2.num_qubits, 2+1)  # volterra needs to be made hermitian so num_qubits grows by 1
+        self.assertEqual(
+            model2.num_qubits, 2 + 1
+        )  # volterra needs to be made hermitian so num_qubits grows by 1
         model3 = ClassiqDemoExample()
         self.assertEqual(model3.num_qubits, 2)
         model4 = ScalingTestModel()

@@ -2,13 +2,17 @@
 from typing import List
 from typing import Tuple
 
+import matplotlib.axis
 import matplotlib.pyplot as plt
 import numpy as np
 
+from quantum_linear_systems.toymodels import ToyModel
 
-def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str) -> None:
-    """
-    Plot classical and quantum solution vectors side by side.
+
+def plot_csol_vs_qsol(
+    classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str
+) -> None:
+    """Plot classical and quantum solution vectors side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
@@ -28,10 +32,13 @@ def plot_csol_vs_qsol(classical_solution: np.ndarray, quantum_solution: np.ndarr
     plt.show()
 
 
-def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, qsols_marker_name: List[Tuple[list, str, str]],
-                              title: str, axis=None) -> None:
-    """
-    Plot classical and quantum solutions side by side.
+def plot_compare_csol_vs_qsol(
+    classical_solution: np.ndarray,
+    qsols_marker_name: List[Tuple[List[np.ndarray], str, str]],
+    title: str,
+    axis: matplotlib.axis.Axis = None,
+) -> None:
+    """Plot classical and quantum solutions side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
@@ -55,12 +62,13 @@ def plot_compare_csol_vs_qsol(classical_solution: np.ndarray, qsols_marker_name:
 
 
 def plot_depth_runtime_distance_vs_problem(
-        depth_runtime_distance_marker_name: List[Tuple[Tuple[list, list, list], str, str]],
-        problems: list,
-        axs: list = None
+    depth_runtime_distance_marker_name: List[
+        Tuple[List[int], List[float], List[float], str, str]
+    ],
+    problems: List[ToyModel],
+    axs: List[matplotlib.axis.Axis] = None,  # type: ignore[assignment]
 ) -> None:
-    """
-    Plot depth and runtime of two algorithms side by side for each problem index.
+    """Plot depth and runtime of two algorithms side by side for each problem index.
 
     Parameters:
         depth_runtime_distance_marker_name (list) : List of tuples of the form (depths, run_times, rel_distance,
@@ -95,10 +103,14 @@ def plot_depth_runtime_distance_vs_problem(
     axs[2].grid(True)
 
 
-def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, run_time: float, name: str,
-                  plot: bool = True) -> None:
-    """
-    Print results of classical and quantum solutions and optionally plot them.
+def print_results(
+    quantum_solution: np.ndarray,
+    classical_solution: np.ndarray,
+    run_time: float,
+    name: str,
+    plot: bool = True,
+) -> None:
+    """Print results of classical and quantum solutions and optionally plot them.
 
     Parameters:
         quantum_solution (numpy.ndarray): Quantum solution.
@@ -112,9 +124,19 @@ def print_results(quantum_solution: np.ndarray, classical_solution: np.ndarray, 
     print("classical", classical_solution.flatten())
     print("quantum", quantum_solution.flatten())
     if plot:
-        plot_csol_vs_qsol(classical_solution=classical_solution, quantum_solution=quantum_solution, title=name)
+        plot_csol_vs_qsol(
+            classical_solution=classical_solution,
+            quantum_solution=quantum_solution,
+            title=name,
+        )
 
     print(f"Finished run in {run_time}s.")
 
-    if np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) > 0.2:
-        raise RuntimeError("The HHL solution is too far from the classical one, please verify your algorithm.")
+    if (
+        np.linalg.norm(classical_solution - quantum_solution)
+        / np.linalg.norm(classical_solution)
+        > 0.2
+    ):
+        raise RuntimeError(
+            "The HHL solution is too far from the classical one, please verify your algorithm."
+        )

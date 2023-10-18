@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "qc-quantum-linear-systems"
+name = "quantum-linear-systems"
 version = "0.1.0"
 description = "Quantum algorithms to solve linear systems of equations."
 authors = ["dmark04 <dmark04@web.de>"]
@@ -7,21 +7,34 @@ license = "Apache 2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.12"
-classiq = "^0.29.2"
-qiskit = "^0.44.2"
-qiskit-algorithms = "^0.2.1"
-matplotlib = "^3.8.0"
-numpy = "^1.26.1"
-quantum-linear-solvers = {git = "https://github.com/dmark04/quantum_linear_solvers", rev = "952cd0cafb3b6775b3c718bebcbee00d00f5dd89"}
-vqls-prototype = {git = "https://github.com/QuantumApplicationLab/vqls-prototype", rev = "2853fb07e416fd766ac13e34dedb6b949342c5e2"}
+python = ">=3.9, <3.12" # >=3.9 because of amazon-braket, <3.12 because of classiq
+classiq = "^0.31.0"
+qiskit = ">=0.43.0, <0.45.0"
+qiskit-algorithms = ">=0.2.1, <0.3.0"
+matplotlib = "^3.5.0" # this version could possible be even lower
+numpy = ">=1.23.0"
 trackhhl = {git = "https://github.com/dmark04/TrackHHL"}
+quantum-linear-solvers = "^0.1.1"
+vqls-prototype = "^0.2.0"
 
+[tool.poetry.group.aws.dependencies]
+qiskit-braket-provider = "^0.0.5"
+amazon-braket-sdk = "^1.61.0.post0"
 
 [tool.poetry.group.test.dependencies]
 pre-commit = "^3.5.0"
 pytest-cov = "^4.1.0"
 pytest = "^7.4.2"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "requires_auth: marks tests as requiring a classiq authentication token, thus being avoided on the pipeline",
+]
+
+[tool.poetry.scripts]
+tests = "tests.run_tests:main"
+show-cov = "tests.run_tests:open_coverage_report"
 
 [build-system]
 requires = ["poetry-core"]
