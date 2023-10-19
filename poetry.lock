@@ -2440,13 +2440,13 @@ visualization = ["ipython (>=5.0.0)", "ipyvue (>=1.8.5)", "ipyvuetify (>=1.1)", 
 
 [[package]]
 name = "qiskit-ibm-runtime"
-version = "0.12.2"
+version = "0.13.0"
 description = "IBM Quantum client for Qiskit Runtime."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "qiskit-ibm-runtime-0.12.2.tar.gz", hash = "sha256:28f2b3447593d4b8f35ffb2c31a74bb6054d0ceb767a676c5cef02f672799b0c"},
-    {file = "qiskit_ibm_runtime-0.12.2-py3-none-any.whl", hash = "sha256:6fd7c985877e9861df5f18c4970e88cd7d95e68623781d6dd4054adb34d317e7"},
+    {file = "qiskit-ibm-runtime-0.13.0.tar.gz", hash = "sha256:6ce86189a6b1a5b7c6359c7b81454c41b2b67c080d83c19d2270182cae3cdc76"},
+    {file = "qiskit_ibm_runtime-0.13.0-py3-none-any.whl", hash = "sha256:533b4505a893be6e9b9a73be874075d671833116f83ee2acea81cd9caebfa22d"},
 ]
 
 [package.dependencies]
@@ -3246,4 +3246,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.12"
-content-hash = "7c4d0bc205ab561a3d0002f33d2eb651c0a057475a15bd939e93f229ccff32a4"
+content-hash = "e4085291cb02f22eecb6fb41592213b0bf481bbf9142188f030c09d03eb3c29f"
