@@ -3,15 +3,21 @@ import subprocess
 import webbrowser
 
 
-def main():
+def main() -> None:
     command = [
         "pytest",
-        "-W", "ignore::DeprecationWarning",
-        "--cov-report", "html",
+        "-W",
+        "ignore::DeprecationWarning",
+        "--cov-report",
+        "html",
         "--cov=quantum_linear_systems",
-        "tests/"
+        "tests/",
+        "--verbose",
     ]
-    subprocess.run(command, check=True)
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Tests failed with error: {e}")
 
 
 def open_coverage_report():

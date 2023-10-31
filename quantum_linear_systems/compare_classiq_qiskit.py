@@ -20,7 +20,7 @@ from quantum_linear_systems.utils import relative_distance_quantum_classical_sol
 def append_to_csv(filename, data):
     """Helper function to append data to an existing csv file."""
     try:
-        with open(filename, mode='a', newline='', encoding='utf-8') as file:
+        with open(filename, mode="a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(data)
     except Exception as exception:
@@ -45,54 +45,87 @@ def solve_models(models, method, save_file):
                 - run_times (list): List of run times for each model's solution.
                 - rel_distances (list): List of relative distances between quantum and classical solutions.
     """
-    quantum_solutions, classical_solutions, run_times, depths, rel_distances = [], [], [], [], []
+    quantum_solutions, classical_solutions, run_times, depths, rel_distances = (
+        [],
+        [],
+        [],
+        [],
+        [],
+    )
 
     for model in models:
         print(datetime.now().strftime("%H:%M:%S"))
         print(f"Solving {model.name} using {method}.")
         qls = QuantumLinearSolver()
-        qsol = qls.solve(matrix_a=model.matrix_a, vector_b=model.vector_b, method=method, file_basename=None)
+        qsol = qls.solve(
+            matrix_a=model.matrix_a,
+            vector_b=model.vector_b,
+            method=method,
+            file_basename=None,
+        )
 
         # todo: once all normalizations are fixed this should be unnecessary, for plotting its still cool probably
         qsol = qsol / np.linalg.norm(qsol)
         csol = model.classical_solution / np.linalg.norm(model.classical_solution)
-        rel_dis = relative_distance_quantum_classical_solution(quantum_solution=qsol,
-                                                               classical_solution=csol)
+        rel_dis = relative_distance_quantum_classical_solution(
+            quantum_solution=qsol, classical_solution=csol
+        )
         quantum_solutions.append(qsol)
         classical_solutions.append(csol)
         run_times.append(qls.run_time)
         depths.append(qls.circuit_depth)
         rel_distances.append(rel_dis)
 
-        data = [model.name, method, qsol, csol, qls.circuit_depth, qls.run_time, rel_dis]
+        data = [
+            model.name,
+            method,
+            qsol,
+            csol,
+            qls.circuit_depth,
+            qls.run_time,
+            rel_dis,
+        ]
         append_to_csv(filename=save_file, data=data)
 
     return quantum_solutions, classical_solutions, (depths, run_times, rel_distances)
 
 
 def compare_qls_and_plot(
-        models: List[ToyModel],
-        qiskit: bool = True,
-        classiq: bool = True,
-        filebasename: str = "comparison"
+    models: List[ToyModel],
+    qiskit: bool = True,
+    classiq: bool = True,
+    filebasename: str = "comparison",
 ) -> None:
     """Compare different implementations of quantum linear solvers and plot the results"""
     filename = f"{filebasename}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     csv_file = f"{filename}.csv"
-    headers = ['model_name', 'solver', 'quantum_solution', 'classical_solution', 'circuit_depth',
-               'run_time', 'relative_distance']
+    headers = [
+        "model_name",
+        "solver",
+        "quantum_solution",
+        "classical_solution",
+        "circuit_depth",
+        "run_time",
+        "relative_distance",
+    ]
 
-    with open(csv_file, mode='w', newline='', encoding="utf-8") as file:
+    with open(csv_file, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
 
     if classiq:
         # classiq first because if something fails its classiq
-        qsols_c_hhl, csols, drd_c_hhl = solve_models(models=models, method="hhl_classiq", save_file=csv_file)
+        qsols_c_hhl, csols, drd_c_hhl = solve_models(
+            models=models, method="hhl_classiq", save_file=csv_file
+        )
         # qsols_c_vqls, _, drd_c_vqls = solve_models(models=models, method="vqls_classiq", save_file=csv_file)
     if qiskit:
-        qsols_q_hhl, csols, drd_q_hhl = solve_models(models=models, method="hhl_qiskit", save_file=csv_file)
-        qsols_q_vqls, _, drd_q_vqls = solve_models(models=models, method="vqls_qiskit", save_file=csv_file)
+        qsols_q_hhl, csols, drd_q_hhl = solve_models(
+            models=models, method="hhl_qiskit", save_file=csv_file
+        )
+        qsols_q_vqls, _, drd_q_vqls = solve_models(
+            models=models, method="vqls_qiskit", save_file=csv_file
+        )
 
     n_problems = len(models)
 
@@ -108,8 +141,12 @@ def compare_qls_and_plot(
             qmn.append((qsols_q_hhl[i], "r^", "hhl_qiskit"))
             qmn.append((qsols_q_vqls[i], "kx", "vqls_qiskit"))
 
-        plot_compare_csol_vs_qsol(classical_solution=csols[i], qsols_marker_name=qmn,
-                                  title=f"Statevectors: {models[i].name}", axis=axs[i, 0])
+        plot_compare_csol_vs_qsol(
+            classical_solution=csols[i],
+            qsols_marker_name=qmn,
+            title=f"Statevectors: {models[i].name}",
+            axis=axs[i, 0],
+        )
     drdmn = []
     if classiq:
         drdmn.append(drd_c_hhl + ("go", "hhl_classiq"))
@@ -118,17 +155,23 @@ def compare_qls_and_plot(
         drdmn.append(drd_q_hhl + ("r^", "hhl_qiskit"))
         drdmn.append(drd_q_vqls + ("kx", "vqls_qiskit"))
 
-    plot_depth_runtime_distance_vs_problem(depth_runtime_distance_marker_name=drdmn, problems=models, axs=axs[:, 1])
+    plot_depth_runtime_distance_vs_problem(
+        depth_runtime_distance_marker_name=drdmn, problems=models, axs=axs[:, 1]
+    )
 
     plt.tight_layout()
-    plt.savefig(f'plots/{filename}.png', dpi=300)
+    plt.savefig(f"plots/{filename}.png", dpi=300)
     plt.show()
 
 
 if __name__ == "__main__":
     # matrix test:
 
-    toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2)]
+    toymodels = [
+        ClassiqDemoExample(),
+        Qiskit4QubitExample(),
+        VolterraProblem(num_qubits=2),
+    ]
     # toymodels = [ClassiqDemoExample(), Qiskit4QubitExample(), VolterraProblem(num_qubits=2),
     #              SimpleHamiltonianModel(3, 2),
     #              SimpleHamiltonianModel(3, 3)]
@@ -143,9 +186,21 @@ if __name__ == "__main__":
     matrix_size_models = []
     for n in [2, 4, 8]:
         matrix_size_models.append(ScalingTestModel(matrix_size=n))
-    compare_qls_and_plot(models=matrix_size_models, qiskit=True, classiq=False, filebasename="size_analysis")
+    compare_qls_and_plot(
+        models=matrix_size_models,
+        qiskit=True,
+        classiq=False,
+        filebasename="size_analysis",
+    )
 
     matrix_sparsity_models = []
     for s in range(1, MAX_SIZE + 1, 2):
-        matrix_sparsity_models.append(ScalingTestModel(matrix_size=MAX_SIZE, matrix_s=s))
-    compare_qls_and_plot(models=matrix_sparsity_models, qiskit=True, classiq=False, filebasename="sparsity_analysis")
+        matrix_sparsity_models.append(
+            ScalingTestModel(matrix_size=MAX_SIZE, matrix_s=s)
+        )
+    compare_qls_and_plot(
+        models=matrix_sparsity_models,
+        qiskit=True,
+        classiq=False,
+        filebasename="sparsity_analysis",
+    )

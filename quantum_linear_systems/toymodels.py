@@ -30,12 +30,17 @@ class ToyModel:
         vector_b (numpy.ndarray): The right-hand side vector for the linear system.
         classical_solution (numpy.ndarray): The classical solution to the linear system.
     """
-    def __init__(self, name: str, matrix: np.ndarray, vector: np.ndarray, csol: np.ndarray):
+
+    def __init__(
+        self, name: str, matrix: np.ndarray, vector: np.ndarray, csol: np.ndarray
+    ):
         if not isinstance(name, str):
             raise TypeError(f"Name of ToyModel must be of type str not {type(name)}.")
         for param in [matrix, vector, csol]:
             if not isinstance(param, np.ndarray):
-                raise TypeError(f"Matrix, vector and csol of ToyModel must be of type np.ndarray not {type(param)}.")
+                raise TypeError(
+                    f"Matrix, vector and csol of ToyModel must be of type np.ndarray not {type(param)}."
+                )
         self.name = name
         self.matrix_a = matrix
         self.vector_b = vector
@@ -83,12 +88,15 @@ class Qiskit4QubitExample(ToyModel):
     vector_b = (1,0)
     classical_solution = (1.125, 0.375)
     """
+
     def __init__(self):
         name = "Qiskit4QubitExample"
         matrix_a = np.array([[1, -1 / 3], [-1 / 3, 1]])
         vector_b = np.array([1, 0])
         classical_solution = np.array([[1.125], [0.375]])
-        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
+        super().__init__(
+            name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution
+        )
 
 
 class VolterraProblem(ToyModel):
@@ -99,10 +107,11 @@ class VolterraProblem(ToyModel):
         num_qubits (int): The size of the problem, such that the total size will be 2**num_qubits.
 
     """
+
     def __init__(self, num_qubits):
         name = f"VolterraProblem(n={num_qubits})"
         # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
-        total_n = 2 ** num_qubits
+        total_n = 2**num_qubits
         delta_s = 1 / total_n
 
         alpha = delta_s / 2
@@ -116,7 +125,9 @@ class VolterraProblem(ToyModel):
 
         classical_solution = self.classically_solve(mat, vec)
 
-        super().__init__(name=name, matrix=a_tilde, vector=b_tilde, csol=classical_solution)
+        super().__init__(
+            name=name, matrix=a_tilde, vector=b_tilde, csol=classical_solution
+        )
 
     @staticmethod
     def volterra_a_matrix(size, alpha):
@@ -155,6 +166,7 @@ class ClassiqDemoExample(ToyModel):
     Define the classiq demo problem. (See https://platform.classiq.io/advanced)
 
     """
+
     def __init__(self):
         name = "ClassiqDemoExample"
         matrix_a = np.array(
@@ -171,7 +183,9 @@ class ClassiqDemoExample(ToyModel):
 
         classical_solution = self.classically_solve(matrix_a, vector_b)
 
-        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
+        super().__init__(
+            name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution
+        )
 
 
 class RandomNQubitProblem(ToyModel):
@@ -183,15 +197,20 @@ class RandomNQubitProblem(ToyModel):
         matrix is not hermitian and needs to be made hermitian the actual num_qubits will increase by 1 from the input.
 
     """
+
     def __init__(self, num_qubits):
         name = f"RandomNQubitProblem(N={num_qubits})"
         matrix_a = np.random.rand(2**num_qubits, 2**num_qubits)
-        matrix_a += matrix_a.T  # make matrix symmetric (don't expand here, to keep problem size to N)
+        matrix_a += (
+            matrix_a.T
+        )  # make matrix symmetric (don't expand here, to keep problem size to N)
         vector_b = np.random.rand(2**num_qubits)
 
         classical_solution = self.classically_solve(matrix_a, vector_b)
 
-        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
+        super().__init__(
+            name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution
+        )
 
 
 def integro_differential_a_matrix(a_matrix: np.ndarray, time_discretization_steps: int):
@@ -200,16 +219,33 @@ def integro_differential_a_matrix(a_matrix: np.ndarray, time_discretization_step
     alpha_n = a_matrix.shape[0]
     identity_block = np.identity(alpha_n)
     zero_block = np.zeros((alpha_n, alpha_n))
-    off_diagonal_block = - np.identity(alpha_n) - delta_t * a_matrix
+    off_diagonal_block = -np.identity(alpha_n) - delta_t * a_matrix
     generated_block = []
     for i in range(time_discretization_steps):
         if i == 0:
-            generated_block.append([np.block([identity_block] + [zero_block for _ in
-                                                                 range(time_discretization_steps - 1)])])
+            generated_block.append(
+                [
+                    np.block(
+                        [identity_block]
+                        + [zero_block for _ in range(time_discretization_steps - 1)]
+                    )
+                ]
+            )
         else:
-            generated_block.append([np.block([[zero_block for _ in range(i-1)] +
-                                             [off_diagonal_block, identity_block] +
-                                             [zero_block for _ in range(time_discretization_steps - (i + 1))]])])
+            generated_block.append(
+                [
+                    np.block(
+                        [
+                            [zero_block for _ in range(i - 1)]
+                            + [off_diagonal_block, identity_block]
+                            + [
+                                zero_block
+                                for _ in range(time_discretization_steps - (i + 1))
+                            ]
+                        ]
+                    )
+                ]
+            )
     return np.block(generated_block)
 
 
@@ -231,10 +267,18 @@ class ScalingTestModel(ToyModel):
     max_num_iterations (int): (optional) Maximum number of attempts to find a matrix that is well-conditioned. Defaults
         to 10.
     """
-    def __init__(self, matrix_size: int = 4, matrix_s: int = 2, matrix_well_conditioned: bool = True,
-                 vector_uniformity: float = 1., max_num_iterations: int = 100):
 
-        vector_b = generate_random_vector(size=matrix_size, uniformity_level=vector_uniformity)
+    def __init__(
+        self,
+        matrix_size: int = 4,
+        matrix_s: int = 2,
+        matrix_well_conditioned: bool = True,
+        vector_uniformity: float = 1.0,
+        max_num_iterations: int = 100,
+    ):
+        vector_b = generate_random_vector(
+            size=matrix_size, uniformity_level=vector_uniformity
+        )
         entropy_before = vector_uniformity_entropy(vector_b)
         vector_b = expand_b_vector(vector_b)
         assert np.isclose(entropy_before, vector_uniformity_entropy(vector_b))
@@ -242,27 +286,38 @@ class ScalingTestModel(ToyModel):
         #  what is the effect on the uniformity of b and therefore the algorithm? entropy does not change-> is this
         #   a good measure?
 
-        matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s_non_zero_entries=matrix_s)
+        matrix_a = generate_s_sparse_matrix(
+            matrix_size=matrix_size, s_non_zero_entries=matrix_s
+        )
         matrix_a = make_matrix_hermitian(matrix_a)
         iterations = 1
 
         if matrix_well_conditioned:
             # for well conditioned we want the matrix to be close to 1
-            threshold = 10 * matrix_size    # Note: small condition numbers are much more difficult for large matrices
+            threshold = (
+                10 * matrix_size
+            )  # Note: small condition numbers are much more difficult for large matrices
         else:
             # for ill conditioned we want the matrix to be a lot larger than 1
             threshold = 1000
 
-        while matrix_well_conditioned != is_matrix_well_conditioned(matrix_a, threshold):
-
-            matrix_a = generate_s_sparse_matrix(matrix_size=matrix_size, s_non_zero_entries=matrix_s)
+        while matrix_well_conditioned != is_matrix_well_conditioned(
+            matrix_a, threshold
+        ):
+            matrix_a = generate_s_sparse_matrix(
+                matrix_size=matrix_size, s_non_zero_entries=matrix_s
+            )
             matrix_a = make_matrix_hermitian(matrix_a)
             iterations += 1
-            print(f"matrix_condition_number = {np.linalg.cond(matrix_a)}, frob={np.linalg.cond(matrix_a, 'fro')},"
-                  f" det(a)={np.linalg.det(matrix_a)}")
+            print(
+                f"matrix_condition_number = {np.linalg.cond(matrix_a)}, frob={np.linalg.cond(matrix_a, 'fro')},"
+                f" det(a)={np.linalg.det(matrix_a)}"
+            )
             if iterations == max_num_iterations:
-                raise ValueError(f"Could not generate matrix where matrix_well_conditioned={matrix_well_conditioned} "
-                                 f"within {iterations} iterations.")
+                raise ValueError(
+                    f"Could not generate matrix where matrix_well_conditioned={matrix_well_conditioned} "
+                    f"within {iterations} iterations."
+                )
 
         print("Succeeded in finding a matrix.")
         classical_solution = self.classically_solve(matrix_a, vector_b)
@@ -271,17 +326,24 @@ class ScalingTestModel(ToyModel):
         matrix_condition_number = np.linalg.cond(matrix_a)
         vector_b_entropy = vector_uniformity_entropy(vector_b)
         name = f"TestNxN_n={matrix_size}_s={matrix_s}_c={matrix_condition_number:.1f}_e={vector_b_entropy:.1f}"
-        super().__init__(name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution)
+        super().__init__(
+            name=name, matrix=matrix_a, vector=vector_b, csol=classical_solution
+        )
 
 
 class HEPTrackReconstruction(ToyModel):
     """Toymodel for HEP particle tracing by Davide, taken from `https://github.com/dnicotra/TrackHHL`."""
+
     def __init__(self, num_detectors=3, num_particles=2):
         # Davide used 3,2 for "small" and 3,3 for "large"
         # Generate a test event
-        detector = SimpleDetectorGeometry(list(range(num_detectors)), [10000 for _ in range(num_detectors)],
-                                          [10000 for _ in range(num_detectors)], [i+1 for i in range(num_detectors)])
-        generator = SimpleGenerator(detector, theta_max=np.pi/3)
+        detector = SimpleDetectorGeometry(
+            list(range(num_detectors)),
+            [10000 for _ in range(num_detectors)],
+            [10000 for _ in range(num_detectors)],
+            [i + 1 for i in range(num_detectors)],
+        )
+        generator = SimpleGenerator(detector, theta_max=np.pi / 3)
 
         event = generator.generate_event(num_particles)
 
@@ -297,7 +359,9 @@ class HEPTrackReconstruction(ToyModel):
         vector_b = ham.b / np.linalg.norm(ham.b)
         matrix_a, vector_b = upscale_pow2(matrix_a, vector_b)
         csol = np.linalg.solve(matrix_a, vector_b)
-        super().__init__(name="HEPSimpleHamiltonian", matrix=matrix_a, vector=vector_b, csol=csol)
+        super().__init__(
+            name="HEPSimpleHamiltonian", matrix=matrix_a, vector=vector_b, csol=csol
+        )
 
 
 if __name__ == "__main__":

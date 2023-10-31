@@ -11,6 +11,7 @@ from quantum_linear_systems.utils import make_matrix_hermitian
 
 class TestUtils(unittest.TestCase):
     """Test utility functions."""
+
     def setUp(self):
         """Set up some matrices and vectors for testing."""
         self.matrix = np.array([[1, 2, 3], [4, 5, 6]])
@@ -29,7 +30,12 @@ class TestUtils(unittest.TestCase):
         for mat in self.test_matrices:
             expanded_vector = expand_b_vector(self.vector, non_square_matrix=mat)
             self.assertEqual(expanded_vector.shape, (mat.shape[0] + mat.shape[1],))
-            self.assertTrue(np.array_equal(expanded_vector, np.array([[7], [8], *(mat.shape[1] * [[0]])]).flatten()))
+            self.assertTrue(
+                np.array_equal(
+                    expanded_vector,
+                    np.array([[7], [8], *(mat.shape[1] * [[0]])]).flatten(),
+                )
+            )
 
     def test_extract_x_from_expanded(self):
         """Test whether x is correctly extracted from an expanded vector (0 x)."""
@@ -46,9 +52,11 @@ class TestUtils(unittest.TestCase):
         """Test whether the solution vector is correctly extracted."""
         hermitian = make_matrix_hermitian(self.matrix)
         state_vector = np.array([0, 0, 1, 0, 0, 0, 0, 0])  # 2**3 = 8 for a 2x2 matrix
-        solution_vector = extract_hhl_solution_vector_from_state_vector(hermitian, state_vector)
+        solution_vector = extract_hhl_solution_vector_from_state_vector(
+            hermitian, state_vector
+        )
         self.assertEqual(solution_vector.shape, (4,))  # Checking shape of the output
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

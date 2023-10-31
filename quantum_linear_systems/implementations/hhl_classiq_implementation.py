@@ -20,7 +20,9 @@ from classiq.interface.generator.qpe import ExponentiationScaling
 from classiq.interface.generator.qpe import ExponentiationSpecification
 from classiq.synthesis import set_execution_preferences
 
-from quantum_linear_systems.implementations.vqls_qiskit_implementation import postprocess_solution
+from quantum_linear_systems.implementations.vqls_qiskit_implementation import (
+    postprocess_solution,
+)
 from quantum_linear_systems.plotting import print_results
 from quantum_linear_systems.toymodels import ClassiqDemoExample
 
@@ -103,7 +105,9 @@ def lcu_naive(herm_mat):
     mylist = []
 
     for pstr in pauli_strings:
-        coeff = (1 / 2**num_qubits) * hilbert_schmidt(pauli_string_2mat(pstr), herm_mat)
+        coeff = (1 / 2**num_qubits) * hilbert_schmidt(
+            pauli_string_2mat(pstr), herm_mat
+        )
         if coeff != 0:
             mylist = mylist + [(pstr, coeff)]
 
@@ -142,7 +146,8 @@ def state_preparation(vector_b: np.ndarray, sp_upper: float) -> StatePreparation
     vector_b = tuple(vector_b)
     # sp_upper = precision of the State Preparation
     return StatePreparation(
-        amplitudes=vector_b, error_metric={"L2": {"upper_bound": sp_upper}})
+        amplitudes=vector_b, error_metric={"L2": {"upper_bound": sp_upper}}
+    )
 
 
 def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstimation:
@@ -174,12 +179,20 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
     )
 
 
-def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b: np.ndarray,
-                     smallest_ev: float, qpe_register_size: int) -> np.ndarray:
+def extract_solution(
+    qprog_hhl,
+    w_min: float,
+    matrix_a: np.ndarray,
+    vec_b: np.ndarray,
+    smallest_ev: float,
+    qpe_register_size: int,
+) -> np.ndarray:
     """Extract the solution vector from the synthesized quantum program."""
     res_hhl = execute(qprog_hhl).result()[0].value
 
-    total_q = GeneratedCircuit.from_qprog(qprog_hhl).data.width  # total number of qubits of the whole circuit
+    total_q = GeneratedCircuit.from_qprog(
+        qprog_hhl
+    ).data.width  # total number of qubits of the whole circuit
 
     target_pos = res_hhl.physical_qubits_map["target"][0]  # position of control qubit
 
@@ -193,13 +206,20 @@ def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b: np.nd
         np.round(parsed_state.amplitude / w_min, 5)
         for solution in range(2 ** int(np.log2(matrix_a.shape[0])))
         for parsed_state in res_hhl.parsed_state_vector
-        if (parsed_state["target"] == 1.0 and
-            parsed_state["solution"] == solution and
+        if (
+            parsed_state["target"] == 1.0
+            and parsed_state["solution"] == solution
+            and
             # this takes the entries where the “phase” register is at state zero
-            [parsed_state.bitstring[k] for k in phase_pos] == ["0"] * qpe_register_size)
+            [parsed_state.bitstring[k] for k in phase_pos] == ["0"] * qpe_register_size
+        )
     ]
     quantum_solution = np.array(qsol)
-    print("euclidian norm", np.linalg.norm(quantum_solution), np.linalg.norm(quantum_solution)/smallest_ev)
+    print(
+        "euclidian norm",
+        np.linalg.norm(quantum_solution),
+        np.linalg.norm(quantum_solution) / smallest_ev,
+    )
     # print("state_vector", res_hhl.state_vector)
 
     global_phase = np.angle(quantum_solution)
@@ -207,7 +227,9 @@ def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b: np.nd
     # normalize
     # todo: this is a hack to obtain the multiplication factor of the normalized quantum solution
     # qsol_corrected = normalize_quantum_by_classical_solution(qsol_corrected, sol_classical)
-    qsol_corrected = postprocess_solution(matrix_a=matrix_a, vector_b=vec_b, solution_x=qsol_corrected)
+    qsol_corrected = postprocess_solution(
+        matrix_a=matrix_a, vector_b=vec_b, solution_x=qsol_corrected
+    )
 
     # Note: this is currently included in postprocess_solution
     # if vec_b_expanded:
@@ -216,7 +238,9 @@ def extract_solution(qprog_hhl, w_min: float, matrix_a: np.ndarray, vec_b: np.nd
     return qsol_corrected
 
 
-def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None):
+def classiq_hhl_implementation(
+    matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None
+):
     """Classiq HHL implementation based on https://docs.classiq.io/latest/tutorials/advanced/hhl/ ."""
     # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
     # verify_matrix_sym_and_pos_ev(mat=matrix_a)
@@ -224,22 +248,32 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     solution_register_size = int(np.log2(len(vector_b)))
     if qpe_register_size is None:
         # calculate size of qpe_register from matrix
-        kappa = np.linalg.cond(matrix_a)    # condition number of matrix
-        neg_vals = True     # whether matrix has negative eigenvalues
-        qpe_register_size = max(solution_register_size + 1, int(np.ceil(np.log2(kappa + 1)))) + neg_vals
-    print(f"Size of solution register is {solution_register_size} , QPE registers is {qpe_register_size}.")
+        kappa = np.linalg.cond(matrix_a)  # condition number of matrix
+        neg_vals = True  # whether matrix has negative eigenvalues
+        qpe_register_size = (
+            max(solution_register_size + 1, int(np.ceil(np.log2(kappa + 1)))) + neg_vals
+        )
+    print(
+        f"Size of solution register is {solution_register_size} , QPE registers is {qpe_register_size}."
+    )
 
     model_hhl = Model()
     # Step 1: state preparation
-    sp_out = model_hhl.StatePreparation(params=state_preparation(vector_b=vector_b, sp_upper=1e-2/3))
+    sp_out = model_hhl.StatePreparation(
+        params=state_preparation(vector_b=vector_b, sp_upper=1e-2 / 3)
+    )
     # Note: value of sp_upper: qiskit hhl.py line 101: epsilon=1e-2, line 120 state prep.: epsilon_s = epsilon / 3
 
     # Step 2 : Quantum Phase Estimation
-    qpe = quantum_phase_estimation(paulis=lcu_naive(matrix_a), qpe_register_size=qpe_register_size)
+    qpe = quantum_phase_estimation(
+        paulis=lcu_naive(matrix_a), qpe_register_size=qpe_register_size
+    )
     qpe_out = model_hhl.PhaseEstimation(params=qpe, in_wires={"IN": sp_out["OUT"]})
 
     # Step 3 : Eigenvalue Inversion
-    w_min = 1 / 2 ** qpe_register_size  # for qpe register of size m, this is the minimal value which can be encoded
+    w_min = (
+        1 / 2**qpe_register_size
+    )  # for qpe register of size m, this is the minimal value which can be encoded
     al_out = model_hhl.AmplitudeLoading(
         params=AmplitudeLoading(
             size=qpe_register_size,
@@ -269,9 +303,11 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     serialized_hhl_model = set_execution_preferences(
         serialized_hhl_model,
         execution_preferences=ExecutionPreferences(
-            num_shots=1, backend_preferences=IBMBackendPreferences(
-                backend_service_provider="IBM Quantum", backend_name="aer_simulator_statevector"
-            )
+            num_shots=1,
+            backend_preferences=IBMBackendPreferences(
+                backend_service_provider="IBM Quantum",
+                backend_name="aer_simulator_statevector",
+            ),
         ),
     )
 
@@ -281,15 +317,19 @@ def classiq_hhl_implementation(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_r
     return qprog_hhl, matrix_a, vector_b, w_min
 
 
-def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None,
-                      show_circuit: bool = False):
+def solve_hhl_classiq(
+    matrix_a: np.ndarray,
+    vector_b: np.ndarray,
+    qpe_register_size: int = None,
+    show_circuit: bool = False,
+):
     """Full implementation unified between classiq and qiskit."""
     np.set_printoptions(precision=3, suppress=True)
     start_time = time.time()
 
-    circuit_hhl, _, _, w_min = classiq_hhl_implementation(matrix_a=matrix_a,
-                                                          vector_b=vector_b,
-                                                          qpe_register_size=qpe_register_size)
+    circuit_hhl, _, _, w_min = classiq_hhl_implementation(
+        matrix_a=matrix_a, vector_b=vector_b, qpe_register_size=qpe_register_size
+    )
     if show_circuit:
         show(circuit_hhl)
 
@@ -303,12 +343,23 @@ def solve_hhl_classiq(matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_s
 
     # extract solution vector
     smallest_eigenval = min(np.linalg.eigvals(matrix_a))
-    quantum_solution = extract_solution(qprog_hhl=circuit_hhl, w_min=w_min, matrix_a=matrix_a,
-                                        vec_b=vector_b, smallest_ev=smallest_eigenval,
-                                        qpe_register_size=qpe_register_size)
+    quantum_solution = extract_solution(
+        qprog_hhl=circuit_hhl,
+        w_min=w_min,
+        matrix_a=matrix_a,
+        vec_b=vector_b,
+        smallest_ev=smallest_eigenval,
+        qpe_register_size=qpe_register_size,
+    )
 
     # todo: this actually might not the real runtime here, but includes the waiting time
-    return quantum_solution, qasm_content, circuit_depth, circuit_width, time.time() - start_time
+    return (
+        quantum_solution,
+        qasm_content,
+        circuit_depth,
+        circuit_width,
+        time.time() - start_time,
+    )
 
 
 if __name__ == "__main__":
@@ -317,8 +368,14 @@ if __name__ == "__main__":
 
     model = ClassiqDemoExample()
 
-    qsol, _, depth, width, run_time = solve_hhl_classiq(matrix_a=model.matrix_a, vector_b=model.vector_b,
-                                                        show_circuit=True)
+    qsol, _, depth, width, run_time = solve_hhl_classiq(
+        matrix_a=model.matrix_a, vector_b=model.vector_b, show_circuit=True
+    )
 
-    print_results(quantum_solution=qsol, classical_solution=model.classical_solution, run_time=run_time,
-                  name=model.name, plot=True)
+    print_results(
+        quantum_solution=qsol,
+        classical_solution=model.classical_solution,
+        run_time=run_time,
+        name=model.name,
+        plot=True,
+    )

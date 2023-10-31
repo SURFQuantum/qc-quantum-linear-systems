@@ -26,12 +26,17 @@ def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
 
     hhl_circuit = naive_hhl_solution.state
     # Get the value of nl
-    qpe_register_size = hhl_circuit.qregs[1].size  # qiskit calculates this itself from the matrix (hhl.py line 391)
-    print(f"Size of solution register is {hhl_circuit.qregs[0].size} , QPE registers is {qpe_register_size}.")
+    qpe_register_size = hhl_circuit.qregs[
+        1
+    ].size  # qiskit calculates this itself from the matrix (hhl.py line 391)
+    print(
+        f"Size of solution register is {hhl_circuit.qregs[0].size} , QPE registers is {qpe_register_size}."
+    )
 
     naive_state_vec = Statevector(hhl_circuit).data
-    hhl_solution_vector = extract_hhl_solution_vector_from_state_vector(hermitian_matrix=matrix_a,
-                                                                        state_vector=naive_state_vec)
+    hhl_solution_vector = extract_hhl_solution_vector_from_state_vector(
+        hermitian_matrix=matrix_a, state_vector=naive_state_vec
+    )
     # scale normalized solution vector to norm of final state
     hhl_solution_vector = naive_hhl_solution.euclidean_norm * hhl_solution_vector
 
@@ -44,11 +49,19 @@ def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
         hhl_solution_vector = extract_x_from_expanded(hhl_solution_vector)
 
     qc_basis = hhl_circuit.decompose(reps=10)
-    print(f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}")
+    print(
+        f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}"
+    )
 
     qasm_content = qc_basis.qasm()
 
-    return hhl_solution_vector, qasm_content, qc_basis.depth(), hhl_circuit.width(), time.time() - start_time
+    return (
+        hhl_solution_vector,
+        qasm_content,
+        qc_basis.depth(),
+        hhl_circuit.width(),
+        time.time() - start_time,
+    )
 
 
 if __name__ == "__main__":
@@ -57,8 +70,14 @@ if __name__ == "__main__":
 
     model = ClassiqDemoExample()
 
-    qsol, _, depth, width, run_time = solve_hhl_qiskit(matrix_a=model.matrix_a, vector_b=model.vector_b,
-                                                       show_circuit=True)
+    qsol, _, depth, width, run_time = solve_hhl_qiskit(
+        matrix_a=model.matrix_a, vector_b=model.vector_b, show_circuit=True
+    )
 
-    print_results(quantum_solution=qsol, classical_solution=model.classical_solution,
-                  run_time=run_time, name=model.name, plot=True)
+    print_results(
+        quantum_solution=qsol,
+        classical_solution=model.classical_solution,
+        run_time=run_time,
+        name=model.name,
+        plot=True,
+    )

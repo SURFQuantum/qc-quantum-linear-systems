@@ -13,7 +13,9 @@ def make_matrix_hermitian(matrix: np.ndarray) -> np.ndarray:
     return hermitian_matrix
 
 
-def expand_b_vector(unexpanded_vector: np.ndarray, non_square_matrix: np.ndarray = None) -> np.ndarray:
+def expand_b_vector(
+    unexpanded_vector: np.ndarray, non_square_matrix: np.ndarray = None
+) -> np.ndarray:
     """Expand vector according to the expansion of the matrix to make it hermitian b -> (b 0)."""
     if non_square_matrix is not None:
         expand_by = non_square_matrix.shape[1]
@@ -41,7 +43,7 @@ def is_expanded(matrix_a: np.ndarray, vector_b: np.ndarray):
 
         return True
 
-    vector_expanded = all(element == 0 for element in vector_b[len(vector_b) // 2:])
+    vector_expanded = all(element == 0 for element in vector_b[len(vector_b) // 2 :])
     matrix_expanded = has_corners_zero(matrix_a)
 
     return vector_expanded and matrix_expanded
@@ -53,32 +55,50 @@ def extract_x_from_expanded(expanded_solution_vector: np.ndarray) -> np.ndarray:
         expanded_solution_vector = np.array(expanded_solution_vector)
     assert isinstance(expanded_solution_vector, np.ndarray)
 
-    return expanded_solution_vector[len(expanded_solution_vector) // 2:].flatten()
+    return expanded_solution_vector[len(expanded_solution_vector) // 2 :].flatten()
 
 
-def extract_hhl_solution_vector_from_state_vector(hermitian_matrix: np.array, state_vector: np.array) -> np.ndarray:
+def extract_hhl_solution_vector_from_state_vector(
+    hermitian_matrix: np.array, state_vector: np.array
+) -> np.ndarray:
     """Extract the solution vector x from the full state vector of the HHL problem which also includes 1 aux. qubit and
     multiple work qubits encoding the eigenvalues.
     """
     size_of_hermitian_matrix = hermitian_matrix.shape[1]
     number_of_qubits_in_result = int(np.log2(len(state_vector)))
-    binary_rep = "1" + (number_of_qubits_in_result-1) * "0"
-    not_normalized_vec = np.real(state_vector[int(binary_rep, 2):(int(binary_rep, 2) + size_of_hermitian_matrix)])
+    binary_rep = "1" + (number_of_qubits_in_result - 1) * "0"
+    not_normalized_vec = np.real(
+        state_vector[
+            int(binary_rep, 2) : (int(binary_rep, 2) + size_of_hermitian_matrix)
+        ]
+    )
 
     return not_normalized_vec / np.linalg.norm(not_normalized_vec)
 
 
-def normalize_quantum_by_classical_solution(quantum_solution: np.ndarray, classical_solution: np.ndarray) -> np.ndarray:
+def normalize_quantum_by_classical_solution(
+    quantum_solution: np.ndarray, classical_solution: np.ndarray
+) -> np.ndarray:
     """Normalize the quantum solution to the same norm as the classical solution."""
-    return (quantum_solution / np.linalg.norm(quantum_solution)) * np.linalg.norm(classical_solution)
+    return (quantum_solution / np.linalg.norm(quantum_solution)) * np.linalg.norm(
+        classical_solution
+    )
 
 
-def relative_distance_quantum_classical_solution(quantum_solution: np.ndarray, classical_solution: np.ndarray) -> float:
+def relative_distance_quantum_classical_solution(
+    quantum_solution: np.ndarray, classical_solution: np.ndarray
+) -> float:
     """Calculate relative distance of quantum and classical solutions in percent."""
     if quantum_solution.shape != classical_solution.shape:
-        raise ValueError(f"Can't compute relative distance. Shape of quantum solution {quantum_solution.shape} "
-                         f"different from classical {classical_solution.shape}.")
-    return np.linalg.norm(classical_solution - quantum_solution) / np.linalg.norm(classical_solution) * 100
+        raise ValueError(
+            f"Can't compute relative distance. Shape of quantum solution {quantum_solution.shape} "
+            f"different from classical {classical_solution.shape}."
+        )
+    return (
+        np.linalg.norm(classical_solution - quantum_solution)
+        / np.linalg.norm(classical_solution)
+        * 100
+    )
 
 
 def generate_random_vector(size, uniformity_level):
@@ -155,7 +175,8 @@ def vector_uniformity_entropy(vector):
 
     # Calculate entropy
     entropy = -np.sum(
-        normalized_vector * np.log2(normalized_vector + 1e-10))  # Adding a small epsilon for numerical stability
+        normalized_vector * np.log2(normalized_vector + 1e-10)
+    )  # Adding a small epsilon for numerical stability
 
     return entropy
 
@@ -197,10 +218,14 @@ def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
     # Generate random non-zero values in the matrix
     for i in range(matrix_size):
         # Randomly choose 's' unique column indices for non-zero entries
-        non_zero_columns = np.random.choice(matrix_size, s_non_zero_entries, replace=False)
+        non_zero_columns = np.random.choice(
+            matrix_size, s_non_zero_entries, replace=False
+        )
 
         # Randomly assign non-zero values to these columns
-        non_zero_values = np.random.rand(s_non_zero_entries)  # You can adjust this distribution as needed
+        non_zero_values = np.random.rand(
+            s_non_zero_entries
+        )  # You can adjust this distribution as needed
 
         # Set the selected columns to the non-zero values
         matrix[i, non_zero_columns] = non_zero_values
@@ -208,21 +233,21 @@ def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
     return matrix
 
 
-def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.):
+def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.0):
     """
-        Check if a matrix is well-conditioned based on a threshold.
+    Check if a matrix is well-conditioned based on a threshold.
 
-        Parameters:
-        matrix (numpy.ndarray): The matrix to be checked for well-conditioning.
-        threshold (float, optional): Threshold to define well-conditioned-ness. Defaults to 10.
+    Parameters:
+    matrix (numpy.ndarray): The matrix to be checked for well-conditioning.
+    threshold (float, optional): Threshold to define well-conditioned-ness. Defaults to 10.
 
-        Returns:
-        bool: True if the matrix is well-conditioned, False otherwise.
+    Returns:
+    bool: True if the matrix is well-conditioned, False otherwise.
 
-        Definition of well-conditioned:
-        A matrix is well-conditioned when its condition number is sufficiently close to 1.
+    Definition of well-conditioned:
+    A matrix is well-conditioned when its condition number is sufficiently close to 1.
 
-        """
+    """
     return np.linalg.cond(matrix) <= threshold
 
 
