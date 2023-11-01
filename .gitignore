@@ -164,4 +164,3 @@ plots/
 *.png
 *.qasm
 *.csv
-quantum_linear_systems/implementations/vqls_classiq_implementation.py
