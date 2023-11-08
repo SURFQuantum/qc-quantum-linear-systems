@@ -163,5 +163,6 @@ cython_debug/
 plots/
 *.png
 *.qasm
+*.qasm3
 *.csv
 quantum_linear_systems/implementations/vqls_classiq_implementation.py

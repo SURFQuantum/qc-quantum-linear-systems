@@ -14,6 +14,7 @@ from vqls_prototype import VQLSLog
 from quantum_linear_systems.plotting import print_results
 from quantum_linear_systems.toymodels import ClassiqDemoExample
 from quantum_linear_systems.toymodels import HEPTrackReconstruction
+from quantum_linear_systems.utils import circuit_to_qasm3
 from quantum_linear_systems.utils import extract_x_from_expanded
 from quantum_linear_systems.utils import is_expanded
 
@@ -64,7 +65,9 @@ def solve_vqls_qiskit(
         print(qc_basis)
 
     # todo: fix, make sure this is the right circuit
-    qasm_content = vqls_circuit.qasm()
+    qasm_content = circuit_to_qasm3(
+        circuit=vqls_circuit, filename="vqls_qiskit_circuit.qasm3"
+    )
 
     print(
         f"Comparing depths original {vqls_circuit.depth()} vs. decomposed {qc_basis.depth()}"
@@ -118,7 +121,7 @@ if __name__ == "__main__":
     N = 1
 
     model = ClassiqDemoExample()
-    model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
+    # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
     # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
     # Note: neither memory nor cpu usage significant at these sizes
     # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria

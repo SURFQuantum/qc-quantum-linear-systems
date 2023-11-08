@@ -7,15 +7,16 @@ license = "Apache 2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9, <3.12"
+python = ">=3.8.2, <3.12"
 classiq = "^0.29.0"
 qiskit = ">=0.43.0, <0.45.0"
 qiskit-algorithms = ">=0.2.1, <0.3.0"
-matplotlib = "^3.8.0" # this version could possible be even lower
+matplotlib = "^3.5.0" # this version could possible be even lower
 numpy = ">=1.23.0"
-trackhhl = {git = "https://github.com/dnicotra/TrackHHL"}
+trackhhl = {git = "https://github.com/dmark04/TrackHHL"}
 quantum-linear-solvers = "^0.1.1"
 vqls-prototype = "^0.1.0"
+qiskit-braket-provider = "^0.0.5"
 
 [tool.poetry.group.test.dependencies]
 pre-commit = "^3.5.0"
