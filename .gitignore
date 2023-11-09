@@ -165,4 +165,5 @@ plots/
 *.qasm
 *.qasm3
 *.csv
+coverage.svg
 quantum_linear_systems/implementations/vqls_classiq_implementation.py
