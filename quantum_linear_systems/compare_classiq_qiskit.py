@@ -1,4 +1,5 @@
-"""Compare the Classiq and Qiskit implementations on different use-cases and plot the results."""
+"""Compare the Classiq and Qiskit implementations on different use-cases and plot the
+results."""
 import csv
 from datetime import datetime
 from typing import List
@@ -28,8 +29,7 @@ def append_to_csv(filename, data):
 
 
 def solve_models(models, method, save_file):
-    """
-    Solve a set of quantum models using the given solver function.
+    """Solve a set of quantum models using the given solver function.
 
     Parameters:
         models (list): A list of quantum models to be solved.
@@ -96,7 +96,8 @@ def compare_qls_and_plot(
     classiq: bool = True,
     filebasename: str = "comparison",
 ) -> None:
-    """Compare different implementations of quantum linear solvers and plot the results"""
+    """Compare different implementations of quantum linear solvers and plot the
+    results."""
     filename = f"{filebasename}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     csv_file = f"{filename}.csv"
     headers = [

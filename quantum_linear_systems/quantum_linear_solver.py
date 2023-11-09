@@ -22,9 +22,7 @@ class QuantumLinearSolver:
     """
 
     def __init__(self):
-        """
-        Initialize the QuantumLinearSolver.
-        """
+        """Initialize the QuantumLinearSolver."""
         self.matrix_a = None
         self.vector_b = None
         self.name = None
@@ -36,8 +34,7 @@ class QuantumLinearSolver:
         self.run_time = None
 
     def check_matrix_square_hermitian(self):
-        """
-        Check if the coefficient matrix A is square and Hermitian.
+        """Check if the coefficient matrix A is square and Hermitian.
 
         Returns:
             bool: True if A is square and Hermitian, False otherwise.
@@ -68,8 +65,7 @@ class QuantumLinearSolver:
         file_basename: str = None,
         **kwargs,
     ) -> np.ndarray:
-        """
-        Solve the linear system Ax = b using the specified method.
+        """Solve the linear system Ax = b using the specified method.
 
         Args:
             matrix_a (numpy.ndarray): Coefficient matrix of shape (n, n).

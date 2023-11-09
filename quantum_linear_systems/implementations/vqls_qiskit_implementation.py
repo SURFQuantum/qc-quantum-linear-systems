@@ -1,4 +1,5 @@
-"""VQLS implementation using Qiskit and https://github.com/QuantumApplicationLab/vqls-prototype"""
+"""VQLS implementation using Qiskit and https://github.com/QuantumApplicationLab/vqls-
+prototype."""
 import time
 
 import numpy as np
@@ -28,7 +29,8 @@ def solve_vqls_qiskit(
     optimizer_max_iter: int = 250,
     show_circuit: bool = False,
 ):
-    """Qiskit HHL implementation based on https://github.com/QuantumApplicationLab/vqls-prototype ."""
+    """Qiskit HHL implementation based on https://github.com/QuantumApplicationLab/vqls-
+    prototype ."""
     start_time = time.time()
     np.set_printoptions(precision=3, suppress=True)
 

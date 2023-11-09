@@ -13,7 +13,8 @@ def circuit_to_qasm3(circuit: QuantumCircuit, filename: str) -> str:
 
 
 def make_matrix_hermitian(matrix: np.ndarray) -> np.ndarray:
-    """Creates a hermitian version of a NxM :obj:np.array A as a  (N+M)x(N+M) block matrix [[0 ,A], [A_dagger, 0]]."""
+    """Creates a hermitian version of a NxM :obj:np.array A as a  (N+M)x(N+M) block
+    matrix [[0 ,A], [A_dagger, 0]]."""
     shape = matrix.shape
     upper_zero = np.zeros(shape=(shape[0], shape[0]))
     lower_zero = np.zeros(shape=(shape[1], shape[1]))
@@ -26,7 +27,8 @@ def make_matrix_hermitian(matrix: np.ndarray) -> np.ndarray:
 def expand_b_vector(
     unexpanded_vector: np.ndarray, non_square_matrix: np.ndarray = None
 ) -> np.ndarray:
-    """Expand vector according to the expansion of the matrix to make it hermitian b -> (b 0)."""
+    """Expand vector according to the expansion of the matrix to make it hermitian b ->
+    (b 0)."""
     if non_square_matrix is not None:
         expand_by = non_square_matrix.shape[1]
     else:
@@ -36,7 +38,8 @@ def expand_b_vector(
 
 
 def is_expanded(matrix_a: np.ndarray, vector_b: np.ndarray):
-    """Check if a vector is expanded, meaning that the second half of the vector contains only zeros."""
+    """Check if a vector is expanded, meaning that the second half of the vector
+    contains only zeros."""
 
     def has_corners_zero(matrix: np.ndarray):
         # Check if the matrix is square (i.e., number of rows == number of columns)
@@ -60,7 +63,8 @@ def is_expanded(matrix_a: np.ndarray, vector_b: np.ndarray):
 
 
 def extract_x_from_expanded(expanded_solution_vector: np.ndarray) -> np.ndarray:
-    """The expanded problem returns a vector y=(0 x), this function returns x from input y."""
+    """The expanded problem returns a vector y=(0 x), this function returns x from input
+    y."""
     if isinstance(expanded_solution_vector, list):
         expanded_solution_vector = np.array(expanded_solution_vector)
     assert isinstance(expanded_solution_vector, np.ndarray)
@@ -71,8 +75,10 @@ def extract_x_from_expanded(expanded_solution_vector: np.ndarray) -> np.ndarray:
 def extract_hhl_solution_vector_from_state_vector(
     hermitian_matrix: np.array, state_vector: np.array
 ) -> np.ndarray:
-    """Extract the solution vector x from the full state vector of the HHL problem which also includes 1 aux. qubit and
-    multiple work qubits encoding the eigenvalues.
+    """Extract the solution vector x from the full state vector of the HHL problem which
+    also includes 1 aux.
+
+    qubit and multiple work qubits encoding the eigenvalues.
     """
     size_of_hermitian_matrix = hermitian_matrix.shape[1]
     number_of_qubits_in_result = int(np.log2(len(state_vector)))
@@ -112,8 +118,7 @@ def relative_distance_quantum_classical_solution(
 
 
 def generate_random_vector(size, uniformity_level):
-    """
-    Generate a random vector of a given size while varying the level of uniformity.
+    """Generate a random vector of a given size while varying the level of uniformity.
 
     Parameters:
     size (int): The size of the vector to be generated.
@@ -168,8 +173,7 @@ def generate_random_vector(size, uniformity_level):
 
 
 def vector_uniformity_entropy(vector):
-    """
-    Calculate the entropy of a vector to measure its uniformity.
+    """Calculate the entropy of a vector to measure its uniformity.
 
     Parameters:
     vector (numpy.ndarray): The input vector for which the uniformity is to be measured.
@@ -192,8 +196,7 @@ def vector_uniformity_entropy(vector):
 
 
 def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
-    """
-    Generate a random s-sparse matrix of a given size.
+    """Generate a random s-sparse matrix of a given size.
 
     Parameters:
     matrix_size (int): The size of the square matrix. It determines the number of rows and columns.
@@ -244,8 +247,7 @@ def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
 
 
 def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.0):
-    """
-    Check if a matrix is well-conditioned based on a threshold.
+    """Check if a matrix is well-conditioned based on a threshold.
 
     Parameters:
     matrix (numpy.ndarray): The matrix to be checked for well-conditioning.
@@ -256,7 +258,6 @@ def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.0):
 
     Definition of well-conditioned:
     A matrix is well-conditioned when its condition number is sufficiently close to 1.
-
     """
     return np.linalg.cond(matrix) <= threshold
 

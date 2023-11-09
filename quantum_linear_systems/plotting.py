@@ -9,8 +9,7 @@ import numpy as np
 def plot_csol_vs_qsol(
     classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str
 ) -> None:
-    """
-    Plot classical and quantum solution vectors side by side.
+    """Plot classical and quantum solution vectors side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
@@ -36,8 +35,7 @@ def plot_compare_csol_vs_qsol(
     title: str,
     axis=None,
 ) -> None:
-    """
-    Plot classical and quantum solutions side by side.
+    """Plot classical and quantum solutions side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
@@ -65,8 +63,7 @@ def plot_depth_runtime_distance_vs_problem(
     problems: list,
     axs: list = None,
 ) -> None:
-    """
-    Plot depth and runtime of two algorithms side by side for each problem index.
+    """Plot depth and runtime of two algorithms side by side for each problem index.
 
     Parameters:
         depth_runtime_distance_marker_name (list) : List of tuples of the form (depths, run_times, rel_distance,
@@ -108,8 +105,7 @@ def print_results(
     name: str,
     plot: bool = True,
 ) -> None:
-    """
-    Print results of classical and quantum solutions and optionally plot them.
+    """Print results of classical and quantum solutions and optionally plot them.
 
     Parameters:
         quantum_solution (numpy.ndarray): Quantum solution.

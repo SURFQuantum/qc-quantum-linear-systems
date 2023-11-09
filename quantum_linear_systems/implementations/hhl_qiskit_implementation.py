@@ -17,7 +17,8 @@ from quantum_linear_systems.utils import is_expanded
 def solve_hhl_qiskit(
     matrix_a: np.ndarray, vector_b: np.ndarray, show_circuit: bool = False
 ):
-    """Solve linear system Ax=b using HHL implemented in qiskit based on the quantum linear solvers package.
+    """Solve linear system Ax=b using HHL implemented in qiskit based on the quantum
+    linear solvers package.
 
     See: https://github.com/anedumla/quantum_linear_solvers.git
     """

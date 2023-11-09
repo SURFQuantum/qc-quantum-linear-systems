@@ -37,8 +37,7 @@ Paulidict = {
 
 # generate all combinations of Pauli strings of size n
 def generate_all_pauli_strings(seq, size):
-    """
-    Generate all combinations of Pauli strings of size n.
+    """Generate all combinations of Pauli strings of size n.
 
     Parameters:
         seq (str): The string of Pauli operators (I, Z, X, Y).
@@ -53,8 +52,7 @@ def generate_all_pauli_strings(seq, size):
 
 # convert a Paulistring of size n to 2**n X 2**n matrix
 def pauli_string_2mat(seq):
-    """
-    Convert a Pauli string of size n to a 2**n x 2**n matrix.
+    """Convert a Pauli string of size n to a 2**n x 2**n matrix.
 
     Parameters:
         seq (str): The string of Pauli operators (I, Z, X, Y).
@@ -70,8 +68,7 @@ def pauli_string_2mat(seq):
 
 # Hilbert-Schmidt-Product of two matrices M1, M2
 def hilbert_schmidt(m_1, m_2):
-    """
-    Compute the Hilbert-Schmidt-Product of two matrices M1, M2.
+    """Compute the Hilbert-Schmidt-Product of two matrices M1, M2.
 
     Parameters:
         m_1 (np.ndarray): The first matrix.
@@ -85,9 +82,8 @@ def hilbert_schmidt(m_1, m_2):
 
 # Naive decomposition, running over all HS products for all Pauli strings
 def lcu_naive(herm_mat):
-    """
-    Naive LCU (linear combination of unitary operations) decomposition, running over all HS products for all Pauli
-    strings.
+    """Naive LCU (linear combination of unitary operations) decomposition, running over
+    all HS products for all Pauli strings.
 
     Parameters:
         herm_mat (np.ndarray): The input Hermitian matrix.
@@ -113,8 +109,7 @@ def lcu_naive(herm_mat):
 
 
 def verify_matrix_sym_and_pos_ev(mat):
-    """
-    Verify that the input matrix is symmetric and has positive eigenvalues.
+    """Verify that the input matrix is symmetric and has positive eigenvalues.
 
     Parameters:
         mat (np.ndarray): The input matrix.
@@ -131,8 +126,7 @@ def verify_matrix_sym_and_pos_ev(mat):
 
 
 def state_preparation(vector_b: np.ndarray, sp_upper: float) -> StatePreparation:
-    """
-    Prepare the state based on the input vector.
+    """Prepare the state based on the input vector.
 
     Parameters:
         vector_b (np.ndarray): The input vector.
@@ -149,8 +143,7 @@ def state_preparation(vector_b: np.ndarray, sp_upper: float) -> StatePreparation
 
 
 def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstimation:
-    """
-    Perform Quantum Phase Estimation (QPE) with the specified precision.
+    """Perform Quantum Phase Estimation (QPE) with the specified precision.
 
     Parameters:
         paulis (list) : List of pauli matrices.
@@ -239,7 +232,8 @@ def extract_solution(
 def classiq_hhl_implementation(
     matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None
 ):
-    """Classiq HHL implementation based on https://docs.classiq.io/latest/tutorials/advanced/hhl/ ."""
+    """Classiq HHL implementation based on
+    https://docs.classiq.io/latest/tutorials/advanced/hhl/ ."""
     # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
     # verify_matrix_sym_and_pos_ev(mat=matrix_a)
 

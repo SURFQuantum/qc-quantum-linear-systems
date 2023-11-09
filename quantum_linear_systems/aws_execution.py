@@ -46,7 +46,8 @@ def run_real_device_aws(circuit: QuantumCircuit, device_name: str, shots=100) ->
 def check_task_status(
     braket_task: AmazonBraketTask, seconds_interval: int = 10
 ) -> None:
-    """Check task status every `second_interval` seconds until the quantum task is done."""
+    """Check task status every `second_interval` seconds until the quantum task is
+    done."""
     while True:
         status = braket_task.status()
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
