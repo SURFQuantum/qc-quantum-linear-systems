@@ -105,9 +105,7 @@ def lcu_naive(herm_mat):
     mylist = []
 
     for pstr in pauli_strings:
-        coeff = (1 / 2**num_qubits) * hilbert_schmidt(
-            pauli_string_2mat(pstr), herm_mat
-        )
+        coeff = (1 / 2**num_qubits) * hilbert_schmidt(pauli_string_2mat(pstr), herm_mat)
         if coeff != 0:
             mylist = mylist + [(pstr, coeff)]
 

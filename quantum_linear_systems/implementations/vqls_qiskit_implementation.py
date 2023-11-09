@@ -13,7 +13,6 @@ from vqls_prototype import VQLSLog
 
 from quantum_linear_systems.plotting import print_results
 from quantum_linear_systems.toymodels import ClassiqDemoExample
-from quantum_linear_systems.toymodels import HEPTrackReconstruction
 from quantum_linear_systems.utils import circuit_to_qasm3
 from quantum_linear_systems.utils import extract_x_from_expanded
 from quantum_linear_systems.utils import is_expanded
