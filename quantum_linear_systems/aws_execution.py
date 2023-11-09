@@ -1,6 +1,8 @@
 import time
 from datetime import datetime
 
+from braket.devices import Devices
+from braket.jobs.hybrid_job import hybrid_job
 from qiskit import QuantumCircuit
 from qiskit.providers import JobStatus
 from qiskit.providers import ProviderV1
@@ -24,19 +26,17 @@ def run_real_device_aws(circuit: QuantumCircuit, device_name: str, shots=100) ->
     provider: ProviderV1 = AWSBraketProvider()
     # select device by name
     if device_name == "ionq":
-        device = provider.get_backend("IonQ Device")
+        backend = provider.get_backend("IonQ Device")
     elif device_name == "rigetti":
-        device = provider.get_backend("Aspen-M-1")
+        backend = provider.get_backend("Aspen-M-1")
     elif device_name == "oqc":
-        device = provider.get_backend("Lucy")
+        backend = provider.get_backend("Lucy")
     else:
         return ValueError(f"{device_name} not in the list of known device names.")
 
-    task = device.run(circuit, shots=shots)
+    task = backend.run(circuit, shots=shots)
 
-    provider.get_backend("Lucy").run()
-
-    retrieved_job: AmazonBraketTask = device.retrieve_job(job_id=task.job_id())
+    retrieved_job: AmazonBraketTask = backend.retrieve_job(job_id=task.job_id())
 
     check_task_status(braket_task=retrieved_job)
     result = retrieved_job.result()
@@ -68,3 +68,9 @@ if __name__ == "__main__":
     dev = "ionq"
     qcirc = QuantumCircuit(3)
     qcirc.draw("mpl")
+
+    device_arn = Devices.Amazon.SV1
+
+    @hybrid_job(device=device_arn)  # choose priority device
+    def execute_hybrid_job():
+        pass
