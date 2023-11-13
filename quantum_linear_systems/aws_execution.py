@@ -125,15 +125,21 @@ if __name__ == "__main__":
             plot=True,
         )
 
-    # submit the job
-    job = execute_hybrid_job()
+    from braket.tracking import Tracker
 
-    check_task_status(braket_task=job, seconds_interval=10)
+    with Tracker() as tracker:
+        # submit the job
+        job = execute_hybrid_job()
 
-    # Check the final status
-    print(f"Job {job.id} finished with status {job.state()}.")
+        check_task_status(braket_task=job, seconds_interval=10)
 
-    # Retrieve results if job is completed
-    if job.state() == "COMPLETED":
-        result = job.result()
-        print("Job result:", result)
+        # Check the final status
+        print(f"Job {job.id} finished with status {job.state()}.")
+
+        # Retrieve results if job is completed
+        if job.state() == "COMPLETED":
+            result = job.result()
+            print("Job result:", result)
+        # display the results
+        print(job.result().measurement_counts)
+    print(tracker.simulator_tasks_cost())
