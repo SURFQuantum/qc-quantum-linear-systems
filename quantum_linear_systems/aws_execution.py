@@ -114,7 +114,8 @@ if __name__ == "__main__":
 
     # List IAM roles
     print("checking roles")
-    roles = iam.list_roles()
+    roles_response = iam.list_roles()
+    roles = roles_response["Roles"]
     # Iterate over all roles
     for role in roles:
         print(f"Role name: {role['RoleName']}")
