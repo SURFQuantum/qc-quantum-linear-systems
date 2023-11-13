@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 
+from braket.aws import AwsSession
 from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from qiskit import QuantumCircuit
@@ -75,7 +76,7 @@ if __name__ == "__main__":
     dev = "ionq"
     qcirc = QuantumCircuit(3)
     qcirc.draw("mpl")
-
+    session = AwsSession(region="eu-central-1")
     device_arn = Devices.Amazon.SV1
 
     @hybrid_job(device=device_arn)  # choose priority device
