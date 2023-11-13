@@ -102,12 +102,12 @@ if __name__ == "__main__":
     os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
     # get account
     aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
-
     # set device
     device_arn = Devices.Amazon.SV1
 
     @hybrid_job(device=device_arn)  # choose priority device
     def execute_hybrid_job():
+        # define hybrid job
         model = ClassiqDemoExample()
         # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
         # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
@@ -124,3 +124,16 @@ if __name__ == "__main__":
             name=model.name,
             plot=True,
         )
+
+    # submit the job
+    job = execute_hybrid_job()
+
+    check_task_status(braket_task=job, seconds_interval=10)
+
+    # Check the final status
+    print(f"Job {job.id} finished with status {job.state()}.")
+
+    # Retrieve results if job is completed
+    if job.state() == "COMPLETED":
+        result = job.result()
+        print("Job result:", result)
