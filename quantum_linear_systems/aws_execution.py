@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Tuple
 
 import boto3
-import botocore
+import botocore.exceptions
 from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
@@ -158,5 +158,11 @@ if __name__ == "__main__":
                 # display the results
                 print(job.result().measurement_counts)
             print(tracker.simulator_tasks_cost())
-        except botocore.errorfactory.AccessDeniedException:
-            print(f"Role {role['RoleName']} access denied!")
+        except botocore.exceptions.ClientError as error:
+            # Check if the exception is an Access Denied exception
+            if error.response["Error"]["Code"] == "AccessDeniedException":
+                print(f"Access denied for {role['RoleName']} when trying to submit.")
+                # Handle the Access Denied exception
+            else:
+                # Handle other exceptions
+                print("An unexpected error occurred.")
