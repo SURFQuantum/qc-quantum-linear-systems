@@ -107,6 +107,39 @@ if __name__ == "__main__":
     aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
     # set device
     device_arn = Devices.Amazon.SV1
+    # Create a client for the IAM service
+    iam_client = boto3.client("iam")
+
+    try:
+        # Define the trust relationship for the Braket service
+        trust_relationship = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {"Service": "braket.amazonaws.com"},
+                    "Action": "sts:AssumeRole",
+                }
+            ],
+        }
+
+        # Create a new IAM role
+        role = iam_client.create_role(
+            RoleName="BraketHybridJobsExecutionRole",
+            AssumeRolePolicyDocument=json.dumps(trust_relationship),
+        )
+
+        # Attach the AmazonBraketFullAccess policy to the new role
+        iam_client.attach_role_policy(
+            RoleName="BraketJobsExecutionRole",
+            PolicyArn="arn:aws:iam::aws:policy/AmazonBraketFullAccess",
+        )
+
+        print(f"Role created: {role['Role']['Arn']}")
+
+    except iam_client.exceptions.ClientError as e:
+        print(f"Error creating role: {e}")
+
     # check  roles
     print("checking roles")
     roles = boto3.client("iam").list_roles()["Roles"]
