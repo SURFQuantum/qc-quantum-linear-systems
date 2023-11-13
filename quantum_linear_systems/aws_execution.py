@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Tuple
 
 import boto3
+import botocore
 from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
@@ -116,43 +117,46 @@ if __name__ == "__main__":
     for role in roles["Roles"]:
         print(role["RoleName"])
         print(role["Arn"])
+        try:
 
-    @hybrid_job(
-        device=device_arn,
-        role_arn="arn:aws:iam::815925483357:role/aws-service-role/braket.amazonaws.com/AWSServiceRoleForAmazonBraket",
-    )  # choose priority device
-    def execute_hybrid_job():
-        # define hybrid job
-        model = ClassiqDemoExample()
-        # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
-        # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
-        # Note: neither memory nor cpu usage significant at these sizes
-        # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
-        qsol, _, depth, width, run_time = solve_vqls_qiskit(
-            matrix_a=model.matrix_a, vector_b=model.vector_b, show_circuit=True
-        )
+            @hybrid_job(
+                device=device_arn,
+                role_arn=role["Arn"],
+            )  # choose priority device
+            def execute_hybrid_job():
+                # define hybrid job
+                model = ClassiqDemoExample()
+                # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
+                # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
+                # Note: neither memory nor cpu usage significant at these sizes
+                # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
+                qsol, _, depth, width, run_time = solve_vqls_qiskit(
+                    matrix_a=model.matrix_a, vector_b=model.vector_b, show_circuit=True
+                )
 
-        print_results(
-            quantum_solution=qsol,
-            classical_solution=model.classical_solution,
-            run_time=run_time,
-            name=model.name,
-            plot=True,
-        )
+                print_results(
+                    quantum_solution=qsol,
+                    classical_solution=model.classical_solution,
+                    run_time=run_time,
+                    name=model.name,
+                    plot=True,
+                )
 
-    with Tracker() as tracker:
-        # submit the job
-        job = execute_hybrid_job()
+            with Tracker() as tracker:
+                # submit the job
+                job = execute_hybrid_job()
 
-        check_task_status(braket_task=job, seconds_interval=10)
+                check_task_status(braket_task=job, seconds_interval=10)
 
-        # Check the final status
-        print(f"Job {job.id} finished with status {job.state()}.")
+                # Check the final status
+                print(f"Job {job.id} finished with status {job.state()}.")
 
-        # Retrieve results if job is completed
-        if job.state() == "COMPLETED":
-            result = job.result()
-            print("Job result:", result)
-        # display the results
-        print(job.result().measurement_counts)
-    print(tracker.simulator_tasks_cost())
+                # Retrieve results if job is completed
+                if job.state() == "COMPLETED":
+                    result = job.result()
+                    print("Job result:", result)
+                # display the results
+                print(job.result().measurement_counts)
+            print(tracker.simulator_tasks_cost())
+        except botocore.errorfactory.AccessDeniedException:
+            print(f"Role {role['RoleName']} access denied!")
