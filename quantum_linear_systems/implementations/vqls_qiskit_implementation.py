@@ -11,7 +11,6 @@ from qiskit.quantum_info import Statevector
 from qiskit_algorithms.optimizers import COBYLA
 from qiskit_algorithms.optimizers import SLSQP
 from vqls_prototype import VQLS
-from vqls_prototype import VQLSLog
 
 from quantum_linear_systems.plotting import print_results
 from quantum_linear_systems.toymodels import ClassiqDemoExample
@@ -51,16 +50,14 @@ def solve_vqls_qiskit(
     if vector_b.ndim == 2:
         vector_b = vector_b.flatten()
 
-    log = VQLSLog([], [])
     vqls = VQLS(
         estimator=estimator,
         ansatz=ansatz,
         optimizer=optimizer,
         sampler=Sampler(),
-        callback=log.update,
+        options={"use_overlap_test": False, "use_local_cost_function": False},
     )
-    opt = {"use_overlap_test": False, "use_local_cost_function": False}
-    res = vqls.solve(matrix_a, vector_b, opt)
+    res = vqls.solve(matrix_a, vector_b)
 
     vqls_circuit = res.state
     vqls_solution_vector = np.real(Statevector(res.state).data)

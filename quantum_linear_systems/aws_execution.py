@@ -10,6 +10,7 @@ from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
 from qiskit import QuantumCircuit
+from qiskit.primitives import Estimator
 from qiskit.providers import JobStatus
 from qiskit.providers import ProviderV1
 from qiskit.result import Result
@@ -130,8 +131,15 @@ if __name__ == "__main__":
                 # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
                 # Note: neither memory nor cpu usage significant at these sizes
                 # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
+
+                # define estimator
+                estimator = Estimator(backend=device_arn)
+
                 qsol, _, depth, width, run_time = solve_vqls_qiskit(
-                    matrix_a=model.matrix_a, vector_b=model.vector_b, show_circuit=True
+                    matrix_a=model.matrix_a,
+                    vector_b=model.vector_b,
+                    show_circuit=True,
+                    estimator=estimator,
                 )
 
                 print_results(

@@ -15,7 +15,7 @@ matplotlib = "^3.5.0" # this version could possible be even lower
 numpy = ">=1.23.0"
 trackhhl = {git = "https://github.com/dmark04/TrackHHL"}
 quantum-linear-solvers = "^0.1.1"
-vqls-prototype = "^0.1.0"
+vqls-prototype = "^0.2.0"
 qiskit-braket-provider = "^0.0.5"
 amazon-braket-sdk = "^1.61.0.post0"
 
