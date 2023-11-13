@@ -1,4 +1,7 @@
 """LinearSolver class."""
+from typing import Any
+from typing import Tuple
+
 import numpy as np
 
 from quantum_linear_systems.implementations.hhl_classiq_implementation import (
@@ -21,24 +24,20 @@ class QuantumLinearSolver:
     * "vqls_qiskit"
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the QuantumLinearSolver."""
-        self.matrix_a = None
-        self.vector_b = None
-        self.name = None
-        self.method = None
-        self.solution = None
-        self.qasm_circuit = None
-        self.circuit_width = None
-        self.circuit_depth = None
-        self.run_time = None
+        self.matrix_a: np.ndarray
+        self.vector_b: np.ndarray
+        self.name: str
+        self.method: str
+        self.solution: np.ndarray
+        self.qasm_circuit: str
+        self.circuit_width: int
+        self.circuit_depth: int
+        self.run_time: float
 
-    def check_matrix_square_hermitian(self):
-        """Check if the coefficient matrix A is square and Hermitian.
-
-        Returns:
-            bool: True if A is square and Hermitian, False otherwise.
-        """
+    def check_matrix_square_hermitian(self) -> None:
+        """Check if the coefficient matrix A is square and Hermitian."""
         if self.matrix_a.shape[0] != self.matrix_a.shape[1]:
             raise ValueError(
                 f"Input matrix A needs to be square, not "
@@ -47,11 +46,11 @@ class QuantumLinearSolver:
         if not np.allclose(self.matrix_a, np.conj(self.matrix_a.T)):
             raise ValueError("Input matrix A is not hermitian!")
 
-    def circuit_data(self):
+    def circuit_data(self) -> Tuple[str, int, int]:
         """Return data about the solution circuit."""
         return self.qasm_circuit, self.circuit_depth, self.circuit_width
 
-    def normalize_model(self):
+    def normalize_model(self) -> None:
         """Normalize the whole problem to valid quantum states."""
         norm_b = np.linalg.norm(self.vector_b)
         self.matrix_a = self.matrix_a / norm_b
@@ -62,8 +61,8 @@ class QuantumLinearSolver:
         matrix_a: np.ndarray,
         vector_b: np.ndarray,
         method: str,
-        file_basename: str = None,
-        **kwargs,
+        file_basename: str,
+        **kwargs: Any,
     ) -> np.ndarray:
         """Solve the linear system Ax = b using the specified method.
 
@@ -118,7 +117,7 @@ class QuantumLinearSolver:
 
         return self.solution
 
-    def save_qasm(self):
+    def save_qasm(self) -> None:
         """Save the qasm circuit as a file."""
         with open(
             f"{self.name}_{self.method}.qasm", "w", encoding="utf-8"

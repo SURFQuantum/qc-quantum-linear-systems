@@ -1,6 +1,11 @@
 """HHL implementation using Classiq."""
 import time
 from itertools import product
+from typing import Any
+from typing import Generator
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 import numpy as np
 from classiq import execute
@@ -15,6 +20,7 @@ from classiq.builtin_functions import StatePreparation
 from classiq.builtin_functions.exponentiation import PauliOperator
 from classiq.execution import ExecutionPreferences
 from classiq.execution import IBMBackendPreferences
+from classiq.interface.executor.quantum_program import QuantumProgram
 from classiq.interface.generator.amplitude_loading import AmplitudeLoadingImplementation
 from classiq.interface.generator.qpe import ExponentiationScaling
 from classiq.interface.generator.qpe import ExponentiationSpecification
@@ -36,7 +42,7 @@ Paulidict = {
 
 
 # generate all combinations of Pauli strings of size n
-def generate_all_pauli_strings(seq, size):
+def generate_all_pauli_strings(seq: str, size: int) -> Generator[str, None, None]:
     """Generate all combinations of Pauli strings of size n.
 
     Parameters:
@@ -51,7 +57,7 @@ def generate_all_pauli_strings(seq, size):
 
 
 # convert a Paulistring of size n to 2**n X 2**n matrix
-def pauli_string_2mat(seq):
+def pauli_string_2mat(seq: str) -> np.matrix:
     """Convert a Pauli string of size n to a 2**n x 2**n matrix.
 
     Parameters:
@@ -67,7 +73,7 @@ def pauli_string_2mat(seq):
 
 
 # Hilbert-Schmidt-Product of two matrices M1, M2
-def hilbert_schmidt(m_1, m_2):
+def hilbert_schmidt(m_1: np.ndarray, m_2: np.ndarray) -> Any:
     """Compute the Hilbert-Schmidt-Product of two matrices M1, M2.
 
     Parameters:
@@ -81,7 +87,7 @@ def hilbert_schmidt(m_1, m_2):
 
 
 # Naive decomposition, running over all HS products for all Pauli strings
-def lcu_naive(herm_mat):
+def lcu_naive(herm_mat: np.ndarray) -> List[Tuple[str, float]]:
     """Naive LCU (linear combination of unitary operations) decomposition, running over
     all HS products for all Pauli strings.
 
@@ -98,7 +104,7 @@ def lcu_naive(herm_mat):
     num_qubits = int(np.log2(herm_mat.shape[0]))
     pauli_strings = list(generate_all_pauli_strings("IZXY", num_qubits))
 
-    mylist = []
+    mylist: List[Tuple[str, float]] = []
 
     for pstr in pauli_strings:
         coeff = (1 / 2**num_qubits) * hilbert_schmidt(pauli_string_2mat(pstr), herm_mat)
@@ -108,7 +114,7 @@ def lcu_naive(herm_mat):
     return mylist
 
 
-def verify_matrix_sym_and_pos_ev(mat):
+def verify_matrix_sym_and_pos_ev(mat: np.ndarray) -> None:
     """Verify that the input matrix is symmetric and has positive eigenvalues.
 
     Parameters:
@@ -142,7 +148,9 @@ def state_preparation(vector_b: np.ndarray, sp_upper: float) -> StatePreparation
     )
 
 
-def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstimation:
+def quantum_phase_estimation(
+    paulis: List[np.matrix], qpe_register_size: int
+) -> PhaseEstimation:
     """Perform Quantum Phase Estimation (QPE) with the specified precision.
 
     Parameters:
@@ -171,7 +179,7 @@ def quantum_phase_estimation(paulis: list, qpe_register_size: int) -> PhaseEstim
 
 
 def extract_solution(
-    qprog_hhl,
+    qprog_hhl: QuantumProgram,
     w_min: float,
     matrix_a: np.ndarray,
     vec_b: np.ndarray,
@@ -230,8 +238,8 @@ def extract_solution(
 
 
 def classiq_hhl_implementation(
-    matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: int = None
-):
+    matrix_a: np.ndarray, vector_b: np.ndarray, qpe_register_size: Optional[int] = None
+) -> Tuple[QuantumProgram, np.ndarray, np.ndarray, float, int]:
     """Classiq HHL implementation based on
     https://docs.classiq.io/latest/tutorials/advanced/hhl/ ."""
     # verifying that the matrix is symmetric and hs eigenvalues in [0,1)
@@ -306,20 +314,20 @@ def classiq_hhl_implementation(
     # Synth circuit
     qprog_hhl = synthesize(serialized_hhl_model)
 
-    return qprog_hhl, matrix_a, vector_b, w_min
+    return qprog_hhl, matrix_a, vector_b, w_min, qpe_register_size
 
 
 def solve_hhl_classiq(
     matrix_a: np.ndarray,
     vector_b: np.ndarray,
-    qpe_register_size: int = None,
+    qpe_register_size: Optional[int] = None,
     show_circuit: bool = False,
-):
+) -> Tuple[np.ndarray, str, int, int, float]:
     """Full implementation unified between classiq and qiskit."""
     np.set_printoptions(precision=3, suppress=True)
     start_time = time.time()
 
-    circuit_hhl, _, _, w_min = classiq_hhl_implementation(
+    circuit_hhl, _, _, w_min, qpe_register_size = classiq_hhl_implementation(
         matrix_a=matrix_a, vector_b=vector_b, qpe_register_size=qpe_register_size
     )
     if show_circuit:

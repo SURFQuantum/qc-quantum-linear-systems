@@ -23,7 +23,7 @@ def naive_hybrid_solve_vqls(
     optimizer_name: str = "cobyla",
     optimizer_max_iter: int = 250,
     show_circuit: bool = False,
-):
+) -> None:
     np.set_printoptions(precision=3, suppress=True)
 
     if ansatz is None:

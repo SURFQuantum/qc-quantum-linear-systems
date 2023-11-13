@@ -1,6 +1,7 @@
 """VQLS implementation using Qiskit and https://github.com/QuantumApplicationLab/vqls-
 prototype."""
 import time
+from typing import Tuple
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -27,7 +28,7 @@ def solve_vqls_qiskit(
     optimizer_name: str = "cobyla",
     optimizer_max_iter: int = 250,
     show_circuit: bool = False,
-):
+) -> Tuple[np.ndarray, str, int, int, float]:
     """Qiskit HHL implementation based on https://github.com/QuantumApplicationLab/vqls-
     prototype ."""
     start_time = time.time()

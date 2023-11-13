@@ -1,10 +1,12 @@
 """Utility functions that can be imported by either implementation."""
+from typing import Any
+
 import numpy as np
 from qiskit import qasm3
 from qiskit import QuantumCircuit
 
 
-def circuit_to_qasm3(circuit: QuantumCircuit, filename: str) -> str:
+def circuit_to_qasm3(circuit: QuantumCircuit, filename: str) -> Any:
     qasm_content = qasm3.dumps(circuit=circuit)
     print(qasm_content)
     with open(filename, "w") as stream:
@@ -37,11 +39,11 @@ def expand_b_vector(
     return np.block([[unexpanded_vector], [lower_zero]]).flatten()
 
 
-def is_expanded(matrix_a: np.ndarray, vector_b: np.ndarray):
+def is_expanded(matrix_a: np.ndarray, vector_b: np.ndarray) -> bool:
     """Check if a vector is expanded, meaning that the second half of the vector
     contains only zeros."""
 
-    def has_corners_zero(matrix: np.ndarray):
+    def has_corners_zero(matrix: np.ndarray) -> bool:
         # Check if the matrix is square (i.e., number of rows == number of columns)
         if matrix.shape[0] != matrix.shape[1]:
             raise ValueError("Matrix not square")
@@ -110,14 +112,14 @@ def relative_distance_quantum_classical_solution(
             f"Can't compute relative distance. Shape of quantum solution {quantum_solution.shape} "
             f"different from classical {classical_solution.shape}."
         )
-    return (
+    return float(
         np.linalg.norm(classical_solution - quantum_solution)
         / np.linalg.norm(classical_solution)
         * 100
     )
 
 
-def generate_random_vector(size, uniformity_level):
+def generate_random_vector(size: int, uniformity_level: float) -> np.ndarray:
     """Generate a random vector of a given size while varying the level of uniformity.
 
     Parameters:
@@ -172,7 +174,7 @@ def generate_random_vector(size, uniformity_level):
     return random_vector / np.linalg.norm(random_vector)
 
 
-def vector_uniformity_entropy(vector):
+def vector_uniformity_entropy(vector: np.ndarray) -> float:
     """Calculate the entropy of a vector to measure its uniformity.
 
     Parameters:
@@ -192,10 +194,10 @@ def vector_uniformity_entropy(vector):
         normalized_vector * np.log2(normalized_vector + 1e-10)
     )  # Adding a small epsilon for numerical stability
 
-    return entropy
+    return float(entropy)
 
 
-def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
+def generate_s_sparse_matrix(matrix_size: int, s_non_zero_entries: int) -> np.ndarray:
     """Generate a random s-sparse matrix of a given size.
 
     Parameters:
@@ -246,7 +248,7 @@ def generate_s_sparse_matrix(matrix_size, s_non_zero_entries):
     return matrix
 
 
-def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.0):
+def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.0) -> bool:
     """Check if a matrix is well-conditioned based on a threshold.
 
     Parameters:
@@ -259,7 +261,7 @@ def is_matrix_well_conditioned(matrix: np.ndarray, threshold: float = 10.0):
     Definition of well-conditioned:
     A matrix is well-conditioned when its condition number is sufficiently close to 1.
     """
-    return np.linalg.cond(matrix) <= threshold
+    return np.linalg.cond(matrix) <= threshold  # type: ignore[no-any-return]
 
 
 # def is_matrix_well_conditioned(matrix, tolerance=1e-6):

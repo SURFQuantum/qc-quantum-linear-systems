@@ -2,12 +2,12 @@ import json
 import os
 import time
 from datetime import datetime
+from typing import Dict
 from typing import Tuple
 
 import boto3
 import botocore.exceptions
 from braket.aws import AwsDevice
-from braket.aws import AwsSession
 from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
@@ -36,7 +36,9 @@ def run_local_aws(circuit: QuantumCircuit, shots: int = 1000) -> Result:
     return task.result()
 
 
-def run_real_device_aws(circuit: QuantumCircuit, device_name: str, shots=100) -> Result:
+def run_real_device_aws(
+    circuit: QuantumCircuit, device_name: str, shots: int = 100
+) -> Result:
     """Run circuit on real AWS BraKet device."""
     provider: ProviderV1 = AWSBraketProvider()
     # select device by name
@@ -80,7 +82,7 @@ def check_task_status(
             time.sleep(seconds_interval)
 
 
-def get_tags():
+def get_tags() -> Dict[str, str]:
     with open("/etc/src_quantum.json", "r") as fp:
         config = json.load(fp)
     return {
@@ -105,66 +107,15 @@ if __name__ == "__main__":
     s3_folder = aws_s3_folder(my_prefix)
     # set region
     os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
-
-    # Set region and create an STS client
-    os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
-    sts_client = boto3.client("sts")
-
-    # Assume the new role
-    assumed_role_details = sts_client.assume_role(
-        RoleArn="arn:aws:iam::815925483357:role/src-administrator",
-        RoleSessionName="AssumeRoleSession1",
-    )
-
-    # Use the assumed role's credentials to create a new session
-    credentials = assumed_role_details["Credentials"]
-    aws_session = AwsSession(
-        aws_access_key_id=credentials["AccessKeyId"],
-        aws_secret_access_key=credentials["SecretAccessKey"],
-        aws_session_token=credentials["SessionToken"],
-    )
-
-    # Now use this AWS session to perform actions with the assumed role's permissions
-    # For example, create a device object
-    device_arn = Devices.Amazon.SV1
-    device = AwsDevice(device_arn, aws_session=aws_session)
-
     # get account
     aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
+
+    device_arn = Devices.Amazon.SV1
+    device = AwsDevice(device_arn)
+
     # set device
     # Create a client for the IAM service
     iam_client = boto3.client("iam")
-
-    try:
-        # Define the trust relationship for the Braket service
-        trust_relationship = {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Effect": "Allow",
-                    "Principal": {"Service": "braket.amazonaws.com"},
-                    "Action": "sts:AssumeRole",
-                }
-            ],
-        }
-
-        # Create a new IAM role
-        role = iam_client.create_role(
-            RoleName="BraketHybridJobsExecutionRole",
-            AssumeRolePolicyDocument=json.dumps(trust_relationship),
-        )
-
-        # Attach the AmazonBraketFullAccess policy to the new role
-        iam_client.attach_role_policy(
-            RoleName="BraketJobsExecutionRole",
-            PolicyArn="arn:aws:iam::aws:policy/AmazonBraketFullAccess",
-        )
-
-        print(f"Role created: {role['Role']['Arn']}")
-
-    except iam_client.exceptions.ClientError as e:
-        print(f"Error creating role: {e}")
-
     # check  roles
     print("checking roles")
     roles = boto3.client("iam").list_roles()["Roles"]
@@ -177,7 +128,7 @@ if __name__ == "__main__":
                 device=device_arn,
                 role_arn=role["Arn"],
             )  # choose priority device
-            def execute_hybrid_job():
+            def execute_hybrid_job() -> None:
                 # define hybrid job
                 model = ClassiqDemoExample()
                 # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
