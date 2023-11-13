@@ -12,6 +12,12 @@ from qiskit_braket_provider import AWSBraketProvider
 from qiskit_braket_provider import BraketLocalBackend
 from qiskit_braket_provider.providers.braket_job import AmazonBraketTask
 
+from quantum_linear_systems.implementations.vqls_qiskit_implementation import (
+    solve_vqls_qiskit,
+)
+from quantum_linear_systems.plotting import print_results
+from quantum_linear_systems.toymodels import ClassiqDemoExample
+
 
 def run_local_aws(circuit: QuantumCircuit, shots: int = 1000) -> Result:
     """Run circuit on local AWS BraKet backend."""
@@ -74,4 +80,19 @@ if __name__ == "__main__":
 
     @hybrid_job(device=device_arn)  # choose priority device
     def execute_hybrid_job():
-        pass
+        model = ClassiqDemoExample()
+        # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
+        # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
+        # Note: neither memory nor cpu usage significant at these sizes
+        # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
+        qsol, _, depth, width, run_time = solve_vqls_qiskit(
+            matrix_a=model.matrix_a, vector_b=model.vector_b, show_circuit=True
+        )
+
+        print_results(
+            quantum_solution=qsol,
+            classical_solution=model.classical_solution,
+            run_time=run_time,
+            name=model.name,
+            plot=True,
+        )
