@@ -107,24 +107,12 @@ if __name__ == "__main__":
     aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
     # set device
     device_arn = Devices.Amazon.SV1
-    # check  rolse
-
-    # Create an IAM service client
-    iam = boto3.client("iam")
-
-    # List IAM roles
+    # check  roles
     print("checking roles")
-    roles_response = iam.list_roles()
-    roles = roles_response["Roles"]
+    roles = boto3.client("iam").list_roles()["Roles"]
     # Iterate over all roles
     for role in roles:
         print(f"Role name: {role['RoleName']}")
-        # To get the attached policies for each role, you can call get_attached_role_policies
-        policies_response = iam.list_attached_role_policies(RoleName=role["RoleName"])
-        policies = policies_response["AttachedPolicies"]
-        for policy in policies:
-            print(f"Policy name: {policy['PolicyName']}")
-
         try:
 
             @hybrid_job(
