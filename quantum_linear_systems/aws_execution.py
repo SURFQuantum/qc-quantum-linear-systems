@@ -1,7 +1,10 @@
+import json
+import os
 import time
 from datetime import datetime
+from typing import Tuple
 
-from braket.aws import AwsSession
+import boto3
 from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from qiskit import QuantumCircuit
@@ -72,11 +75,35 @@ def check_task_status(
             time.sleep(seconds_interval)
 
 
+def get_tags():
+    with open("/etc/src_quantum.json", "r") as fp:
+        config = json.load(fp)
+    return {
+        "workspace_id": config["workspace_id"],
+        "subscription": config["subscription"],
+    }
+
+
+def aws_s3_folder(folder_name: str) -> Tuple[str, str]:
+    with open("/etc/src_quantum.json", "r") as fp:
+        config = json.load(fp)
+    bucket = f"amazon-braket-{config['workspace_id']}"
+    return (
+        bucket,
+        folder_name,
+    )
+
+
 if __name__ == "__main__":
-    dev = "ionq"
-    qcirc = QuantumCircuit(3)
-    qcirc.draw("mpl")
-    session = AwsSession(region="eu-central-1")
+    # SURF-ResearchCloud setup
+    my_prefix = "quantum_linear_systems"
+    s3_folder = aws_s3_folder(my_prefix)
+    # set region
+    os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
+    # get account
+    aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
+
+    # set device
     device_arn = Devices.Amazon.SV1
 
     @hybrid_job(device=device_arn)  # choose priority device
