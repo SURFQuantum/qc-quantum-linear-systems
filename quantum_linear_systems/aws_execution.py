@@ -115,8 +115,12 @@ if __name__ == "__main__":
     roles = iam.list_roles()
     for role in roles["Roles"]:
         print(role["RoleName"])
+        print(role["Arn"])
 
-    @hybrid_job(device=device_arn)  # choose priority device
+    @hybrid_job(
+        device=device_arn,
+        role_arn="arn:aws:iam::815925483357:role/aws-service-role/braket.amazonaws.com/AWSServiceRoleForAmazonBraket",
+    )  # choose priority device
     def execute_hybrid_job():
         # define hybrid job
         model = ClassiqDemoExample()
