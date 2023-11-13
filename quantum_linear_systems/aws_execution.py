@@ -116,17 +116,13 @@ if __name__ == "__main__":
     print("checking roles")
     roles = iam.list_roles()
     # Iterate over all roles
-    for role in iam.roles.all():
-        # Print the role name and the attached policies
-        print(role.role_name)
-        # Get the policies attached to the role
-        for policy in role.attached_policies.all():
-            print(policy.policy_name)
-            # Check if the policy is related to Amazon Braket
-            if "Braket" in policy.policy_name:
-                print(
-                    f"The role {role.role_name} has a Braket-related policy: {policy.policy_name}"
-                )
+    for role in roles:
+        print(f"Role name: {role['RoleName']}")
+        # To get the attached policies for each role, you can call get_attached_role_policies
+        policies_response = iam.list_attached_role_policies(RoleName=role["RoleName"])
+        policies = policies_response["AttachedPolicies"]
+        for policy in policies:
+            print(f"Policy name: {policy['PolicyName']}")
 
         try:
 
