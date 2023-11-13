@@ -10,7 +10,7 @@ from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
 from qiskit import QuantumCircuit
-from qiskit.primitives import Estimator
+from qiskit.primitives import BackendEstimator
 from qiskit.providers import JobStatus
 from qiskit.providers import ProviderV1
 from qiskit.result import Result
@@ -133,7 +133,8 @@ if __name__ == "__main__":
                 # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
 
                 # define estimator
-                estimator = Estimator(backend=device_arn)
+                backend = AWSBraketProvider().get_backend(name=device_arn)
+                estimator = BackendEstimator(backend=backend, skip_transpilation=False)
 
                 qsol, _, depth, width, run_time = solve_vqls_qiskit(
                     matrix_a=model.matrix_a,
