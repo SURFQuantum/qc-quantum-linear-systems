@@ -115,9 +115,19 @@ if __name__ == "__main__":
     # List IAM roles
     print("checking roles")
     roles = iam.list_roles()
-    for role in roles["Roles"]:
-        print(role["RoleName"])
-        print(role["Arn"])
+    # Iterate over all roles
+    for role in iam.roles.all():
+        # Print the role name and the attached policies
+        print(role.role_name)
+        # Get the policies attached to the role
+        for policy in role.attached_policies.all():
+            print(policy.policy_name)
+            # Check if the policy is related to Amazon Braket
+            if "Braket" in policy.policy_name:
+                print(
+                    f"The role {role.role_name} has a Braket-related policy: {policy.policy_name}"
+                )
+
         try:
 
             @hybrid_job(
