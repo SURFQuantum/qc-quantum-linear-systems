@@ -6,6 +6,8 @@ from typing import Tuple
 
 import boto3
 import botocore.exceptions
+from braket.aws import AwsDevice
+from braket.aws import AwsSession
 from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
@@ -103,10 +105,33 @@ if __name__ == "__main__":
     s3_folder = aws_s3_folder(my_prefix)
     # set region
     os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
+
+    # Set region and create an STS client
+    os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
+    sts_client = boto3.client("sts")
+
+    # Assume the new role
+    assumed_role_details = sts_client.assume_role(
+        RoleArn="arn:aws:iam::815925483357:role/src-administrator",
+        RoleSessionName="AssumeRoleSession1",
+    )
+
+    # Use the assumed role's credentials to create a new session
+    credentials = assumed_role_details["Credentials"]
+    aws_session = AwsSession(
+        aws_access_key_id=credentials["AccessKeyId"],
+        aws_secret_access_key=credentials["SecretAccessKey"],
+        aws_session_token=credentials["SessionToken"],
+    )
+
+    # Now use this AWS session to perform actions with the assumed role's permissions
+    # For example, create a device object
+    device_arn = Devices.Amazon.SV1
+    device = AwsDevice(device_arn, aws_session=aws_session)
+
     # get account
     aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
     # set device
-    device_arn = Devices.Amazon.SV1
     # Create a client for the IAM service
     iam_client = boto3.client("iam")
 
