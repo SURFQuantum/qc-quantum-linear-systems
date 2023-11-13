@@ -7,6 +7,7 @@ from typing import Tuple
 import boto3
 from braket.devices import Devices
 from braket.jobs.hybrid_job import hybrid_job
+from braket.tracking import Tracker
 from qiskit import QuantumCircuit
 from qiskit.providers import JobStatus
 from qiskit.providers import ProviderV1
@@ -104,6 +105,16 @@ if __name__ == "__main__":
     aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
     # set device
     device_arn = Devices.Amazon.SV1
+    # check  rolse
+
+    # Create an IAM service client
+    iam = boto3.client("iam")
+
+    # List IAM roles
+    print("checking roles")
+    roles = iam.list_roles()
+    for role in roles["Roles"]:
+        print(role["RoleName"])
 
     @hybrid_job(device=device_arn)  # choose priority device
     def execute_hybrid_job():
@@ -124,8 +135,6 @@ if __name__ == "__main__":
             name=model.name,
             plot=True,
         )
-
-    from braket.tracking import Tracker
 
     with Tracker() as tracker:
         # submit the job
