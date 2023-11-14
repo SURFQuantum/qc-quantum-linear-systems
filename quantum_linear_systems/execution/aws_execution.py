@@ -7,9 +7,8 @@ from typing import Dict
 from typing import Tuple
 
 import boto3
-import botocore.exceptions
-from braket.aws import AwsDevice
 from braket.devices import Devices
+from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
 from qiskit import QuantumCircuit
@@ -109,84 +108,78 @@ if __name__ == "__main__":
     parser.add_argument(
         "--real", action="store_true", help="Use a real device instead of a simulator"
     )
+    parser.add_argument(
+        "--local", action="store_true", help="Run the hybrid job locally"
+    )
     args = parser.parse_args()
 
     # SURF-ResearchCloud setup
     my_prefix = "quantum_linear_systems"
     s3_folder = aws_s3_folder(my_prefix)
+    output_data_config = OutputDataConfig(
+        s3Path=f"s3://{s3_folder[0]}/{s3_folder[1]}/output"
+    )
     # set region
     os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
     # get account
     aws_account_id = boto3.client("sts").get_caller_identity()["Account"]
     # set device
-    if args.real:
-        device_arn = "arn:aws:braket:eu-west-2::device/qpu/oqc/Lucy"
-    else:
-        device_arn = Devices.Amazon.SV1
-    device = AwsDevice(device_arn)
+    device_arn = (
+        "arn:aws:braket:eu-west-2::device/qpu/oqc/Lucy"
+        if args.real
+        else Devices.Amazon.SV1
+    )
 
-    # Create a client for the IAM service
-    iam_client = boto3.client("iam")
-    # check  roles
-    print("checking roles")
-    roles = boto3.client("iam").list_roles()["Roles"]
-    # Iterate over all roles
-    for role in roles:
-        print(f"Role name: {role['RoleName']}")
-        try:
+    # Define the role ARN for executing the hybrid job (replace with your actual role ARN)
+    role_arn = "arn:aws:iam::123456789012:role/YourBraketHybridJobRole"
 
-            @hybrid_job(
-                device=device_arn,
-                role_arn=role["Arn"],
-            )  # choose priority device
-            def execute_hybrid_job() -> None:
-                # define hybrid job
-                model = ClassiqDemoExample()
-                # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
-                # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
-                # Note: neither memory nor cpu usage significant at these sizes
-                # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
+    @hybrid_job(
+        device=device_arn,
+        role_arn=role_arn,
+        output_data_config=output_data_config,
+        dependencies="aws_requirements.txt",
+        local=args.local,
+    )  # choose priority device
+    def execute_hybrid_job() -> None:
+        # define hybrid job
+        model = ClassiqDemoExample()
+        # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
+        # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
+        # Note: neither memory nor cpu usage significant at these sizes
+        # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
 
-                # define estimator
-                backend = AWSBraketProvider().get_backend(name=device_arn)
-                estimator = BackendEstimator(backend=backend, skip_transpilation=False)
+        # define estimator
+        backend = AWSBraketProvider().get_backend(name=device_arn)
+        estimator = BackendEstimator(backend=backend, skip_transpilation=False)
 
-                qsol, _, depth, width, run_time = solve_vqls_qiskit(
-                    matrix_a=model.matrix_a,
-                    vector_b=model.vector_b,
-                    show_circuit=True,
-                    estimator=estimator,
-                )
+        qsol, _, depth, width, run_time = solve_vqls_qiskit(
+            matrix_a=model.matrix_a,
+            vector_b=model.vector_b,
+            show_circuit=True,
+            estimator=estimator,
+        )
 
-                print_results(
-                    quantum_solution=qsol,
-                    classical_solution=model.classical_solution,
-                    run_time=run_time,
-                    name=model.name,
-                    plot=True,
-                )
+        print_results(
+            quantum_solution=qsol,
+            classical_solution=model.classical_solution,
+            run_time=run_time,
+            name=model.name,
+            plot=True,
+        )
 
-            with Tracker() as tracker:
-                # submit the job
-                job = execute_hybrid_job()
+    with Tracker() as tracker:
+        # submit the job
+        job = execute_hybrid_job()
 
-                check_task_status(braket_task=job, seconds_interval=10)
+        check_task_status(braket_task=job, seconds_interval=10)
 
-                # Check the final status
-                print(f"Job {job.id} finished with status {job.state()}.")
+        # Check the final status
+        print(f"Job {job.id} finished with status {job.state()}.")
 
-                # Retrieve results if job is completed
-                if job.state() == "COMPLETED":
-                    result = job.result()
-                    print("Job result:", result)
-                # display the results
-                print(job.result().measurement_counts)
-            print(tracker.simulator_tasks_cost())
-        except botocore.exceptions.ClientError as error:
-            # Check if the exception is an Access Denied exception
-            if error.response["Error"]["Code"] == "AccessDeniedException":
-                print(f"Access denied for {role['RoleName']} when trying to submit.")
-                # Handle the Access Denied exception
-            else:
-                # Handle other exceptions
-                print("An unexpected error occurred.")
+        # Retrieve results if job is completed
+        if job.state() == "COMPLETED":
+            result = job.result()
+            print("Job result:", result)
+        # display the results
+        print(job.result().measurement_counts)
+    print(tracker.simulator_tasks_cost())
