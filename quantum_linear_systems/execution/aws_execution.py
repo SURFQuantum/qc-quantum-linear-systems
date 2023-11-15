@@ -7,6 +7,7 @@ from typing import Dict
 from typing import Tuple
 
 import boto3
+from braket.aws import AwsSession
 from braket.devices import Devices
 from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
@@ -135,6 +136,8 @@ if __name__ == "__main__":
     os.environ[
         "BRAKET_JOBS_ROLE_ARN"
     ] = "arn:aws:iam::815925483357:role/src-workspace-AmazonBraketJobsExecutionRole"
+    aws_session = AwsSession()
+    print("Default role", aws_session.get_default_jobs_role())
 
     @hybrid_job(
         device=device_arn,
