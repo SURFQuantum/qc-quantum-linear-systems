@@ -131,7 +131,7 @@ if __name__ == "__main__":
     )
 
     # Define the role ARN for executing the hybrid job (replace with your actual role ARN)
-    role_arn = "arn:aws:iam::123456789012:role/YourBraketHybridJobRole"
+    role_arn = "arn:aws:iam::815925483357:role/surf-administrator"
 
     @hybrid_job(
         device=device_arn,
