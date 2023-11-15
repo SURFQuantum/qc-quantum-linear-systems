@@ -22,7 +22,7 @@ class TestQiskitVQLS(unittest.TestCase):
             num_qubits=1, entanglement="full", reps=3, insert_barriers=False
         )
 
-    def test_4qubit_example(self):
+    def test_4qubit_example(self) -> None:
         """Test if qiskit can solve the 4qubit example."""
         q_sol, _, _, width, _ = solve_vqls_qiskit(
             self.test_model.matrix_a,
@@ -35,7 +35,7 @@ class TestQiskitVQLS(unittest.TestCase):
             np.allclose(self.test_model.classical_solution, q_sol, atol=1e-3)
         )
 
-    def test_postprocessing(self):
+    def test_postprocessing(self) -> None:
         """Test the functionality of the postprocessing function."""
         # test normalization
         matrix_a = np.random.rand(2, 2)

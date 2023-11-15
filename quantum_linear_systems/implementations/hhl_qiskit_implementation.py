@@ -1,19 +1,25 @@
 """HHL implementation using Qiskit."""
 import time
+from typing import Tuple
 
 import numpy as np
 from linear_solvers import HHL
+from linear_solvers import LinearSolverResult
 from qiskit.quantum_info import Statevector
 
 from quantum_linear_systems.plotting import print_results
 from quantum_linear_systems.toymodels import ClassiqDemoExample
+from quantum_linear_systems.utils import circuit_to_qasm3
 from quantum_linear_systems.utils import extract_hhl_solution_vector_from_state_vector
 from quantum_linear_systems.utils import extract_x_from_expanded
 from quantum_linear_systems.utils import is_expanded
 
 
-def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
-    """Solve linear system Ax=b using HHL implemented in qiskit based on the quantum linear solvers package.
+def solve_hhl_qiskit(
+    matrix_a: np.ndarray, vector_b: np.ndarray, show_circuit: bool = False
+) -> Tuple[np.ndarray, str, int, int, float]:
+    """Solve linear system Ax=b using HHL implemented in qiskit based on the quantum
+    linear solvers package.
 
     See: https://github.com/anedumla/quantum_linear_solvers.git
     """
@@ -22,7 +28,9 @@ def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
 
     # solve HHL using qiskit
     hhl_implementation = HHL()
-    naive_hhl_solution = hhl_implementation.solve(matrix=matrix_a, vector=vector_b)
+    naive_hhl_solution: LinearSolverResult = hhl_implementation.solve(
+        matrix=matrix_a, vector=vector_b
+    )
 
     hhl_circuit = naive_hhl_solution.state
     # Get the value of nl
@@ -53,7 +61,9 @@ def solve_hhl_qiskit(matrix_a, vector_b, show_circuit: bool = False):
         f"Comparing depths original {hhl_circuit.depth()} vs. decomposed {qc_basis.depth()}"
     )
 
-    qasm_content = qc_basis.qasm()
+    qasm_content = circuit_to_qasm3(
+        circuit=qc_basis, filename="hhl_qiskit_circuit.qasm3"
+    )
 
     return (
         hhl_solution_vector,
