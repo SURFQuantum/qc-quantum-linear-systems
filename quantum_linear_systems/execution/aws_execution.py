@@ -131,11 +131,14 @@ if __name__ == "__main__":
     )
 
     # Define the role ARN for executing the hybrid job (replace with your actual role ARN)
-    role_arn = "arn:aws:iam::815925483357:role/surf-administrator"
+    # role_arn = "arn:aws:iam::815925483357:role/surf-administrator"
+    os.environ[
+        "BRAKET_JOBS_ROLE_ARN"
+    ] = "arn:aws:iam::815925483357:role/src-workspace-AmazonBraketJobsExecutionRole"
 
     @hybrid_job(
         device=device_arn,
-        role_arn=role_arn,
+        # role_arn=role_arn,
         output_data_config=output_data_config,
         dependencies="aws_requirements.txt",
         local=args.local,
