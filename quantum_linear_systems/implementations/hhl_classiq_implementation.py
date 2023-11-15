@@ -18,8 +18,8 @@ from classiq.builtin_functions import Exponentiation
 from classiq.builtin_functions import PhaseEstimation
 from classiq.builtin_functions import StatePreparation
 from classiq.builtin_functions.exponentiation import PauliOperator
+from classiq.execution import ClassiqBackendPreferences
 from classiq.execution import ExecutionPreferences
-from classiq.execution import IBMBackendPreferences
 from classiq.interface.executor.quantum_program import QuantumProgram
 from classiq.interface.generator.amplitude_loading import AmplitudeLoadingImplementation
 from classiq.interface.generator.qpe import ExponentiationScaling
@@ -172,7 +172,7 @@ def quantum_phase_estimation(
             scaling=ExponentiationScaling(
                 max_depth=150,
                 # todo: why not precision
-                # scaling=2
+                max_depth_scaling_factor=2,
             )
         ),
     )
@@ -304,9 +304,8 @@ def classiq_hhl_implementation(
         serialized_hhl_model,
         execution_preferences=ExecutionPreferences(
             num_shots=1,
-            backend_preferences=IBMBackendPreferences(
-                backend_service_provider="IBM Quantum",
-                backend_name="aer_simulator_statevector",
+            backend_preferences=ClassiqBackendPreferences(
+                backend_name="aer_simulator_statevector"
             ),
         ),
     )
