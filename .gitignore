@@ -15,4 +15,3 @@ plots/
 *.png
 *.qasm
 *.qasm3
-coverage.svg
