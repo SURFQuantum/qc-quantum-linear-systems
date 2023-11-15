@@ -33,6 +33,23 @@ files = [
 ]
 
 [[package]]
+name = "asteval"
+version = "0.9.31"
+description = "Safe, minimalistic evaluator of python expression using ast module"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "asteval-0.9.31-py3-none-any.whl", hash = "sha256:2761750c184d97707c292b62df3b10e330a809a2201721acc435a2b89a114263"},
+    {file = "asteval-0.9.31.tar.gz", hash = "sha256:a2da066b6696dba9835c5f7dec63e0ffb5bd2b4e3bb5f0b9a604aeafb17d833d"},
+]
+
+[package.extras]
+all = ["Sphinx", "build", "coverage", "pytest", "pytest-cov", "twine"]
+dev = ["build", "twine"]
+doc = ["Sphinx"]
+test = ["coverage", "pytest", "pytest-cov"]
+
+[[package]]
 name = "asttokens"
 version = "2.4.0"
 description = "Annotate AST trees with source code positions"
@@ -758,6 +775,16 @@ unicode = ["unicodedata2 (>=15.0.0)"]
 woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
+name = "future"
+version = "0.18.3"
+description = "Clean single-source support for Python 3 and 2"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "future-0.18.3.tar.gz", hash = "sha256:34a17436ed1e96697a86f9de3d15a3b0be01d8bc8de9c1dffd59fb8234ed5307"},
+]
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -1219,6 +1246,62 @@ files = [
 ]
 
 [[package]]
+name = "llvmlite"
+version = "0.41.1"
+description = "lightweight wrapper around basic LLVM functionality"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "llvmlite-0.41.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:c1e1029d47ee66d3a0c4d6088641882f75b93db82bd0e6178f7bd744ebce42b9"},
+    {file = "llvmlite-0.41.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:150d0bc275a8ac664a705135e639178883293cf08c1a38de3bbaa2f693a0a867"},
+    {file = "llvmlite-0.41.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1eee5cf17ec2b4198b509272cf300ee6577229d237c98cc6e63861b08463ddc6"},
+    {file = "llvmlite-0.41.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0dd0338da625346538f1173a17cabf21d1e315cf387ca21b294ff209d176e244"},
+    {file = "llvmlite-0.41.1-cp310-cp310-win32.whl", hash = "sha256:fa1469901a2e100c17eb8fe2678e34bd4255a3576d1a543421356e9c14d6e2ae"},
+    {file = "llvmlite-0.41.1-cp310-cp310-win_amd64.whl", hash = "sha256:2b76acee82ea0e9304be6be9d4b3840208d050ea0dcad75b1635fa06e949a0ae"},
+    {file = "llvmlite-0.41.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:210e458723436b2469d61b54b453474e09e12a94453c97ea3fbb0742ba5a83d8"},
+    {file = "llvmlite-0.41.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:855f280e781d49e0640aef4c4af586831ade8f1a6c4df483fb901cbe1a48d127"},
+    {file = "llvmlite-0.41.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b67340c62c93a11fae482910dc29163a50dff3dfa88bc874872d28ee604a83be"},
+    {file = "llvmlite-0.41.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2181bb63ef3c607e6403813421b46982c3ac6bfc1f11fa16a13eaafb46f578e6"},
+    {file = "llvmlite-0.41.1-cp311-cp311-win_amd64.whl", hash = "sha256:9564c19b31a0434f01d2025b06b44c7ed422f51e719ab5d24ff03b7560066c9a"},
+    {file = "llvmlite-0.41.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:5940bc901fb0325970415dbede82c0b7f3e35c2d5fd1d5e0047134c2c46b3281"},
+    {file = "llvmlite-0.41.1-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:8b0a9a47c28f67a269bb62f6256e63cef28d3c5f13cbae4fab587c3ad506778b"},
+    {file = "llvmlite-0.41.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f8afdfa6da33f0b4226af8e64cfc2b28986e005528fbf944d0a24a72acfc9432"},
+    {file = "llvmlite-0.41.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8454c1133ef701e8c050a59edd85d238ee18bb9a0eb95faf2fca8b909ee3c89a"},
+    {file = "llvmlite-0.41.1-cp38-cp38-win32.whl", hash = "sha256:2d92c51e6e9394d503033ffe3292f5bef1566ab73029ec853861f60ad5c925d0"},
+    {file = "llvmlite-0.41.1-cp38-cp38-win_amd64.whl", hash = "sha256:df75594e5a4702b032684d5481db3af990b69c249ccb1d32687b8501f0689432"},
+    {file = "llvmlite-0.41.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:04725975e5b2af416d685ea0769f4ecc33f97be541e301054c9f741003085802"},
+    {file = "llvmlite-0.41.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:bf14aa0eb22b58c231243dccf7e7f42f7beec48970f2549b3a6acc737d1a4ba4"},
+    {file = "llvmlite-0.41.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:92c32356f669e036eb01016e883b22add883c60739bc1ebee3a1cc0249a50828"},
+    {file = "llvmlite-0.41.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:24091a6b31242bcdd56ae2dbea40007f462260bc9bdf947953acc39dffd54f8f"},
+    {file = "llvmlite-0.41.1-cp39-cp39-win32.whl", hash = "sha256:880cb57ca49e862e1cd077104375b9d1dfdc0622596dfa22105f470d7bacb309"},
+    {file = "llvmlite-0.41.1-cp39-cp39-win_amd64.whl", hash = "sha256:92f093986ab92e71c9ffe334c002f96defc7986efda18397d0f08534f3ebdc4d"},
+    {file = "llvmlite-0.41.1.tar.gz", hash = "sha256:f19f767a018e6ec89608e1f6b13348fa2fcde657151137cb64e56d48598a92db"},
+]
+
+[[package]]
+name = "lmfit"
+version = "1.2.2"
+description = "Least-Squares Minimization with Bounds and Constraints"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "lmfit-1.2.2-py3-none-any.whl", hash = "sha256:3101bb16236179cc2e332202d621109271269dcb8edaa8983eecbffdaf57eb0c"},
+    {file = "lmfit-1.2.2.tar.gz", hash = "sha256:044a052a11a61da0576274504c17eb7e2803b41128e25821e96632207f23c88c"},
+]
+
+[package.dependencies]
+asteval = ">=0.9.28"
+numpy = ">=1.19"
+scipy = ">=1.6"
+uncertainties = ">=3.1.4"
+
+[package.extras]
+all = ["Pillow", "Sphinx", "build", "cairosvg", "check-wheel-contents", "corner", "coverage", "dill", "emcee (>=3.0.0)", "flaky", "ipykernel", "jupyter-sphinx (>=0.2.4)", "matplotlib", "numdifftools", "pandas", "pre-commit", "pycairo", "pytest", "pytest-cov", "sphinx-gallery (>=0.10)", "sphinxcontrib-svg2pdfconverter", "sympy", "twine"]
+dev = ["build", "check-wheel-contents", "pre-commit", "twine"]
+doc = ["Pillow", "Sphinx", "cairosvg", "corner", "dill", "emcee (>=3.0.0)", "ipykernel", "jupyter-sphinx (>=0.2.4)", "matplotlib", "numdifftools", "pandas", "pycairo", "sphinx-gallery (>=0.10)", "sphinxcontrib-svg2pdfconverter", "sympy"]
+test = ["coverage", "flaky", "pytest", "pytest-cov"]
+
+[[package]]
 name = "mapomatic"
 version = "0.6.0"
 description = "Mapomatic"
@@ -1405,6 +1488,17 @@ qiskit-terra = ">=0.18"
 scipy = ">=1.3"
 
 [[package]]
+name = "multiset"
+version = "3.0.1"
+description = "An implementation of a multiset."
+optional = false
+python-versions = ">=3.7.*"
+files = [
+    {file = "multiset-3.0.1-py2.py3-none-any.whl", hash = "sha256:5247391995a92b61a70d1fc3596fd5004346e37400ac6bdcb9549f3ab048a0c0"},
+    {file = "multiset-3.0.1.tar.gz", hash = "sha256:e45671cae8385a8e6248a9b07a3a83280c2d0cc4312713058cfbacdc5ec9973e"},
+]
+
+[[package]]
 name = "nest-asyncio"
 version = "1.5.8"
 description = "Patch asyncio to allow nested event loops"
@@ -1446,6 +1540,40 @@ files = [
 
 [package.dependencies]
 setuptools = "*"
+
+[[package]]
+name = "numba"
+version = "0.58.1"
+description = "compiling Python code using LLVM"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "numba-0.58.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:07f2fa7e7144aa6f275f27260e73ce0d808d3c62b30cff8906ad1dec12d87bbe"},
+    {file = "numba-0.58.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:7bf1ddd4f7b9c2306de0384bf3854cac3edd7b4d8dffae2ec1b925e4c436233f"},
+    {file = "numba-0.58.1-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:bc2d904d0319d7a5857bd65062340bed627f5bfe9ae4a495aef342f072880d50"},
+    {file = "numba-0.58.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:4e79b6cc0d2bf064a955934a2e02bf676bc7995ab2db929dbbc62e4c16551be6"},
+    {file = "numba-0.58.1-cp310-cp310-win_amd64.whl", hash = "sha256:81fe5b51532478149b5081311b0fd4206959174e660c372b94ed5364cfb37c82"},
+    {file = "numba-0.58.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:bcecd3fb9df36554b342140a4d77d938a549be635d64caf8bd9ef6c47a47f8aa"},
+    {file = "numba-0.58.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:a1eaa744f518bbd60e1f7ccddfb8002b3d06bd865b94a5d7eac25028efe0e0ff"},
+    {file = "numba-0.58.1-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:bf68df9c307fb0aa81cacd33faccd6e419496fdc621e83f1efce35cdc5e79cac"},
+    {file = "numba-0.58.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:55a01e1881120e86d54efdff1be08381886fe9f04fc3006af309c602a72bc44d"},
+    {file = "numba-0.58.1-cp311-cp311-win_amd64.whl", hash = "sha256:811305d5dc40ae43c3ace5b192c670c358a89a4d2ae4f86d1665003798ea7a1a"},
+    {file = "numba-0.58.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:ea5bfcf7d641d351c6a80e8e1826eb4a145d619870016eeaf20bbd71ef5caa22"},
+    {file = "numba-0.58.1-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:e63d6aacaae1ba4ef3695f1c2122b30fa3d8ba039c8f517784668075856d79e2"},
+    {file = "numba-0.58.1-cp38-cp38-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:6fe7a9d8e3bd996fbe5eac0683227ccef26cba98dae6e5cee2c1894d4b9f16c1"},
+    {file = "numba-0.58.1-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:898af055b03f09d33a587e9425500e5be84fc90cd2f80b3fb71c6a4a17a7e354"},
+    {file = "numba-0.58.1-cp38-cp38-win_amd64.whl", hash = "sha256:d3e2fe81fe9a59fcd99cc572002101119059d64d31eb6324995ee8b0f144a306"},
+    {file = "numba-0.58.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:5c765aef472a9406a97ea9782116335ad4f9ef5c9f93fc05fd44aab0db486954"},
+    {file = "numba-0.58.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:9e9356e943617f5e35a74bf56ff6e7cc83e6b1865d5e13cee535d79bf2cae954"},
+    {file = "numba-0.58.1-cp39-cp39-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:240e7a1ae80eb6b14061dc91263b99dc8d6af9ea45d310751b780888097c1aaa"},
+    {file = "numba-0.58.1-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:45698b995914003f890ad839cfc909eeb9c74921849c712a05405d1a79c50f68"},
+    {file = "numba-0.58.1-cp39-cp39-win_amd64.whl", hash = "sha256:bd3dda77955be03ff366eebbfdb39919ce7c2620d86c906203bed92124989032"},
+    {file = "numba-0.58.1.tar.gz", hash = "sha256:487ded0633efccd9ca3a46364b40006dbdaca0f95e99b8b83e778d1195ebcbaa"},
+]
+
+[package.dependencies]
+llvmlite = "==0.41.*"
+numpy = ">=1.22,<1.27"
 
 [[package]]
 name = "numexpr"
@@ -2436,6 +2564,71 @@ qiskit-terra = ">=0.24"
 scipy = ">=1.4"
 
 [[package]]
+name = "qiskit-dynamics"
+version = "0.4.1"
+description = "Qiskit ODE solver"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "qiskit-dynamics-0.4.1.tar.gz", hash = "sha256:a419e5229d6bc26b3b05bd6656fe587c1b5d65f25bc064cf87da6b08f9154e34"},
+    {file = "qiskit_dynamics-0.4.1-py3-none-any.whl", hash = "sha256:4debee2b2632bb5d9cb2924d2bb503f718e88506351b0dee7a3c7775ff0faa5e"},
+]
+
+[package.dependencies]
+matplotlib = ">=3.0"
+multiset = ">=3.0.1"
+numpy = ">=1.17"
+qiskit-terra = ">=0.23.0"
+scipy = ">=1.4"
+
+[package.extras]
+jax = ["jax (>=0.2.26,<=0.4.6)", "jaxlib (>=0.1.75,<=0.4.6)"]
+
+[[package]]
+name = "qiskit-experiments"
+version = "0.5.4"
+description = "Software for developing quantum computing programs"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "qiskit-experiments-0.5.4.tar.gz", hash = "sha256:58a3457d773ae511986db938ef412066ce04131ac9b65a6f74b405a1a7204457"},
+    {file = "qiskit_experiments-0.5.4-py3-none-any.whl", hash = "sha256:5dc2a59b4df432451ca1916ed01afa36f5257810f445b30296ef1182b0213970"},
+]
+
+[package.dependencies]
+lmfit = "*"
+matplotlib = ">=3.4"
+numpy = ">=1.17"
+qiskit-dynamics = ">=0.3.0"
+qiskit-ibm-experiment = ">=0.2.5"
+qiskit-terra = ">=0.22"
+rustworkx = "*"
+scipy = ">=1.4"
+uncertainties = "*"
+
+[[package]]
+name = "qiskit-ibm-experiment"
+version = "0.3.5"
+description = "Qiskit IBM Experiment service for accessing the quantum experiment interface at IBM"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "qiskit-ibm-experiment-0.3.5.tar.gz", hash = "sha256:df5b82b09894667854addd12b7445b6bd09e9a0fdde345b38f7eb7cc2333b9aa"},
+    {file = "qiskit_ibm_experiment-0.3.5-py3-none-any.whl", hash = "sha256:c6fa0faffc7375121e1abdc6f449d3505b2927886f715f8fe2ab85e4b377b056"},
+]
+
+[package.dependencies]
+numpy = ">=1.13"
+pandas = ">=1.3.0"
+python-dateutil = ">=2.8.0"
+pyyaml = ">=6.0.0"
+qiskit-terra = ">=0.18.0"
+requests = ">=2.19"
+requests-ntlm = ">=1.1.0"
+typing-extensions = ">=4.0.0"
+urllib3 = ">=1.21.1"
+
+[[package]]
 name = "qiskit-ibm-provider"
 version = "0.7.1"
 description = "Qiskit IBM Quantum Provider for accessing the quantum devices and simulators at IBM"
@@ -2821,6 +3014,28 @@ files = [
 ]
 
 [[package]]
+name = "sparse"
+version = "0.14.0"
+description = "Sparse n-dimensional arrays"
+optional = false
+python-versions = ">=3.8, <4"
+files = [
+    {file = "sparse-0.14.0-py2.py3-none-any.whl", hash = "sha256:77e3c32ace6184de29074db94901c63e113c7729b28c8b3f1885aaf5e1934323"},
+    {file = "sparse-0.14.0.tar.gz", hash = "sha256:5f5827a37f6cd6f6730a541f994c95c60a3ae2329e01f4ba21ced5339aea0098"},
+]
+
+[package.dependencies]
+numba = ">=0.49"
+numpy = ">=1.17"
+scipy = ">=0.19"
+
+[package.extras]
+all = ["dask[array]", "pytest (>=3.5)", "pytest-black", "pytest-cov", "sphinx", "sphinx-rtd-theme", "tox"]
+docs = ["sphinx", "sphinx-rtd-theme"]
+tests = ["dask[array]", "pytest (>=3.5)", "pytest-black", "pytest-cov"]
+tox = ["dask[array]", "pytest (>=3.5)", "pytest-black", "pytest-cov", "tox"]
+
+[[package]]
 name = "sspilib"
 version = "0.1.0"
 description = "SSPI API bindings for Python"
@@ -3015,6 +3230,26 @@ files = [
 ]
 
 [[package]]
+name = "tqdm"
+version = "4.66.1"
+description = "Fast, Extensible Progress Meter"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tqdm-4.66.1-py3-none-any.whl", hash = "sha256:d302b3c5b53d47bce91fea46679d9c3c6508cf6332229aa1e7d8653723793386"},
+    {file = "tqdm-4.66.1.tar.gz", hash = "sha256:d88e651f9db8d8551a62556d3cff9e3034274ca5d66e93197cf2490e2dcb69c7"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-xdist"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "trackhhl"
 version = "0.2.0"
 description = ""
@@ -3050,6 +3285,20 @@ docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["argcomplete (>=3.0.3)", "mypy (>=1.5.1)", "pre-commit", "pytest (>=7.0,<7.5)", "pytest-mock", "pytest-mypy-testing"]
 
 [[package]]
+name = "treelib"
+version = "1.7.0"
+description = "A Python implementation of tree structure."
+optional = false
+python-versions = "*"
+files = [
+    {file = "treelib-1.7.0-py3-none-any.whl", hash = "sha256:c37795eaba19f73f3e1a905ef3f4f0cab660dc7617126e8ae99391e25c755416"},
+    {file = "treelib-1.7.0.tar.gz", hash = "sha256:9bff1af416b9e642a6cd0e0431d15edf26a24b8d0c8ae68afbd3801b5e30fb61"},
+]
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.8.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -3077,6 +3326,26 @@ numpy = ">=1.13.3"
 [package.extras]
 docs = ["furo", "myst-parser", "sphinx (>=4.0)", "sphinx-copybutton (>=0.3.1)", "sphinx-github-changelog"]
 test = ["boost-histogram (>=1.0)", "importlib-metadata (>=1.0)", "pytest (>=6)"]
+
+[[package]]
+name = "uncertainties"
+version = "3.1.7"
+description = "Transparent calculations with uncertainties on the quantities involved (aka error propagation); fast calculation of derivatives"
+optional = false
+python-versions = "*"
+files = [
+    {file = "uncertainties-3.1.7-py2.py3-none-any.whl", hash = "sha256:4040ec64d298215531922a68fa1506dc6b1cb86cd7cca8eca848fcfe0f987151"},
+    {file = "uncertainties-3.1.7.tar.gz", hash = "sha256:80111e0839f239c5b233cb4772017b483a0b7a1573a581b92ab7746a35e6faab"},
+]
+
+[package.dependencies]
+future = "*"
+
+[package.extras]
+all = ["nose", "numpy", "sphinx"]
+docs = ["sphinx"]
+optional = ["numpy"]
+tests = ["nose", "numpy"]
 
 [[package]]
 name = "urllib3"
@@ -3116,13 +3385,13 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "vqls-prototype"
-version = "0.1.0"
-description = "Prototype for a Quantum Linear Solver"
+version = "0.2.0"
+description = "Repository for a quantum prototype"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "vqls_prototype-0.1.0-py3-none-any.whl", hash = "sha256:e04f26f3f83b3f7904f745eb9b23d1e2428dff4c7e4ab71173eb75b922cae060"},
-    {file = "vqls_prototype-0.1.0.tar.gz", hash = "sha256:5c4c325228d7f6aec876d581f6f63a956487b2df70eafae60bd4d63fbae37943"},
+    {file = "vqls_prototype-0.2.0-py3-none-any.whl", hash = "sha256:16ee05fd5054adf36df499c9d44e816db244dcaad5985fc66f4b8a50a1a74108"},
+    {file = "vqls_prototype-0.2.0.tar.gz", hash = "sha256:8163438c8fe9e2a4c19c1c9fcd0222ad1fea6310a0902e987ee4acb6d91be103"},
 ]
 
 [package.dependencies]
@@ -3130,11 +3399,18 @@ certifi = ">=2021.5.30"
 importlib-metadata = ">=4.8.1"
 ipykernel = ">=6.15.0"
 matplotlib = ">=3.5.3"
+networkx = ">=2.8.4"
 pylatexenc = ">=2.10"
-pytest = ">=6.2.5"
-qiskit-aer = ">=0.12.0"
+qiskit = ">=0.14.1"
+qiskit-aer = ">=0.10.3"
+qiskit-experiments = ">=0.5.3"
 qiskit-ibm-runtime = ">=0.9.3"
-qiskit-terra = ">=0.23.1"
+sparse = ">=0.14.0"
+tqdm = ">=4.64.1"
+treelib = "*"
+
+[package.extras]
+dev = ["black[jupyter] (>=22.1,<23.0)", "coverage (>=5.5)", "jupyter-sphinx (>=0.3.2)", "mypy (>=0.780)", "mypy-extensions (>=0.4.3)", "nbqa (>=1.1.1)", "nbsphinx (>=0.8.8)", "pylint (>=2.9.5)", "pytest (>=6.2.5)", "pytest-randomly (>=1.2.0)", "qiskit-sphinx-theme (>=1.16.0,<1.17.0)", "reno (>=3.5.0)", "sphinx-autodoc-typehints (>=1.17.0)", "treon (>=0.1.3)"]
 
 [[package]]
 name = "wcwidth"
@@ -3262,4 +3538,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.12"
-content-hash = "1b634cf2206668c258a7654d1bbdf51ffed74b166e7e765f55c331846cb01710"
+content-hash = "dc5b1ab6101c556a4b946d61f78181a3094a721cc269a2f6c18f5b677a8ad16c"
