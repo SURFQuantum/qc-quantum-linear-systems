@@ -19,7 +19,7 @@ class TestQiskitHHL(unittest.TestCase):
     def setUp(self) -> None:
         self.test_model = Qiskit4QubitExample()
 
-    def test_4qubit_example(self):
+    def test_4qubit_example(self) -> None:
         """Test if qiskit can solve the 4qubit example."""
         q_sol, _, _, width, _ = solve_hhl_qiskit(
             self.test_model.matrix_a, self.test_model.vector_b, show_circuit=False
@@ -35,7 +35,7 @@ class TestClassiqHHL(unittest.TestCase):
         self.test_model = Qiskit4QubitExample()
 
     @pytest.mark.requires_auth
-    def test_4qubit_example(self):
+    def test_4qubit_example(self) -> None:
         """Test if classiq can solve the 4qubit example."""
         qpe_register = 3
         q_sol, _, _, width, _ = solve_hhl_classiq(

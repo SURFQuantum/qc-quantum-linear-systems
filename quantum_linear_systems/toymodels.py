@@ -15,8 +15,7 @@ from quantum_linear_systems.utils import vector_uniformity_entropy
 
 
 class ToyModel:
-    """
-    A class representing a generic toy problem for linear systems.
+    """A class representing a generic toy problem for linear systems.
 
     Parameters:
         name (str): The name or identifier for the toy problem.
@@ -52,11 +51,11 @@ class ToyModel:
         print("b =", self.vector_b)
 
     @property
-    def num_qubits(self):
+    def num_qubits(self) -> int:
         """Return the number of qubits involved in the problem."""
         return int(np.log2(self.matrix_a.shape[0]))
 
-    def normalize_model(self):
+    def normalize_model(self) -> None:
         """Normalize the whole problem to valid quantum states."""
         norm_b = np.linalg.norm(self.vector_b)
         self.matrix_a = self.matrix_a / norm_b
@@ -65,8 +64,7 @@ class ToyModel:
 
     @staticmethod
     def classically_solve(mat: np.ndarray, vec: np.ndarray) -> np.ndarray:
-        """
-        Solve a linear system using classical methods.
+        """Solve a linear system using classical methods.
 
         Parameters:
            mat (numpy.ndarray): Coefficient matrix of the linear system.
@@ -79,9 +77,9 @@ class ToyModel:
 
 
 class Qiskit4QubitExample(ToyModel):
-    """
-    Reproduces the qiskit "4-qubit-HHL" example from `https://learn.qiskit.org/course/ch-applications/
-    solving-linear-systems-of-equations-using-hhl-and-its-qiskit-implementation#example1`
+    """Reproduces the qiskit "4-qubit-HHL" example from
+    `https://learn.qiskit.org/course/ch-applications/ solving-linear-systems-of-
+    equations-using-hhl-and-its-qiskit-implementation#example1`
 
     matrix_a =   1  -1/3
                 -1/3 1
@@ -89,7 +87,7 @@ class Qiskit4QubitExample(ToyModel):
     classical_solution = (1.125, 0.375)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         name = "Qiskit4QubitExample"
         matrix_a = np.array([[1, -1 / 3], [-1 / 3, 1]])
         vector_b = np.array([1, 0])
@@ -100,15 +98,13 @@ class Qiskit4QubitExample(ToyModel):
 
 
 class VolterraProblem(ToyModel):
-    """
-    Define the Volterra integral equation problem ready for solving.
+    """Define the Volterra integral equation problem ready for solving.
 
     Parameters:
         num_qubits (int): The size of the problem, such that the total size will be 2**num_qubits.
-
     """
 
-    def __init__(self, num_qubits):
+    def __init__(self, num_qubits: int) -> None:
         name = f"VolterraProblem(n={num_qubits})"
         # starting with simplified Volterra integral equation x(t) = 1 - I(x(s)ds)0->t
         total_n = 2**num_qubits
@@ -130,7 +126,7 @@ class VolterraProblem(ToyModel):
         )
 
     @staticmethod
-    def volterra_a_matrix(size, alpha):
+    def volterra_a_matrix(size: int, alpha: float) -> np.ndarray:
         """Creates a matrix representing the linear system of the Volterra integral equation x(t) = 1 - INT(x(s)ds).
         Parameters
         ----------
@@ -162,12 +158,12 @@ class VolterraProblem(ToyModel):
 
 
 class ClassiqDemoExample(ToyModel):
-    """
-    Define the classiq demo problem. (See https://platform.classiq.io/advanced)
+    """Define the classiq demo problem.
 
+    (See https://platform.classiq.io/advanced)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         name = "ClassiqDemoExample"
         matrix_a = np.array(
             [
@@ -189,16 +185,14 @@ class ClassiqDemoExample(ToyModel):
 
 
 class RandomNQubitProblem(ToyModel):
-    """
-    Define a problem consisting of a random MxM matrix and vector.
+    """Define a problem consisting of a random MxM matrix and vector.
 
     Parameters:
         num_qubits (int): Number of qubits, such that the total size will be M=2**problem_size. Important: If the
         matrix is not hermitian and needs to be made hermitian the actual num_qubits will increase by 1 from the input.
-
     """
 
-    def __init__(self, num_qubits):
+    def __init__(self, num_qubits: int) -> None:
         name = f"RandomNQubitProblem(N={num_qubits})"
         matrix_a = np.random.rand(2**num_qubits, 2**num_qubits)
         matrix_a += (
@@ -213,8 +207,11 @@ class RandomNQubitProblem(ToyModel):
         )
 
 
-def integro_differential_a_matrix(a_matrix: np.ndarray, time_discretization_steps: int):
-    """Build a matrix of arbitrary size representing the integro-differential toy model."""
+def integro_differential_a_matrix(
+    a_matrix: np.ndarray, time_discretization_steps: int
+) -> np.ndarray:
+    """Build a matrix of arbitrary size representing the integro-differential toy
+    model."""
     delta_t = 1 / time_discretization_steps
     alpha_n = a_matrix.shape[0]
     identity_block = np.identity(alpha_n)
@@ -250,7 +247,8 @@ def integro_differential_a_matrix(a_matrix: np.ndarray, time_discretization_step
 
 
 class ScalingTestModel(ToyModel):
-    """ToyModel to test how algorithms scale with different properties of the input matrix and vector.
+    """ToyModel to test how algorithms scale with different properties of the input
+    matrix and vector.
 
     Considerations:
         1. if b is not close to uniform state preparation may be costly
@@ -332,9 +330,10 @@ class ScalingTestModel(ToyModel):
 
 
 class HEPTrackReconstruction(ToyModel):
-    """Toymodel for HEP particle tracing by Davide, taken from `https://github.com/dnicotra/TrackHHL`."""
+    """Toymodel for HEP particle tracing by Davide, taken from
+    `https://github.com/dnicotra/TrackHHL`."""
 
-    def __init__(self, num_detectors=3, num_particles=2):
+    def __init__(self, num_detectors: int = 3, num_particles: int = 2) -> None:
         # Davide used 3,2 for "small" and 3,3 for "large"
         # Generate a test event
         detector = SimpleDetectorGeometry(
