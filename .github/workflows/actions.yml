@@ -67,7 +67,7 @@ jobs:
         files: coverage.svg
 
     - name: Commit files
-      if: github.event_name == 'pull_request' && steps.verify-changed-files.outputs.files_changed == 'true'
+      if: github.event_name == 'pull_request' && steps.verify-changed-files.outputs.files_changed == 'true' && matrix.python-version == '3.10'
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
@@ -75,7 +75,7 @@ jobs:
         git commit -m "Updated coverage.svg"
 
     - name: Push changes
-      if: github.event_name == 'pull_request' && steps.verify-changed-files.outputs.files_changed == 'true'
+      if: github.event_name == 'pull_request' && steps.verify-changed-files.outputs.files_changed == 'true' == 'true' && matrix.python-version == '3.10'
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
