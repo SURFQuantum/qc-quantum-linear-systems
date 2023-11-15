@@ -139,6 +139,7 @@ if __name__ == "__main__":
         output_data_config=output_data_config,
         dependencies="aws_requirements.txt",
         local=args.local,
+        tags=get_tags(),
     )  # choose priority device
     def execute_hybrid_job() -> None:
         # define hybrid job
