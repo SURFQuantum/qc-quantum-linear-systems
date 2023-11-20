@@ -19,7 +19,7 @@ vqls-prototype = "^0.2.0"
 
 [tool.poetry.group.aws.dependencies]
 qiskit-braket-provider = "^0.0.5"
-amazon-braket-sdk = "^1.61.0.post0"
+amazon-braket-sdk = "^1.62.1"
 
 [tool.poetry.group.test.dependencies]
 pre-commit = "^3.5.0"
