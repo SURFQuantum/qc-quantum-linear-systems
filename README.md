@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/SURFQuantum/qc-quantum-linear-systems/badge.svg?branch=main)](https://coveralls.io/github/SURFQuantum/qc-quantum-linear-systems?branch=main)
+
 # quantum-linear-systems
 Quantum algorithms to solve linear systems of equations.
 
