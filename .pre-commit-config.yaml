@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
@@ -22,19 +22,19 @@ repos:
       - id: reorder-python-imports
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.6.1'
+    rev: 'v1.7.0'
     hooks:
       - id: mypy
         args: [ --strict, --ignore-missing-imports, --allow-untyped-decorators, --allow-subclassing-any ]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.5
+    rev: v0.1.6
     hooks:
       - id: ruff
         args: [ --fix ]
       - id: ruff-format
   - repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.1
+    rev: v1.7.5
     hooks:
       - id: docformatter
         args: [ --in-place, --black ]
