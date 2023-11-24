@@ -359,7 +359,10 @@ class HEPTrackReconstruction(ToyModel):
         matrix_a, vector_b = upscale_pow2(matrix_a, vector_b)
         csol = np.linalg.solve(matrix_a, vector_b)
         super().__init__(
-            name="HEPSimpleHamiltonian", matrix=matrix_a, vector=vector_b, csol=csol
+            name=f"HEPSimpleHamiltonianD{num_detectors}P{num_particles}",
+            matrix=matrix_a,
+            vector=vector_b,
+            csol=csol,
         )
 
 
