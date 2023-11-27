@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.12" # >=3.9 because of amazon-braket, <3.12 because of classiq
-classiq = "^0.31.0"
+classiq = "^0.32.0"
 qiskit = ">=0.43.0, <0.45.0"
 qiskit-algorithms = ">=0.2.1, <0.3.0"
 matplotlib = "^3.8.2" # this version could be lowered to 3.5.0 or even further back
