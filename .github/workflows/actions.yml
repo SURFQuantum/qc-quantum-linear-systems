@@ -48,4 +48,11 @@ jobs:
     - name: Install the project dependencies
       run: poetry install
     - name: Run the automated tests (ignore deprecation errors )
-      run: poetry run pytest -m "not requires_auth" -W ignore::DeprecationWarning --cov-report xml --cov=quantum_linear_systems tests/
+      run: poetry run pytest -m "not requires_auth" -W ignore::DeprecationWarning --cov-report=lcov --cov=quantum_linear_systems tests/
+    - name: Upload results to Coveralls (only on Python3.10 job)
+      if: matrix.python-version == '3.10'
+      env:
+        NODE_COVERALLS_DEBUG: 1
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -7,6 +7,7 @@ from typing import Dict
 from typing import Tuple
 
 import boto3
+from braket.aws import AwsSession
 from braket.devices import Devices
 from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
@@ -131,14 +132,20 @@ if __name__ == "__main__":
     )
 
     # Define the role ARN for executing the hybrid job (replace with your actual role ARN)
-    role_arn = "arn:aws:iam::123456789012:role/YourBraketHybridJobRole"
+    # role_arn = "arn:aws:iam::815925483357:role/surf-administrator"
+    os.environ[
+        "BRAKET_JOBS_ROLE_ARN"
+    ] = "arn:aws:iam::815925483357:role/src-workspace-AmazonBraketJobsExecutionRole"
+    aws_session = AwsSession()
+    print("Default role", aws_session.get_default_jobs_role())
 
     @hybrid_job(
         device=device_arn,
-        role_arn=role_arn,
+        # role_arn=role_arn,
         output_data_config=output_data_config,
         dependencies="aws_requirements.txt",
         local=args.local,
+        tags=get_tags(),
     )  # choose priority device
     def execute_hybrid_job() -> None:
         # define hybrid job

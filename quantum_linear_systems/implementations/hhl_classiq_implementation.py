@@ -334,7 +334,7 @@ def solve_hhl_classiq(
 
     gen_circ = GeneratedCircuit.parse_raw(circuit_hhl)
     circuit_depth = gen_circ.transpiled_circuit.depth
-    circuit_width = len(gen_circ.analyzer_data.qubits)
+    circuit_width = gen_circ.data.width
     print("depth = ", circuit_depth)
     print("width = ", circuit_width)
 
