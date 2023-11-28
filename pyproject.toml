@@ -3,8 +3,20 @@ name = "quantum-linear-systems"
 version = "0.1.0"
 description = "Quantum algorithms to solve linear systems of equations."
 authors = ["dmark04 <dmark04@web.de>"]
-license = "Apache 2.0"
+license = "Apache-2.0"
 readme = "README.md"
+keywords = ["science", "quantum"]
+repository = "https://github.com/SURFQuantum/qc-quantum-linear-systems"
+classifiers=[
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering",
+    ]
+include = ["CHANGELOG.md"]
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.12" # >=3.9 because of amazon-braket, <3.12 because of classiq
