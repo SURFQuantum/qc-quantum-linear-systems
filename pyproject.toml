@@ -5,7 +5,7 @@ description = "Quantum algorithms to solve linear systems of equations."
 authors = ["dmark04 <dmark04@web.de>"]
 license = "Apache-2.0"
 readme = "README.md"
-keywords = ["science", "quantum"]
+keywords = ["quantum", "quantum-computing", "linear-systems", "linear-equations", "hhl", "linear-equation-solver", "hhl-algorithm", "variational-quantum-algorithms"]
 repository = "https://github.com/SURFQuantum/qc-quantum-linear-systems"
 classifiers=[
         "Development Status :: 4 - Beta",

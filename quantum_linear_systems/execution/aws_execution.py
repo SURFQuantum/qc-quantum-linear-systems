@@ -8,7 +8,6 @@ from typing import Tuple
 
 import boto3
 from braket.aws import AwsQuantumJob
-from braket.devices import Devices
 from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
@@ -149,7 +148,7 @@ if __name__ == "__main__":
     device_arn = (
         "arn:aws:braket:eu-west-2::device/qpu/oqc/Lucy"
         if args.real
-        else Devices.Amazon.SV1
+        else "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
     )
 
     # Define the role ARN for executing the hybrid job (replace with your actual role ARN)
