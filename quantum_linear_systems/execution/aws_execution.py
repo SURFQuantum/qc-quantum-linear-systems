@@ -14,7 +14,6 @@ from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
 from qiskit import QuantumCircuit
 from qiskit.primitives import BackendEstimator
-from qiskit.providers import JobStatus
 from qiskit.providers import ProviderV1
 from qiskit.result import Result
 from qiskit.visualization import plot_histogram
@@ -64,19 +63,39 @@ def run_real_device_aws(
 def check_job_status(
     aws_quantum_job: AwsQuantumJob, seconds_interval: int = 10
 ) -> None:
-    """Check job status every `seconds_interval` seconds until the quantum job is
-    done."""
+    """Check job status every `seconds_interval` seconds until the quantum job is done
+    or failed."""
     while True:
         state = aws_quantum_job.state()
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        if state == JobStatus.DONE:
-            print(f"{current_time} - Your quantum job {aws_quantum_job.arn} is done!")
-            break  # Exit the loop if the job is done
+
+        if state == "COMPLETED":
+            print(
+                f"{current_time} - Your quantum job {aws_quantum_job.arn} has completed successfully."
+            )
+            # Retrieve and print job result
+            result = aws_quantum_job.result()
+            print("Job result:", result)
+            # Print measurement probabilities if available
+            if "measurementProbabilities" in result:
+                print("Measurement Probabilities:", result["measurementProbabilities"])
+            break
+        elif state == "FAILED":
+            print(f"{current_time} - Your quantum job {aws_quantum_job.arn} failed.")
+            # Retrieve and print job metadata for debugging
+            metadata = aws_quantum_job.metadata()
+            print("Job failed with metadata:", metadata)
+            # Display logs for debugging
+            try:
+                aws_quantum_job.logs(wait=False)
+            except Exception as e:
+                print("An error occurred while retrieving logs:", e)
+            break
         else:
             print(
                 f"{current_time} - Current status of your quantum job {aws_quantum_job.arn} is: {state}"
             )
-            if state == JobStatus.QUEUED:
+            if state == "QUEUED":
                 queue_info = aws_quantum_job.queue_position()
                 if queue_info and queue_info.queue_position:
                     print(
