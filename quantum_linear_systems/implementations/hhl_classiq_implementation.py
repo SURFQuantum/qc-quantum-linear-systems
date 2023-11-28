@@ -333,6 +333,9 @@ def classiq_hhl_implementation(
     # Synth circuit
     qprog_hhl = synthesize(serialized_hhl_model)
 
+    with open("hhl.qmod", "w") as f:
+        f.write(serialized_hhl_model)
+
     return qprog_hhl, matrix_a, vector_b, w_min, qpe_register_size
 
 
