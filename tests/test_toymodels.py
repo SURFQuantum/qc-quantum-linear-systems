@@ -10,7 +10,7 @@ from quantum_linear_systems.toymodels import VolterraProblem
 class TestToyModels(unittest.TestCase):
     """Unittest the ToyModels."""
 
-    def test_default_values(self):
+    def test_default_values(self) -> None:
         """Test correct initialization."""
         model1 = Qiskit4QubitExample()
         self.assertEqual(model1.num_qubits, 1)

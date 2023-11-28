@@ -2,15 +2,17 @@
 from typing import List
 from typing import Tuple
 
+import matplotlib.axis
 import matplotlib.pyplot as plt
 import numpy as np
+
+from quantum_linear_systems.toymodels import ToyModel
 
 
 def plot_csol_vs_qsol(
     classical_solution: np.ndarray, quantum_solution: np.ndarray, title: str
 ) -> None:
-    """
-    Plot classical and quantum solution vectors side by side.
+    """Plot classical and quantum solution vectors side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
@@ -32,12 +34,11 @@ def plot_csol_vs_qsol(
 
 def plot_compare_csol_vs_qsol(
     classical_solution: np.ndarray,
-    qsols_marker_name: List[Tuple[list, str, str]],
+    qsols_marker_name: List[Tuple[List[np.ndarray], str, str]],
     title: str,
-    axis=None,
+    axis: matplotlib.axis.Axis = None,
 ) -> None:
-    """
-    Plot classical and quantum solutions side by side.
+    """Plot classical and quantum solutions side by side.
 
     Parameters:
         classical_solution (numpy.ndarray): Array representing the classical solution.
@@ -61,12 +62,13 @@ def plot_compare_csol_vs_qsol(
 
 
 def plot_depth_runtime_distance_vs_problem(
-    depth_runtime_distance_marker_name: List[Tuple[Tuple[list, list, list], str, str]],
-    problems: list,
-    axs: list = None,
+    depth_runtime_distance_marker_name: List[
+        Tuple[List[int], List[float], List[float], str, str]
+    ],
+    problems: List[ToyModel],
+    axs: List[matplotlib.axis.Axis] = None,  # type: ignore[assignment]
 ) -> None:
-    """
-    Plot depth and runtime of two algorithms side by side for each problem index.
+    """Plot depth and runtime of two algorithms side by side for each problem index.
 
     Parameters:
         depth_runtime_distance_marker_name (list) : List of tuples of the form (depths, run_times, rel_distance,
@@ -108,8 +110,7 @@ def print_results(
     name: str,
     plot: bool = True,
 ) -> None:
-    """
-    Print results of classical and quantum solutions and optionally plot them.
+    """Print results of classical and quantum solutions and optionally plot them.
 
     Parameters:
         quantum_solution (numpy.ndarray): Quantum solution.

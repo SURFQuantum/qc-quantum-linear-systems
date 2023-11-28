@@ -1,7 +1,10 @@
-"""Compare the Classiq and Qiskit implementations on different use-cases and plot the results."""
+"""Compare the Classiq and Qiskit implementations on different use-cases and plot the
+results."""
 import csv
 from datetime import datetime
+from typing import Any
 from typing import List
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,7 +20,7 @@ from quantum_linear_systems.toymodels import VolterraProblem
 from quantum_linear_systems.utils import relative_distance_quantum_classical_solution
 
 
-def append_to_csv(filename, data):
+def append_to_csv(filename: str, data: Any) -> None:
     """Helper function to append data to an existing csv file."""
     try:
         with open(filename, mode="a", newline="", encoding="utf-8") as file:
@@ -27,9 +30,12 @@ def append_to_csv(filename, data):
         print(f"Error while appending to CSV: {exception}")
 
 
-def solve_models(models, method, save_file):
-    """
-    Solve a set of quantum models using the given solver function.
+def solve_models(
+    models: List[ToyModel], method: str, save_file: str
+) -> Tuple[
+    List[np.ndarray], List[np.ndarray], Tuple[List[int], List[float], List[float]]
+]:
+    """Solve a set of quantum models using the given solver function.
 
     Parameters:
         models (list): A list of quantum models to be solved.
@@ -45,13 +51,11 @@ def solve_models(models, method, save_file):
                 - run_times (list): List of run times for each model's solution.
                 - rel_distances (list): List of relative distances between quantum and classical solutions.
     """
-    quantum_solutions, classical_solutions, run_times, depths, rel_distances = (
-        [],
-        [],
-        [],
-        [],
-        [],
-    )
+    quantum_solutions: List[np.ndarray] = []
+    classical_solutions: List[np.ndarray] = []
+    run_times: List[float] = []
+    depths: List[int] = []
+    rel_distances: List[float] = []
 
     for model in models:
         print(datetime.now().strftime("%H:%M:%S"))
@@ -61,7 +65,7 @@ def solve_models(models, method, save_file):
             matrix_a=model.matrix_a,
             vector_b=model.vector_b,
             method=method,
-            file_basename=None,
+            file_basename=model.name,
         )
 
         # todo: once all normalizations are fixed this should be unnecessary, for plotting its still cool probably
@@ -96,7 +100,8 @@ def compare_qls_and_plot(
     classiq: bool = True,
     filebasename: str = "comparison",
 ) -> None:
-    """Compare different implementations of quantum linear solvers and plot the results"""
+    """Compare different implementations of quantum linear solvers and plot the
+    results."""
     filename = f"{filebasename}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     csv_file = f"{filename}.csv"
     headers = [

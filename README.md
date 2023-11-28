@@ -1,17 +1,22 @@
+[![Coverage Status](https://coveralls.io/repos/github/SURFQuantum/qc-quantum-linear-systems/badge.svg?branch=main)](https://coveralls.io/github/SURFQuantum/qc-quantum-linear-systems?branch=main)
+
 # quantum-linear-systems
 Quantum algorithms to solve linear systems of equations.
 
+## Installation
+Dependencies are managed with [poetry](https://python-poetry.org/).
+If poetry is not already installed on your system/evironment, follow the [installation instructions](https://python-poetry.org/docs/#installation).
+
+Then clone the project
+```
+git clone https://github.com/SURFQuantum/qc-quantum-linear-systems.git
+```
+Switch to the project directory with ```cd qc-quantum-linear-systems``` and then simply:
+```
+poetry install
+```
+to install all dependencies.
 ## Additional Requirements
-### Qiskit Linear Systems
-In addition to the requirements in `requirements.txt` it is also necessary to manually install the
-[linear solvers](https://github.com/anedumla/quantum_linear_solvers) package, as Qiskit has deprecated the HHL
-algorithm implementations (see their [algorithms migration guide](https://qiskit.org/documentation/migration_guides/algorithms_migration.html)).
-
-The linear solvers package can be installed by executing:
-```
-pip install git+https://github.com/anedumla/quantum_linear_solvers
-```
-
 ### Classiq SDK
 This project makes use of the [classiq](https://www.classiq.io/) SDK.
 To use the `classiq` SKD the user must perform authentication.
