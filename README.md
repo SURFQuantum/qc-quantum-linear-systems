@@ -1,3 +1,6 @@
+[![PyPI Version](https://img.shields.io/pypi/v/quantum-linear-systems.svg)](https://pypi.org/project/quantum-linear-systems)
+![Python Version](https://img.shields.io/badge/Python-3.9%20%E2%86%92%203.12-blue)
+![CI/CD](https://github.com/SURFQuantum/qc-quantum-linear-systems/actions/workflows/actions.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/SURFQuantum/qc-quantum-linear-systems/badge.svg?branch=main)](https://coveralls.io/github/SURFQuantum/qc-quantum-linear-systems?branch=main)
 
 # quantum-linear-systems
