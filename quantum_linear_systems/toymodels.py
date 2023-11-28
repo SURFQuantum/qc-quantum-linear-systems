@@ -1,9 +1,5 @@
 """Implementations of toy-models that can be imported by the algorithms."""
 import numpy as np
-from trackhhl.hamiltonians.simple_hamiltonian import SimpleHamiltonian
-from trackhhl.hamiltonians.simple_hamiltonian import upscale_pow2
-from trackhhl.toy.simple_generator import SimpleDetectorGeometry
-from trackhhl.toy.simple_generator import SimpleGenerator
 
 from quantum_linear_systems.utils import expand_b_vector
 from quantum_linear_systems.utils import extract_x_from_expanded
@@ -12,6 +8,10 @@ from quantum_linear_systems.utils import generate_s_sparse_matrix
 from quantum_linear_systems.utils import is_matrix_well_conditioned
 from quantum_linear_systems.utils import make_matrix_hermitian
 from quantum_linear_systems.utils import vector_uniformity_entropy
+# from trackhhl.hamiltonians.simple_hamiltonian import SimpleHamiltonian
+# from trackhhl.hamiltonians.simple_hamiltonian import upscale_pow2
+# from trackhhl.toy.simple_generator import SimpleDetectorGeometry
+# from trackhhl.toy.simple_generator import SimpleGenerator
 
 
 class ToyModel:
@@ -329,41 +329,41 @@ class ScalingTestModel(ToyModel):
         )
 
 
-class HEPTrackReconstruction(ToyModel):
-    """Toymodel for HEP particle tracing by Davide, taken from
-    `https://github.com/dnicotra/TrackHHL`."""
-
-    def __init__(self, num_detectors: int = 3, num_particles: int = 2) -> None:
-        # Davide used 3,2 for "small" and 3,3 for "large"
-        # Generate a test event
-        detector = SimpleDetectorGeometry(
-            list(range(num_detectors)),
-            [10000 for _ in range(num_detectors)],
-            [10000 for _ in range(num_detectors)],
-            [i + 1 for i in range(num_detectors)],
-        )
-        generator = SimpleGenerator(detector, theta_max=np.pi / 3)
-
-        event = generator.generate_event(num_particles)
-
-        # Initialise Hamiltonian
-        epsilon = 1e-5
-        gamma = 2.0
-        delta = 1.0
-
-        ham = SimpleHamiltonian(epsilon, gamma, delta)
-        ham.construct_hamiltonian(event)
-
-        matrix_a = ham.A.todense() / np.linalg.norm(ham.b)
-        vector_b = ham.b / np.linalg.norm(ham.b)
-        matrix_a, vector_b = upscale_pow2(matrix_a, vector_b)
-        csol = np.linalg.solve(matrix_a, vector_b)
-        super().__init__(
-            name=f"HEPSimpleHamiltonianD{num_detectors}P{num_particles}",
-            matrix=matrix_a,
-            vector=vector_b,
-            csol=csol,
-        )
+# class HEPTrackReconstruction(ToyModel):
+#     """Toymodel for HEP particle tracing by Davide, taken from
+#     `https://github.com/dnicotra/TrackHHL`."""
+#
+#     def __init__(self, num_detectors: int = 3, num_particles: int = 2) -> None:
+#         # Davide used 3,2 for "small" and 3,3 for "large"
+#         # Generate a test event
+#         detector = SimpleDetectorGeometry(
+#             list(range(num_detectors)),
+#             [10000 for _ in range(num_detectors)],
+#             [10000 for _ in range(num_detectors)],
+#             [i + 1 for i in range(num_detectors)],
+#         )
+#         generator = SimpleGenerator(detector, theta_max=np.pi / 3)
+#
+#         event = generator.generate_event(num_particles)
+#
+#         # Initialise Hamiltonian
+#         epsilon = 1e-5
+#         gamma = 2.0
+#         delta = 1.0
+#
+#         ham = SimpleHamiltonian(epsilon, gamma, delta)
+#         ham.construct_hamiltonian(event)
+#
+#         matrix_a = ham.A.todense() / np.linalg.norm(ham.b)
+#         vector_b = ham.b / np.linalg.norm(ham.b)
+#         matrix_a, vector_b = upscale_pow2(matrix_a, vector_b)
+#         csol = np.linalg.solve(matrix_a, vector_b)
+#         super().__init__(
+#             name=f"HEPSimpleHamiltonianD{num_detectors}P{num_particles}",
+#             matrix=matrix_a,
+#             vector=vector_b,
+#             csol=csol,
+#         )
 
 
 if __name__ == "__main__":
