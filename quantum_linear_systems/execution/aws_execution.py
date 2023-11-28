@@ -150,6 +150,7 @@ if __name__ == "__main__":
         if args.real
         else "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
     )
+    device_name = "oqc/Lucy" if args.real else "SV1"
 
     # Define the role ARN for executing the hybrid job (replace with your actual role ARN)
     surf_role_arn = (
@@ -173,7 +174,7 @@ if __name__ == "__main__":
         # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
 
         # define estimator
-        backend = AWSBraketProvider().get_backend(name=device_arn)
+        backend = AWSBraketProvider().get_backend(name=device_name)
         estimator = BackendEstimator(backend=backend, skip_transpilation=False)
 
         qsol, _, depth, width, run_time = solve_vqls_qiskit(

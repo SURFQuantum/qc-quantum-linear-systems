@@ -7,6 +7,10 @@
 Quantum algorithms to solve linear systems of equations.
 
 ## Installation
+Note: The preferred way to install this is manually and not via pypi! The pypi package can be used to import this package e.g. on AWS.
+
+Instead: Please follow these instructions:
+
 Dependencies are managed with [poetry](https://python-poetry.org/).
 If poetry is not already installed on your system/evironment, follow the [installation instructions](https://python-poetry.org/docs/#installation).
 
