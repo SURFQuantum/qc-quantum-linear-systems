@@ -84,10 +84,18 @@ def check_job_status(
             break
         elif state == "FAILED":
             print(f"{current_time} - Your quantum job {aws_quantum_job.arn} failed.")
-            # Retrieve and print job metadata for debugging
+
+            # Retrieve job metadata
             metadata = aws_quantum_job.metadata()
             print("Job failed with metadata:", metadata)
-            # Display logs for debugging
+
+            # Extract and print failure reason in red
+            failure_reason = metadata.get(
+                "failureReason", "No specific failure reason provided."
+            )
+            print(f"\033[91mFailure Reason: {failure_reason}\033[0m")  # Red color
+
+            # Attempt to display logs for more context
             try:
                 aws_quantum_job.logs(wait=False)
             except Exception as e:
@@ -197,7 +205,7 @@ if __name__ == "__main__":
         circuit.cx(0, 1)
         circuit.rz(theta, 0)
 
-        observable = SparsePauliOp.from_list([("ZI", 1.0)])
+        observable = SparsePauliOp(["II", "XZ"])
 
         # Define a cost function
         def cost_function(param: np.ndarray) -> float:
