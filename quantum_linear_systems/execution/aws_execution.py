@@ -7,6 +7,7 @@ from typing import Dict
 from typing import Tuple
 
 import boto3
+import numpy as np
 from braket.aws import AwsQuantumJob
 from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
@@ -198,9 +199,9 @@ if __name__ == "__main__":
         circuit.rz(theta, 0)
 
         # Define a cost function
-        def cost_function(param: float) -> float:
+        def cost_function(param: np.ndarray) -> float:
             observable = SparsePauliOp(Pauli("ZI"))
-            bound_circuit = circuit.bind_parameters({theta: param})
+            bound_circuit = circuit.bind_parameters({theta: param[0]})
             job = estimator.run(
                 [bound_circuit], [observable]
             )  # Observable needs to be defined
