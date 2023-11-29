@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 import time
 from datetime import datetime
@@ -12,18 +13,25 @@ from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
 from qiskit import QuantumCircuit
+from qiskit.circuit import Parameter
+from qiskit.opflow import I
+from qiskit.opflow import Z
 from qiskit.primitives import BackendEstimator
 from qiskit.providers import ProviderV1
 from qiskit.result import Result
 from qiskit.visualization import plot_histogram
+from qiskit_algorithms.optimizers import COBYLA
 from qiskit_braket_provider import AWSBraketProvider
 from qiskit_braket_provider import BraketLocalBackend
 
-from quantum_linear_systems.implementations.vqls_qiskit_implementation import (
-    solve_vqls_qiskit,
-)
-from quantum_linear_systems.plotting import print_results
-from quantum_linear_systems.toymodels import ClassiqDemoExample
+# from quantum_linear_systems.implementations.vqls_qiskit_implementation import (
+#     solve_vqls_qiskit,
+# )
+# from quantum_linear_systems.plotting import print_results
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger()
 
 
 def run_local_aws(circuit: QuantumCircuit, shots: int = 1000) -> Result:
@@ -166,31 +174,53 @@ if __name__ == "__main__":
         tags=get_tags(),
     )  # choose priority device
     def execute_hybrid_job() -> None:
-        # define hybrid job
-        model = ClassiqDemoExample()
-        # model = HEPTrackReconstruction(num_detectors=5, num_particles=5)
-        # runtimes(250): 3,3 =150s; 4,3=153s; 4,4=677s ;5,4=654s (c.25) ; 5,5=3492s (c0.34)
-        # Note: neither memory nor cpu usage significant at these sizes
-        # Note: after 250 iterations the cost is not low enough, would it make more sense to define different stop criteria
-
         # define estimator
         backend = AWSBraketProvider().get_backend(name=device_name)
         estimator = BackendEstimator(backend=backend, skip_transpilation=False)
 
-        qsol, _, depth, width, run_time = solve_vqls_qiskit(
-            matrix_a=model.matrix_a,
-            vector_b=model.vector_b,
-            show_circuit=True,
-            estimator=estimator,
-        )
+        # Original VQLS example
+        # model = ClassiqDemoExample()
+        # qsol, _, depth, width, run_time = solve_vqls_qiskit(
+        #     matrix_a=model.matrix_a,
+        #     vector_b=model.vector_b,
+        #     show_circuit=True,
+        #     estimator=estimator,
+        # )
+        #
+        # print_results(
+        #     quantum_solution=qsol,
+        #     classical_solution=model.classical_solution,
+        #     run_time=run_time,
+        #     name=model.name,
+        #     plot=True,
+        # )
 
-        print_results(
-            quantum_solution=qsol,
-            classical_solution=model.classical_solution,
-            run_time=run_time,
-            name=model.name,
-            plot=True,
-        )
+        # Create a simple circuit
+        theta = Parameter("θ")
+        circuit = QuantumCircuit(2)
+        circuit.h(0)
+        circuit.cx(0, 1)
+        circuit.rz(theta, 0)
+
+        # Define a cost function
+        def cost_function(param: float) -> float:
+            observable = Z ^ I
+            bound_circuit = circuit.bind_parameters({theta: param})
+            job = estimator.run(
+                [bound_circuit], [observable]
+            )  # Observable needs to be defined
+            cost = 1 - job.result().values[0]  # 1-exp_value
+            return float(cost)
+
+        # Use a classical optimizer
+        optimizer = COBYLA(maxiter=100)
+        initial_point = 0.0
+        result = optimizer.minimize(fun=cost_function, x0=initial_point)
+        optimal_point = result.x
+        value = result.fun
+
+        print("Optimal point:", optimal_point)
+        print("Optimal value:", value)
 
     with Tracker() as tracker:
         # submit the job
