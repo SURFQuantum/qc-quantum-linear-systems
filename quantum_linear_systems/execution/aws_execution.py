@@ -1,6 +1,5 @@
 import argparse
 import json
-import logging
 import os
 import time
 from datetime import datetime
@@ -14,10 +13,10 @@ from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
-from qiskit.opflow import I
-from qiskit.opflow import Z
 from qiskit.primitives import BackendEstimator
 from qiskit.providers import ProviderV1
+from qiskit.quantum_info import Pauli
+from qiskit.quantum_info import SparsePauliOp
 from qiskit.result import Result
 from qiskit.visualization import plot_histogram
 from qiskit_algorithms.optimizers import COBYLA
@@ -28,10 +27,6 @@ from qiskit_braket_provider import BraketLocalBackend
 #     solve_vqls_qiskit,
 # )
 # from quantum_linear_systems.plotting import print_results
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
 
 
 def run_local_aws(circuit: QuantumCircuit, shots: int = 1000) -> Result:
@@ -204,7 +199,7 @@ if __name__ == "__main__":
 
         # Define a cost function
         def cost_function(param: float) -> float:
-            observable = Z ^ I
+            observable = SparsePauliOp(Pauli("ZI"))
             bound_circuit = circuit.bind_parameters({theta: param})
             job = estimator.run(
                 [bound_circuit], [observable]
@@ -214,7 +209,7 @@ if __name__ == "__main__":
 
         # Use a classical optimizer
         optimizer = COBYLA(maxiter=100)
-        initial_point = 0.0
+        initial_point = [0.0]
         result = optimizer.minimize(fun=cost_function, x0=initial_point)
         optimal_point = result.x
         value = result.fun
