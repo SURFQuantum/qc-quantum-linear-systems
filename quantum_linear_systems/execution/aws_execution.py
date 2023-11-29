@@ -16,7 +16,6 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
 from qiskit.primitives import BackendEstimator
 from qiskit.providers import ProviderV1
-from qiskit.quantum_info import Pauli
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.result import Result
 from qiskit.visualization import plot_histogram
@@ -198,14 +197,13 @@ if __name__ == "__main__":
         circuit.cx(0, 1)
         circuit.rz(theta, 0)
 
+        observable = SparsePauliOp.from_list([("ZI", 1.0)])
+
         # Define a cost function
         def cost_function(param: np.ndarray) -> float:
-            observable = SparsePauliOp(Pauli("ZI"))
             bound_circuit = circuit.bind_parameters({theta: param[0]})
-            job = estimator.run(
-                [bound_circuit], [observable]
-            )  # Observable needs to be defined
-            cost = 1 - job.result().values[0]  # 1-exp_value
+            job = estimator.run([bound_circuit], [observable])
+            cost = 1 - job.result().values[0]  # 1 - expectation value
             return float(cost)
 
         # Use a classical optimizer
