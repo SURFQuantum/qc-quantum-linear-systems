@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-import time
 from typing import Dict
 from typing import Tuple
 
@@ -17,6 +16,8 @@ from qiskit.primitives import BackendEstimator
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms.optimizers import COBYLA
 from qiskit_braket_provider import AWSBraketProvider
+
+from quantum_linear_systems.execution.aws_execution import check_job_status
 
 
 def get_tags() -> Dict[str, str]:
@@ -116,12 +117,6 @@ if __name__ == "__main__":
         # submit the job
         job: AwsQuantumJob = execute_hybrid_job()
 
-        while True:
-            state = job.state()
-            if state in ["COMPLETED", "FAILED"]:
-                break
-            else:
-                print(f"{job} submitted, not done yet.")
-                time.sleep(10)
+        check_job_status(job)
 
     print(tracker.simulator_tasks_cost())
