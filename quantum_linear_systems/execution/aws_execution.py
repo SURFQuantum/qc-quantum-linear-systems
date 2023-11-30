@@ -7,59 +7,18 @@ from typing import Dict
 from typing import Tuple
 
 import boto3
-import numpy as np
 from braket.aws import AwsQuantumJob
 from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
-from qiskit import QuantumCircuit
-from qiskit.circuit import Parameter
 from qiskit.primitives import BackendEstimator
-from qiskit.providers import ProviderV1
-from qiskit.quantum_info import SparsePauliOp
-from qiskit.result import Result
-from qiskit.visualization import plot_histogram
-from qiskit_algorithms.optimizers import COBYLA
 from qiskit_braket_provider import AWSBraketProvider
-from qiskit_braket_provider import BraketLocalBackend
 
-# from quantum_linear_systems.implementations.vqls_qiskit_implementation import (
-#     solve_vqls_qiskit,
-# )
-# from quantum_linear_systems.plotting import print_results
-
-
-def run_local_aws(circuit: QuantumCircuit, shots: int = 1000) -> Result:
-    """Run circuit on local AWS BraKet backend."""
-    local_simulator = BraketLocalBackend()
-    task = local_simulator.run(circuit, shots=shots)
-    plot_histogram(task.result().get_counts())
-    return task.result()
-
-
-def run_real_device_aws(
-    circuit: QuantumCircuit, device_name: str, shots: int = 100
-) -> Result:
-    """Run circuit on real AWS BraKet device."""
-    provider: ProviderV1 = AWSBraketProvider()
-    # select device by name
-    device = None
-    if device_name == "ionq":
-        device = "arn:aws:braket:::device/qpu/ionq/ionQdevice"
-    elif device_name == "rigetti":
-        device = "arn:aws:braket:::device/qpu/rigetti/Aspen-M-1"
-    elif device_name == "oqc":
-        device = "arn:aws:braket:::device/qpu/oqc/Lucy"
-
-    if device is None:
-        raise ValueError(f"{device_name} not in the list of known device ARNs.")
-
-    backend = provider.get_backend(device)
-    aws_quantum_job = backend.run(circuit, shots=shots)
-
-    check_job_status(aws_quantum_job=aws_quantum_job)
-    job_result = aws_quantum_job.result()
-    plot_histogram(job_result.get_counts())
+from quantum_linear_systems.implementations.vqls_qiskit_implementation import (
+    solve_vqls_qiskit,
+)
+from quantum_linear_systems.plotting import print_results
+from quantum_linear_systems.toymodels import ClassiqDemoExample
 
 
 def check_job_status(
@@ -174,6 +133,8 @@ if __name__ == "__main__":
         output_data_config=output_data_config,
         dependencies="aws_requirements.txt",
         local=args.local,
+        # todo: figure out how the 'local' parameter is supposed to work?
+        #  do I also need to set the BraketLocalBackend manually?
         tags=get_tags(),
     )  # choose priority device
     def execute_hybrid_job() -> None:
@@ -181,48 +142,21 @@ if __name__ == "__main__":
         backend = AWSBraketProvider().get_backend(name=device_name)
         estimator = BackendEstimator(backend=backend, skip_transpilation=False)
 
-        # Original VQLS example
-        # model = ClassiqDemoExample()
-        # qsol, _, depth, width, run_time = solve_vqls_qiskit(
-        #     matrix_a=model.matrix_a,
-        #     vector_b=model.vector_b,
-        #     show_circuit=True,
-        #     estimator=estimator,
-        # )
-        #
-        # print_results(
-        #     quantum_solution=qsol,
-        #     classical_solution=model.classical_solution,
-        #     run_time=run_time,
-        #     name=model.name,
-        #     plot=True,
-        # )
+        model = ClassiqDemoExample()
+        qsol, _, depth, width, run_time = solve_vqls_qiskit(
+            matrix_a=model.matrix_a,
+            vector_b=model.vector_b,
+            show_circuit=True,
+            estimator=estimator,
+        )
 
-        # Create a simple circuit
-        theta = Parameter("θ")
-        circuit = QuantumCircuit(2)
-        circuit.h(0)
-        circuit.cx(0, 1)
-        circuit.rz(theta, 0)
-
-        observable = SparsePauliOp(["II", "XZ"])
-
-        # Define a cost function
-        def cost_function(param: np.ndarray) -> float:
-            bound_circuit = circuit.bind_parameters({theta: param[0]})
-            job = estimator.run([bound_circuit], [observable])
-            cost = 1 - job.result().values[0]  # 1 - expectation value
-            return float(cost)
-
-        # Use a classical optimizer
-        optimizer = COBYLA(maxiter=100)
-        initial_point = [0.0]
-        result = optimizer.minimize(fun=cost_function, x0=initial_point)
-        optimal_point = result.x
-        value = result.fun
-
-        print("Optimal point:", optimal_point)
-        print("Optimal value:", value)
+        print_results(
+            quantum_solution=qsol,
+            classical_solution=model.classical_solution,
+            run_time=run_time,
+            name=model.name,
+            plot=True,
+        )
 
     with Tracker() as tracker:
         # submit the job
