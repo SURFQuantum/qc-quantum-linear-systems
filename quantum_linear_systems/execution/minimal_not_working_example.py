@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import time
 from typing import Dict
 from typing import Tuple
 
@@ -114,5 +115,13 @@ if __name__ == "__main__":
     with Tracker() as tracker:
         # submit the job
         job: AwsQuantumJob = execute_hybrid_job()
+
+        while True:
+            state = job.state()
+            if state in ["COMPLETED", "FAILED"]:
+                break
+            else:
+                print(f"{job} submitted, not done yet.")
+                time.sleep(10)
 
     print(tracker.simulator_tasks_cost())
