@@ -42,13 +42,13 @@ test = ["black", "flake8", "flake8-rst-docstrings", "isort", "jsonschema (==3.2.
 
 [[package]]
 name = "amazon-braket-sdk"
-version = "1.62.1"
+version = "1.64.0"
 description = "An open source library for interacting with quantum computing devices on Amazon Braket"
 optional = false
 python-versions = ">= 3.9"
 files = [
-    {file = "amazon-braket-sdk-1.62.1.tar.gz", hash = "sha256:383e1a33c712612406a666eed6740f375708fd4986e5607338d645b6b2af521d"},
-    {file = "amazon_braket_sdk-1.62.1-py3-none-any.whl", hash = "sha256:d514c4027075dc34745f55e366cdd8dc43f0703a7cf9a04ccb4d4a6239656153"},
+    {file = "amazon-braket-sdk-1.64.0.tar.gz", hash = "sha256:9e88faa7bdc0cfaa6ec583a8b575b4ed39f2aefa86b76d5b67fed645fdfa03bf"},
+    {file = "amazon_braket_sdk-1.64.0-py3-none-any.whl", hash = "sha256:f032acbf5d4ea6ab824af51a7cac3801a2d9ce11748d3dfee27cdca466fd9ebb"},
 ]
 
 [package.dependencies]
@@ -1887,8 +1887,8 @@ files = [
 mypy-extensions = ">=0.2.0"
 numpy = [
     {version = ">=1.19.3", markers = "python_version >= \"3.9\" and python_version < \"3.10\""},
-    {version = ">=1.22.0", markers = "python_version >= \"3.11\""},
     {version = ">=1.21.6", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.22.0", markers = "python_version >= \"3.11\""},
 ]
 openpulse = ">=0.4.1,<0.5.0"
 
@@ -2004,8 +2004,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
-    {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
     {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
 ]
 python-dateutil = ">=2.8.1"
 pytz = ">=2020.1"
