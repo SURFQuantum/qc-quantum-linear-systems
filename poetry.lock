@@ -397,12 +397,12 @@ files = [
 
 [[package]]
 name = "classiq"
-version = "0.32.1"
+version = "0.33.0"
 description = "Classiq's Python SDK for quantum computing"
 optional = false
 python-versions = ">=3.8,<3.12"
 files = [
-    {file = "classiq-0.32.1-py3-none-any.whl", hash = "sha256:e261cf8502e023ad00debb054d3beabb93b696aca805a69fa051a11a563e95a5"},
+    {file = "classiq-0.33.0-py3-none-any.whl", hash = "sha256:3ed740316d974ce03dcaa052506ba5da46c4de87313216a6dc0d121484daecb0"},
 ]
 
 [package.dependencies]
@@ -3775,4 +3775,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.12"
-content-hash = "5e23298469828fb75372b950b66c91611ead8105d87ff02313a370acc90e117d"
+content-hash = "611cb93a80146123e949a572673240d1304ccaecf8d05db7f32e353115efc638"
