@@ -12,6 +12,7 @@ from typing import Tuple
 from typing import Union
 
 import numpy as np
+from qiskit import execute
 from qiskit import QuantumCircuit
 from qiskit.algorithms.minimum_eigen_solvers.vqe import _validate_bounds
 from qiskit.algorithms.minimum_eigen_solvers.vqe import _validate_initial_point
@@ -21,6 +22,7 @@ from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
 from qiskit.primitives import Estimator
 from qiskit.primitives import Sampler
 from qiskit.quantum_info import Statevector
+from qiskit_aer import QasmSimulator
 from qiskit_algorithms.optimizers import COBYLA
 from qiskit_algorithms.optimizers import SLSQP
 from vqls_prototype import VQLS
@@ -73,74 +75,67 @@ def naive_hybrid_solve_vqls(
             "verbose": True,
         },
     )
-    print("--------------")
     # Note: copied from vqls._solve()
-
     # compute the circuits needed for the hadamard tests
     hdmr_tests_norm, hdmr_tests_overlap = vqls.construct_circuit(matrix_a, vector_b)
-    print("len constructed circ ", len(hdmr_tests_overlap) + len(hdmr_tests_norm))
-    # compute he coefficient matrix
+    hdmr_norm_circuits = [c for h in hdmr_tests_norm for c in h.circuits]
+    hdmr_overlap_circuits = [c for h in hdmr_tests_overlap for c in h.circuits]
+
+    # compute the coefficient matrix
     coefficient_matrix = vqls.get_coefficient_matrix(
         np.array([mat_i.coeff for mat_i in vqls.matrix_circuits])
     )
-    print("coeff matrix: ", coefficient_matrix)
 
     # set an expectation for this algorithm run (will be reset to None at the end)
-    initial_point = _validate_initial_point(vqls.initial_point, vqls.ansatz)
+    # initial_point = _validate_initial_point(vqls.initial_point, vqls.ansatz)
     bounds = _validate_bounds(vqls.ansatz)
-    print(initial_point)
 
     # Convert the gradient operator into a callable function that is compatible with the
     # optimization routine.
     gradient = vqls._gradient
-    vqls._eval_count = 0
+    # vqls._eval_count = 0
 
     # get the cost evaluation function
-    cost_evaluation = vqls.get_cost_evaluation_function(
-        hdmr_tests_norm, hdmr_tests_overlap, coefficient_matrix
-    )
-    print("Cost_evaluation: ", cost_evaluation)
-    print("-----")
-    res = vqls.solve(matrix_a, vector_b)
+    # cost_evaluation = vqls.get_cost_evaluation_function(
+    #     hdmr_tests_norm, hdmr_tests_overlap, coefficient_matrix
+    # )
 
     # Step 1: determine initial set of parameters
-    estimator_parameters = estimator.parameters
+    parameter_names = ansatz.parameters
 
-    initial_parameters: List[float] = estimator_parameters
-    if initial_parameters is None:
-        print("Step 1: Not implemented yet.")
+    initial_parameters: List[float] = _validate_initial_point(
+        vqls.initial_point, vqls.ansatz
+    )
     # Step 2: get circuits from estimator and assign initial parameters
-    estimator_circuits = estimator.circuits
-
-    print("Estimator circuits", estimator_circuits)
-    print("Estimator parameters", estimator_parameters)
 
     for n in range(optimizer_max_iter):
         new_params, current_cost = naive_hybrid_loop(
-            circuits=estimator_circuits,
-            parameter_names=estimator_parameters,
+            norm_circuits=hdmr_norm_circuits,
+            overlap_circuits=hdmr_overlap_circuits,
+            parameter_names=parameter_names,
             parameter_values=initial_parameters,
-            optimizer=vqls.optimizer[0],
+            optimizer=vqls.optimizer,
             gradient=gradient,
             bounds=bounds,
+            coeff_matrix=coefficient_matrix,
+            vqls_instance=vqls,
         )
         initial_parameters = new_params
         print(f"Cost={current_cost} in iteration {n}/{optimizer_max_iter}.")
 
     # Step 6: create output state from final set of params
-    sol_circuit = ansatz.assign_parameters(
+    vqls_circuit = ansatz.assign_parameters(
         {
             param: value
             for param, value in zip(
-                estimator_parameters[0],
+                parameter_names,
                 initial_parameters,
             )
         }
     )
-    print("Step 6: Not implemented yet.")
+    raise NotImplementedError("Step 6: Not implemented yet.")
 
-    vqls_circuit = sol_circuit
-    vqls_solution_vector = np.real(Statevector(res.state).data)
+    vqls_solution_vector = np.real(Statevector(vqls_circuit).data)
 
     quantum_solution = postprocess_solution(
         matrix_a=matrix_a, vector_b=vector_b, solution_x=vqls_solution_vector
@@ -170,39 +165,71 @@ def naive_hybrid_solve_vqls(
 
 
 def naive_hybrid_loop(
-    circuits: List[QuantumCircuit],
+    norm_circuits: List[QuantumCircuit],
+    overlap_circuits: List[QuantumCircuit],
     parameter_names: List[str],
     parameter_values: List[float],
     optimizer: Union[Optimizer, Minimizer],
     gradient: Callable[[Any], Any],
     bounds: list[tuple[float, float]],
+    coeff_matrix: np.ndarray,  # also for evaluation of cost function
+    vqls_instance: VQLS,  # so we don't have to copy everything for the cost function
 ) -> Tuple[List[float], float]:
-    qasm_circuits: List[str] = []
-    for i, circ in enumerate(circuits):
-        print(circ.name)
-        # Bind parameters to specific values
-        bound_circ = circ.assign_parameters(
-            {
-                param: value
-                for param, value in zip(
-                    parameter_names[i],
-                    list(np.zeros(len(parameter_names[i]))),
-                    # parameter_values,
-                )
-            }
-        )
-        qasm_circuits.append(bound_circ.qasm())
-        print(bound_circ.draw())
+    norm_qasm = [
+        circ.assign_parameters(
+            {param: value for param, value in zip(parameter_names, parameter_values)}
+        ).qasm()
+        for i, circ in enumerate(norm_circuits)
+    ]
+
+    overlap_qasm = [
+        circ.assign_parameters(
+            {param: value for param, value in zip(parameter_names, parameter_values)}
+        ).qasm()
+        for i, circ in enumerate(overlap_circuits)
+    ]
+    qasm_circuits = (norm_qasm, overlap_qasm)
 
     # Step 3: Execute on quantum backend
-    def execute_quantum(qasm_circs: List[str]) -> None:
+    def execute_quantum(
+        qasm_circs: Tuple[List[str], List[str]],
+    ) -> Tuple[List[float], List[float]]:
         """Execute the different circuits on the quantum device."""
-        print("Step 3: Not implemented yet.")
+        # todo: for QuantumInspire this needs to be replaced with what they do, here a qiskit implementation:
+        backend = QasmSimulator()
+        norm_qasm, overlap_qasm = qasm_circs
+        # todo: here we need to figure out how we extract the desired quantity from the results
+        norm_results = []
+        for qcirc in norm_qasm:
+            qc = QuantumCircuit.from_qasm_str(qcirc)
+            # Add measurements to the circuit if not already present
+            qc.measure_all()
+            job = execute(qc, backend)
+            result = job.result().get_counts()
+            norm_results.append(result)
+        overlap_results = []
+        for qcirc in overlap_qasm:
+            qc = QuantumCircuit.from_qasm_str(qcirc)
+            # Add measurements to the circuit if not already present
+            qc.measure_all()
+            job = execute(qc, backend)
+            result = job.result().get_counts()
+            overlap_results.append(result)
+
+        return norm_results, overlap_results
+
+    norm_res, overlap_res = execute_quantum(qasm_circs=qasm_circuits)
 
     # Step 4: minimize cost function
     def cost_function(x0: List[float]) -> float:
         """VQLS cost function."""
-        return x0[0] * 0.0
+        # Note: copied from vqls
+        cost_value = vqls_instance._assemble_cost_function(
+            hdmr_values_norm=norm_res,
+            hdmr_values_overlap=overlap_res,
+            coefficient_matrix=coeff_matrix,
+        )
+        return float(cost_value)
 
     print(optimizer)
     results = optimizer.minimize(
@@ -211,7 +238,7 @@ def naive_hybrid_loop(
         jac=gradient,
         bounds=bounds,
     )
-    print("Step 4: Not implemented yet.")
+    raise NotImplementedError("Step 4: Not implemented yet.")
 
     # Step 5: get new parameters to start
     new_params = results.x
