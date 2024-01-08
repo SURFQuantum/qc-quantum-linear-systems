@@ -7,20 +7,18 @@ from typing import Dict
 from typing import Tuple
 
 import boto3
-from braket.aws import AwsSession
+from braket.aws import AwsQuantumJob
 from braket.devices import Devices
 from braket.jobs import OutputDataConfig
 from braket.jobs.hybrid_job import hybrid_job
 from braket.tracking import Tracker
 from qiskit import QuantumCircuit
 from qiskit.primitives import BackendEstimator
-from qiskit.providers import JobStatus
 from qiskit.providers import ProviderV1
 from qiskit.result import Result
 from qiskit.visualization import plot_histogram
 from qiskit_braket_provider import AWSBraketProvider
 from qiskit_braket_provider import BraketLocalBackend
-from qiskit_braket_provider.providers.braket_job import AmazonBraketTask
 
 from quantum_linear_systems.implementations.vqls_qiskit_implementation import (
     solve_vqls_qiskit,
@@ -43,43 +41,66 @@ def run_real_device_aws(
     """Run circuit on real AWS BraKet device."""
     provider: ProviderV1 = AWSBraketProvider()
     # select device by name
+    device = None
     if device_name == "ionq":
-        backend = provider.get_backend("IonQ Device")
+        device = "arn:aws:braket:::device/qpu/ionq/ionQdevice"
     elif device_name == "rigetti":
-        backend = provider.get_backend("Aspen-M-1")
+        device = "arn:aws:braket:::device/qpu/rigetti/Aspen-M-1"
     elif device_name == "oqc":
-        backend = provider.get_backend("Lucy")
-    else:
-        return ValueError(f"{device_name} not in the list of known device names.")
+        device = "arn:aws:braket:::device/qpu/oqc/Lucy"
 
-    task = backend.run(circuit, shots=shots)
+    if device is None:
+        raise ValueError(f"{device_name} not in the list of known device ARNs.")
 
-    retrieved_job: AmazonBraketTask = backend.retrieve_job(job_id=task.job_id())
+    backend = provider.get_backend(device)
+    aws_quantum_job = backend.run(circuit, shots=shots)
 
-    check_task_status(braket_task=retrieved_job)
-    result = retrieved_job.result()
-    plot_histogram(result.get_counts())
+    check_job_status(aws_quantum_job=aws_quantum_job)
+    job_result = aws_quantum_job.result()
+    plot_histogram(job_result.get_counts())
 
 
-def check_task_status(
-    braket_task: AmazonBraketTask, seconds_interval: int = 10
+def check_job_status(
+    aws_quantum_job: AwsQuantumJob, seconds_interval: int = 10
 ) -> None:
-    """Check task status every `second_interval` seconds until the quantum task is
-    done."""
+    """Check job status every `seconds_interval` seconds until the quantum job is done
+    or failed."""
     while True:
-        status = braket_task.status()
+        state = aws_quantum_job.state()
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        if status == JobStatus.DONE:
-            print(f"{current_time} - Your quantum task {braket_task.task_id} is done!")
-            break  # Exit the loop if the job is done
+
+        if state == "COMPLETED":
+            print(
+                f"{current_time} - Your quantum job {aws_quantum_job.arn} has completed successfully."
+            )
+            # Retrieve and print job result
+            result = aws_quantum_job.result()
+            print("Job result:", result)
+            # Print measurement probabilities if available
+            if "measurementProbabilities" in result:
+                print("Measurement Probabilities:", result["measurementProbabilities"])
+            break
+        elif state == "FAILED":
+            print(f"{current_time} - Your quantum job {aws_quantum_job.arn} failed.")
+            # Retrieve and print job metadata for debugging
+            metadata = aws_quantum_job.metadata()
+            print("Job failed with metadata:", metadata)
+            # Display logs for debugging
+            try:
+                aws_quantum_job.logs(wait=False)
+            except Exception as e:
+                print("An error occurred while retrieving logs:", e)
+            break
         else:
             print(
-                f"{current_time} - Current status of your quantum task {braket_task.task_id} is: {status}"
+                f"{current_time} - Current status of your quantum job {aws_quantum_job.arn} is: {state}"
             )
-            if status == JobStatus.QUEUED:
-                print(
-                    f"{current_time} - Your position in the queue is {braket_task.queue_position()}"
-                )
+            if state == "QUEUED":
+                queue_info = aws_quantum_job.queue_position()
+                if queue_info and queue_info.queue_position:
+                    print(
+                        f"{current_time} - Your position in the queue is {queue_info.queue_position}"
+                    )
             time.sleep(seconds_interval)
 
 
@@ -132,16 +153,13 @@ if __name__ == "__main__":
     )
 
     # Define the role ARN for executing the hybrid job (replace with your actual role ARN)
-    # role_arn = "arn:aws:iam::815925483357:role/surf-administrator"
-    os.environ[
-        "BRAKET_JOBS_ROLE_ARN"
-    ] = "arn:aws:iam::815925483357:role/src-workspace-AmazonBraketJobsExecutionRole"
-    aws_session = AwsSession()
-    print("Default role", aws_session.get_default_jobs_role())
+    surf_role_arn = (
+        "arn:aws:iam::815925483357:role/src-workspace-AmazonBraketJobsExecutionRole"
+    )
 
     @hybrid_job(
         device=device_arn,
-        # role_arn=role_arn,
+        role_arn=surf_role_arn,
         output_data_config=output_data_config,
         dependencies="aws_requirements.txt",
         local=args.local,
@@ -176,17 +194,17 @@ if __name__ == "__main__":
 
     with Tracker() as tracker:
         # submit the job
-        job = execute_hybrid_job()
+        job: AwsQuantumJob = execute_hybrid_job()
 
-        check_task_status(braket_task=job, seconds_interval=10)
+        check_job_status(aws_quantum_job=job, seconds_interval=10)
 
         # Check the final status
-        print(f"Job {job.id} finished with status {job.state()}.")
+        print(f"Job {job.arn} finished with status {job.state()}.")
 
         # Retrieve results if job is completed
         if job.state() == "COMPLETED":
             result = job.result()
             print("Job result:", result)
-        # display the results
-        print(job.result().measurement_counts)
+            # display the results
+            print(result.measurement_counts)
     print(tracker.simulator_tasks_cost())
