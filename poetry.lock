@@ -2697,17 +2697,17 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "qiskit"
-version = "0.44.3"
+version = "0.45.1"
 description = "Software for developing quantum computing programs"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "qiskit-0.44.3-py3-none-any.whl", hash = "sha256:947a02f581c7a5eba7c739c840924cf8996be7205a6ee3720a1422deb0b781fe"},
-    {file = "qiskit-0.44.3.tar.gz", hash = "sha256:bc3447fda682cff5789125b51936450781bd9a73b817db8610f23ba16c1b8912"},
+    {file = "qiskit-0.45.1-py3-none-any.whl", hash = "sha256:86a757f38f4934a0668cafd3bf0a18e3abaeac697d14f0a9e155cfab2d8c1817"},
+    {file = "qiskit-0.45.1.tar.gz", hash = "sha256:1ae868c514db3e35c0a75d8ec08002491b9301586647637f11f744f8a376bb9e"},
 ]
 
 [package.dependencies]
-qiskit-terra = "0.25.3"
+qiskit-terra = "0.45.1"
 
 [package.extras]
 all = ["qiskit-terra[all]"]
@@ -2944,43 +2944,42 @@ visualization = ["ipython (>=5.0.0)", "ipyvue (>=1.4.1)", "ipyvuetify (>=1.1)", 
 
 [[package]]
 name = "qiskit-terra"
-version = "0.25.3"
+version = "0.45.1"
 description = "Software for developing quantum computing programs"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "qiskit-terra-0.25.3.tar.gz", hash = "sha256:1540a63d9771021724d0587975bd6b9fe0210852f4d96df7ec86305e0b09608c"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-macosx_10_9_universal2.whl", hash = "sha256:7e824d0f7c346160c816723abacd5d56497354044c3b78e511c4bc82252ec1a0"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-macosx_10_9_x86_64.whl", hash = "sha256:ab343e992a87ec7e3931fa4734bb4b60c10307920046965463e880aca80e3fa8"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:89e359fa9f0124e596e62cc9ba23440507278fb27029876d611f8c116e5a7668"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:5ea164fc9843c309affd804ddf6445f786ae4019006dd77ec60765cf46b91599"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b11517d5ba89f6b53ff29aaa6110de2cfc9458ae5c8a0dbe6b5e84ca0e1de8b5"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:66398c780a29e3118c740ae09a69de4cdb80e12bc58ac9e7fee28623f82ac6a5"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d547d217608f9f3adf7175f240c52be4ddad1bcc857e4a413b5c23b03b2ff642"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-win32.whl", hash = "sha256:85cb5f3e4789e1d5d1c0e35263bd519679d8d27c92c330429f36b213cae72834"},
-    {file = "qiskit_terra-0.25.3-cp38-abi3-win_amd64.whl", hash = "sha256:577480f6c3e0593ff8f826d82221c142ea77229a42c893054be5e65e5d100e1d"},
+    {file = "qiskit-terra-0.45.1.tar.gz", hash = "sha256:4ed0cf0d5f275276a27135b9d02f599d0c59c0c1c4286c2392314558481ed736"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-macosx_10_9_universal2.whl", hash = "sha256:edb6907b648ba8f2dd2c7409849afa7be7e2edb350014d3e78fc6d03505b205f"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-macosx_10_9_x86_64.whl", hash = "sha256:df34e6cbfc566b3411272de5dcc1c4f20c9d2d4af2b2e5f2f821d075bc05f5f8"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:4f3cade24c2dba896686fdd27986304a8784bf4c2e55181853f08ff1c766019c"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:dde0571a3e0be9ced6a50240b28d9e048309aa712fcdb37571c090e7845bed9e"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4e29d1264b890619d0a0ff2d0cdb244cb12ea27217c47a8f1ef2c8eaa9bd6b94"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:47f9e7e25b0b04b73a8475865a2b0850bc5104536eaca05278657933167a7174"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:9081e1731d0fe80619612073f9cfbcfbd4cd64c01c843ce936f4eb17876cb020"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9f8500c757386354fbb1d9424395541b90cc72d8b0dadaf2606d01190fa7594d"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-win32.whl", hash = "sha256:f9c641c6a14b599aca1de59c9c2c2cd7a711000749523f0d6f503a3445ddd4b6"},
+    {file = "qiskit_terra-0.45.1-cp38-abi3-win_amd64.whl", hash = "sha256:f41387fa19145f5ed22fa5f7e3bed44ba4ee4ba06bfbfada83b5a516587f2a74"},
 ]
 
 [package.dependencies]
 dill = ">=0.3"
-numpy = ">=1.17"
+numpy = ">=1.17,<2"
 ply = ">=3.10"
 psutil = ">=5"
 python-dateutil = ">=2.8.0"
 rustworkx = ">=0.13.0"
 scipy = ">=1.5"
 stevedore = ">=3.0.0"
-symengine = {version = ">=0.9,<0.10", markers = "platform_machine == \"x86_64\" or platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"amd64\" or platform_machine == \"arm64\""}
+symengine = {version = ">=0.9,<0.10.0 || >0.10.0", markers = "platform_machine == \"x86_64\" or platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"amd64\" or platform_machine == \"arm64\""}
 sympy = ">=1.3"
 typing-extensions = {version = "*", markers = "python_version < \"3.11\""}
 
 [package.extras]
 all = ["ipywidgets (>=7.3.0)", "matplotlib (>=3.3)", "pillow (>=4.2.1)", "pydot", "pygments (>=2.4)", "pylatexenc (>=1.4)", "python-constraint (>=1.4)", "qiskit-qasm3-import (>=0.1.0)", "seaborn (>=0.9.0)", "z3-solver (>=4.7)"]
-bip-mapper = ["cplex", "docplex"]
 crosstalk-pass = ["z3-solver (>=4.7)"]
 csp-layout-pass = ["python-constraint (>=1.4)"]
 qasm3-import = ["qiskit-qasm3-import (>=0.1.0)"]
-toqm = ["qiskit-toqm (>=0.1.0)"]
 visualization = ["ipywidgets (>=7.3.0)", "matplotlib (>=3.3)", "pillow (>=4.2.1)", "pydot", "pygments (>=2.4)", "pylatexenc (>=1.4)", "seaborn (>=0.9.0)"]
 
 [[package]]
@@ -3497,14 +3496,14 @@ develop = false
 
 [package.dependencies]
 mplhep = "^0.3.30"
-qiskit = "^0.44.2"
+qiskit = "^0.45.0"
 quantum-linear-solvers = "^0.1.1"
 
 [package.source]
 type = "git"
 url = "https://github.com/dmark04/TrackHHL"
 reference = "HEAD"
-resolved_reference = "ddc46306c7f8669d8cafd2037bd6eb91779caa3d"
+resolved_reference = "331cdbfeaf943eb1119e8ead521839299b7749b7"
 
 [[package]]
 name = "traitlets"
@@ -3775,4 +3774,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.12"
-content-hash = "611cb93a80146123e949a572673240d1304ccaecf8d05db7f32e353115efc638"
+content-hash = "f6748ee5e5e3aa3d5bc84cc939749011b965ff83335f418a3d4cebcafc6d53c3"
