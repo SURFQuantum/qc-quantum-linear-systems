@@ -397,12 +397,12 @@ files = [
 
 [[package]]
 name = "classiq"
-version = "0.33.0"
+version = "0.34.0"
 description = "Classiq's Python SDK for quantum computing"
 optional = false
 python-versions = ">=3.8,<3.12"
 files = [
-    {file = "classiq-0.33.0-py3-none-any.whl", hash = "sha256:3ed740316d974ce03dcaa052506ba5da46c4de87313216a6dc0d121484daecb0"},
+    {file = "classiq-0.34.0-py3-none-any.whl", hash = "sha256:2fe4a9b838763a2fe03be6c1e78ff3297a0a7e295ef389a536fc4170aee573a8"},
 ]
 
 [package.dependencies]
@@ -1887,8 +1887,8 @@ files = [
 mypy-extensions = ">=0.2.0"
 numpy = [
     {version = ">=1.19.3", markers = "python_version >= \"3.9\" and python_version < \"3.10\""},
-    {version = ">=1.21.6", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.22.0", markers = "python_version >= \"3.11\""},
+    {version = ">=1.21.6", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 openpulse = ">=0.4.1,<0.5.0"
 
@@ -2004,8 +2004,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
-    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.1"
 pytz = ">=2020.1"
@@ -3775,4 +3775,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.12"
-content-hash = "611cb93a80146123e949a572673240d1304ccaecf8d05db7f32e353115efc638"
+content-hash = "fbf567202898fbdace762939793d0ae97c0b67cec850247e60f0a66274032132"
