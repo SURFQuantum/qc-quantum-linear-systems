@@ -22,6 +22,7 @@ from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes
 from qiskit.primitives import Estimator
 from qiskit.primitives import Sampler
 from qiskit.quantum_info import Statevector
+from qiskit.result import QuasiDistribution
 from qiskit_aer import QasmSimulator
 from qiskit_algorithms.optimizers import COBYLA
 from qiskit_algorithms.optimizers import SLSQP
@@ -80,6 +81,7 @@ def naive_hybrid_solve_vqls(
     hdmr_tests_norm, hdmr_tests_overlap = vqls.construct_circuit(matrix_a, vector_b)
     hdmr_norm_circuits = [c for h in hdmr_tests_norm for c in h.circuits]
     hdmr_overlap_circuits = [c for h in hdmr_tests_overlap for c in h.circuits]
+    print("obserables", vqls.estimator.observables)
 
     # compute the coefficient matrix
     coefficient_matrix = vqls.get_coefficient_matrix(
@@ -206,7 +208,8 @@ def naive_hybrid_loop(
             qc.measure_all()
             job = execute(qc, backend)
             result = job.result().get_counts()
-            norm_results.append(result)
+            quasi_dist = QuasiDistribution(result)
+            norm_results.append(quasi_dist)
         overlap_results = []
         for qcirc in overlap_qasm:
             qc = QuantumCircuit.from_qasm_str(qcirc)
@@ -214,8 +217,22 @@ def naive_hybrid_loop(
             qc.measure_all()
             job = execute(qc, backend)
             result = job.result().get_counts()
-            overlap_results.append(result)
-
+            quasi_dist = QuasiDistribution(result)
+            overlap_results.append(quasi_dist)
+        print(norm_results)
+        norm_results = test_post_processing(
+            norm_results,
+            num_qubits=vqls_instance._get_local_circuits()[0].num_qubits,
+            post_process_coeffs=vqls_instance._get_local_circuits()[
+                0
+            ].post_process_coeffs,
+        )
+        norm_results = np.array([1.0 - 2.0 * val for val in norm_results]).astype(
+            "complex128"
+        )
+        norm_results *= np.array([1.0, 1.0j])
+        print(norm_results)
+        exit()
         return norm_results, overlap_results
 
     norm_res, overlap_res = execute_quantum(qasm_circs=qasm_circuits)
@@ -223,6 +240,7 @@ def naive_hybrid_loop(
     # Step 4: minimize cost function
     def cost_function(x0: List[float]) -> float:
         """VQLS cost function."""
+        # Note since we already evaluated the circuits the input params are not used here
         # Note: copied from vqls
         cost_value = vqls_instance._assemble_cost_function(
             hdmr_values_norm=norm_res,
@@ -231,20 +249,47 @@ def naive_hybrid_loop(
         )
         return float(cost_value)
 
-    print(optimizer)
     results = optimizer.minimize(
         fun=cost_function,
-        x0=list(np.zeros(len(parameter_values))),
+        x0=parameter_values,
         jac=gradient,
         bounds=bounds,
     )
-    raise NotImplementedError("Step 4: Not implemented yet.")
 
     # Step 5: get new parameters to start
     new_params = results.x
     cost = results.fun
 
     return new_params, cost
+
+
+def test_post_processing(  # type: ignore
+    sampler_result, num_qubits: int, post_process_coeffs
+) -> np.ndarray:
+    """Post process the sampled values of the circuits.
+
+    Args:
+        sampler_result (results): Result of the sampler
+
+    Returns:
+        List: value of the overlap hadammard test
+    """
+
+    # quasi_dist = sampler_result.quasi_dists
+    quasi_dist = sampler_result
+    output = []
+
+    for qdist in quasi_dist:
+        # add missing keys
+        val = np.array([qdist[k] if k in qdist else 0 for k in range(2**num_qubits)])
+
+        value_0, value_1 = val[0::2], val[1::2]
+        proba_0 = (value_0 * post_process_coeffs).sum()
+        proba_1 = (value_1 * post_process_coeffs).sum()
+
+        output.append(proba_0 - proba_1)
+
+    return np.array(output).astype("complex128")
 
 
 if __name__ == "__main__":

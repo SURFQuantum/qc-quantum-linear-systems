@@ -56,7 +56,11 @@ def solve_vqls_qiskit(
         ansatz=ansatz,
         optimizer=optimizer,
         sampler=Sampler(),
-        options={"use_overlap_test": False, "use_local_cost_function": False},
+        options={
+            "use_overlap_test": False,
+            "use_local_cost_function": False,
+            "verbose": True,
+        },
     )
     res = vqls.solve(matrix_a, vector_b)
 
