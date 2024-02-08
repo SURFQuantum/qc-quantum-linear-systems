@@ -45,8 +45,8 @@ title: Framework
 flowchart TD
     A[Matrix A, vector x] -->|inside| B(ToyModel)
     C(QuantumLinearSolver) -->|baseclass| D{QLS.solve:}
-    M[Implementations
-    HHL/VQLS, Classiq/qiskit] ---> |method| D
+    M["Implementations
+    HHL/VQLS, Classiq/qiskit"] ---> |method| D
     B --> |A,x| D
     D --> CH((check))
     CH --> S((impl.solve))
