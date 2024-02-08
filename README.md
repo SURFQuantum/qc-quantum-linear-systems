@@ -22,7 +22,7 @@ to install all dependencies.
 ## Additional Requirements
 ### Classiq SDK
 This project makes use of the [classiq](https://www.classiq.io/) SDK.
-To use the `classiq` SKD the user must perform authentication.
+To use the `classiq` SDK the user must perform authentication.
 For more info check out the [classiq docs](https://docs.classiq.io/latest/) page.
 
 Authentication is as simple as:
@@ -41,12 +41,12 @@ Completing the login completes the authentication process.
 ```mermaid
 flowchart TD
     A[Matrix A, vector x] -->|inside| B(ToyModel)
-    C(QuantumLinearSolver) -->|baseclass| D{QLS.solve:}
-    M["Implementations
-    HHL/VQLS, Classiq/qiskit"] ---> |method| D
+    subgraph QuantumLinearSolver
+        D{"QLS.solve()"} --> CH{{check}}
+        CH --> S{{"impl.solve()"}}
+    end
+    M[Implementations HHL/VQLS, Classiq/qiskit] ---> |method| D
     B --> |A,x| D
-    D --> CH((check))
-    CH --> S((impl.solve))
     S --> Q[QASM circuit]
     S --> V[StateVector]
 ```
