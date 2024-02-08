@@ -39,9 +39,6 @@ Completing the login completes the authentication process.
 ## Framework Diagram
 
 ```mermaid
----
-title: Framework
----
 flowchart TD
     A[Matrix A, vector x] -->|inside| B(ToyModel)
     C(QuantumLinearSolver) -->|baseclass| D{QLS.solve:}
