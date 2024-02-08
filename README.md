@@ -34,3 +34,19 @@ classiq.authenticate()
 This will open a confirmation window in your default browser.
 After confirming the user code the classiq login screen appears.
 Completing the login completes the authentication process.
+
+
+## Framework Diagram
+
+```mermaid
+flowchart TD
+    A[Matrix A, vector x] -->|inside| B(ToyModel)
+    C(QuantumLinearSolver) -->|baseclass| D{QLS.solve:}
+    M["Implementations
+    HHL/VQLS, Classiq/qiskit"] ---> |method| D
+    B --> |A,x| D
+    D --> CH((check))
+    CH --> S((impl.solve))
+    S --> Q[QASM circuit]
+    S --> V[StateVector]
+```
