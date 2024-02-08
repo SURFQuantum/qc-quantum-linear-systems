@@ -40,13 +40,13 @@ Completing the login completes the authentication process.
 
 ```mermaid
 flowchart TD
-    A[Matrix A, vector x] -->|inside| B(ToyModel)
-    subgraph QuantumLinearSolver
-        D{"QLS.solve()"} --> CH{{check matrix}}
+    subgraph Class QuantumLinearSolver
+        D{"QLS.solve()"} --> CH{{check}}
         CH --> S{{"impl.solve()"}}
     end
-    M[Implementations HHL/VQLS, Classiq/qiskit] ---> |method| D
+    A(Matrix A, vector x) -->|inside| B[Class ToyModel]
+    M(Implementations HHL/VQLS, Classiq/qiskit) ---> |method| D
     B --> |A,x| D
-    S --> Q[QASM circuit]
-    S --> V[StateVector]
+    S --> Q(QASM circuit)
+    S --> V(StateVector)
 ```
