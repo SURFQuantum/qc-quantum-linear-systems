@@ -42,7 +42,7 @@ Completing the login completes the authentication process.
 flowchart TD
     A[Matrix A, vector x] -->|inside| B(ToyModel)
     subgraph QuantumLinearSolver
-        D{"QLS.solve()"} --> CH{{check}}
+        D{"QLS.solve()"} --> CH{{check matrix}}
         CH --> S{{"impl.solve()"}}
     end
     M[Implementations HHL/VQLS, Classiq/qiskit] ---> |method| D
