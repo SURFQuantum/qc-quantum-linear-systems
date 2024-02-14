@@ -44,9 +44,9 @@ flowchart TD
         D{"QLS.solve()"} --> CH{{check}}
         CH --> S{{"impl.solve()"}}
     end
-    A(Matrix A, vector x) -->|inside| B[Class ToyModel]
+    A(Matrix A, vector b) -->|inside| B[Class ToyModel]
     M(Implementations HHL/VQLS, Classiq/qiskit) ---> |method| D
-    B --> |A,x| D
+    B --> |A,b| D
     S --> Q(QASM circuit)
-    S --> V(StateVector)
+    S --> V("StateVector |x>")
 ```

@@ -36,14 +36,15 @@ class QuantumLinearSolver:
         self.circuit_depth: int
         self.run_time: float
 
-    def check_matrix_square_hermitian(self) -> None:
+    @staticmethod
+    def check_matrix_square_hermitian(matrix_a: np.ndarray) -> None:
         """Check if the coefficient matrix A is square and Hermitian."""
-        if self.matrix_a.shape[0] != self.matrix_a.shape[1]:
+        if matrix_a.shape[0] != matrix_a.shape[1]:
             raise ValueError(
                 f"Input matrix A needs to be square, not "
-                f"{self.matrix_a.shape[0]}x{self.matrix_a.shape[1]}."
+                f"{matrix_a.shape[0]}x{matrix_a.shape[1]}."
             )
-        if not np.allclose(self.matrix_a, np.conj(self.matrix_a.T)):
+        if not np.allclose(matrix_a, np.conj(matrix_a.T)):
             raise ValueError("Input matrix A is not hermitian!")
 
     def circuit_data(self) -> Tuple[str, int, int]:
@@ -83,7 +84,7 @@ class QuantumLinearSolver:
             method,
         )
         # currently all implemented solvers share these requirements
-        self.check_matrix_square_hermitian()
+        self.check_matrix_square_hermitian(self.matrix_a)
 
         # self.normalize_model() # this should be in the respective solver method if it is needed
 
