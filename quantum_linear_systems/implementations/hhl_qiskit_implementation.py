@@ -5,6 +5,7 @@ from typing import Tuple
 import numpy as np
 from linear_solvers import HHL
 from linear_solvers import LinearSolverResult
+from qiskit.providers import Backend
 from qiskit.quantum_info import Statevector
 
 from quantum_linear_systems.plotting import print_results
@@ -16,7 +17,10 @@ from quantum_linear_systems.utils import is_expanded
 
 
 def solve_hhl_qiskit(
-    matrix_a: np.ndarray, vector_b: np.ndarray, show_circuit: bool = False
+    matrix_a: np.ndarray,
+    vector_b: np.ndarray,
+    show_circuit: bool = False,
+    backend: Backend = None,
 ) -> Tuple[np.ndarray, str, int, int, float]:
     """Solve linear system Ax=b using HHL implemented in qiskit based on the quantum
     linear solvers package.
@@ -27,7 +31,7 @@ def solve_hhl_qiskit(
     start_time = time.time()
 
     # solve HHL using qiskit
-    hhl_implementation = HHL()
+    hhl_implementation = HHL(quantum_instance=backend)
     naive_hhl_solution: LinearSolverResult = hhl_implementation.solve(
         matrix=matrix_a, vector=vector_b
     )
