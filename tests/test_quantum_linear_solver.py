@@ -16,7 +16,7 @@ class TestQuantumLinearSolver(unittest.TestCase):
         # Test case 2: Diagonal matrix with positive values
         matrix_a = np.diag([2, 3, 5])
         result = qls.check_matrix_condition_number(matrix_a)
-        self.assertEqual(result, 5.0)
+        self.assertEqual(result, 2.5)
 
     def test_check_matrix_sparsity(self) -> None:
         qls = QuantumLinearSolver()
@@ -28,7 +28,7 @@ class TestQuantumLinearSolver(unittest.TestCase):
         # Test case 2: Identity matrix
         matrix_a = np.eye(3)
         result = qls.check_matrix_sparsity(matrix_a)
-        self.assertEqual(result, 0.0)
+        self.assertEqual(result, 6 / 9)
 
 
 if __name__ == "__main__":
