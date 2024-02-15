@@ -36,17 +36,6 @@ class QuantumLinearSolver:
         self.circuit_depth: int
         self.run_time: float
 
-    @staticmethod
-    def check_matrix_square_hermitian(matrix_a: np.ndarray) -> None:
-        """Check if the coefficient matrix A is square and Hermitian."""
-        if matrix_a.shape[0] != matrix_a.shape[1]:
-            raise ValueError(
-                f"Input matrix A needs to be square, not "
-                f"{matrix_a.shape[0]}x{matrix_a.shape[1]}."
-            )
-        if not np.allclose(matrix_a, np.conj(matrix_a.T)):
-            raise ValueError("Input matrix A is not hermitian!")
-
     def circuit_data(self) -> Tuple[str, int, int]:
         """Return data about the solution circuit."""
         return self.qasm_circuit, self.circuit_depth, self.circuit_width
@@ -124,6 +113,35 @@ class QuantumLinearSolver:
             f"{self.name}_{self.method}.qasm", "w", encoding="utf-8"
         ) as qasm_file:
             qasm_file.write(self.qasm_circuit)
+
+    @staticmethod
+    def check_matrix_square_hermitian(matrix_a: np.ndarray) -> None:
+        """Check if the coefficient matrix A is square and Hermitian."""
+        if matrix_a.shape[0] != matrix_a.shape[1]:
+            raise ValueError(
+                f"Input matrix A needs to be square, not "
+                f"{matrix_a.shape[0]}x{matrix_a.shape[1]}."
+            )
+        if not np.allclose(matrix_a, np.conj(matrix_a.T)):
+            raise ValueError("Input matrix A is not hermitian!")
+
+    @staticmethod
+    def check_matrix_condition_number(matrix_a: np.ndarray) -> float:
+        """Check the condition number of the matrix A."""
+        eigvals = np.linalg.eigvals(matrix_a)
+        abs_eigvals = np.abs(eigvals)
+        max_eigval = np.max(abs_eigvals)
+        min_eigval = np.min(abs_eigvals[np.nonzero(abs_eigvals)])
+        return float(max_eigval / min_eigval)
+
+    @staticmethod
+    def check_matrix_sparsity(matrix_a: np.ndarray) -> float:
+        """Check the sparsity of the matrix A."""
+        num_zeros = np.sum(
+            matrix_a == 0
+        )  # todo: maybe better to loosen sparsity condition to being close to 0
+        num_elements = matrix_a.shape[0] * matrix_a.shape[1]
+        return float(num_zeros / num_elements)
 
 
 if __name__ == "__main__":
