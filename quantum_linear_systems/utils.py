@@ -8,7 +8,6 @@ from qiskit import QuantumCircuit
 
 def circuit_to_qasm3(circuit: QuantumCircuit, filename: str) -> Any:
     qasm_content = qasm3.dumps(circuit=circuit)
-    print(qasm_content)
     with open(filename, "w") as stream:
         qasm3.dump(circuit=circuit, stream=stream)
     return qasm_content
