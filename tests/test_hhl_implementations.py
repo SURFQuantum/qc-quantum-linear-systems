@@ -1,4 +1,5 @@
 """Test HHL implementations."""
+
 import unittest
 
 import numpy as np

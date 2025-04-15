@@ -117,10 +117,7 @@ def aws_s3_folder(folder_name: str) -> Tuple[str, str]:
     with open("/etc/src_quantum.json", "r") as fp:
         config = json.load(fp)
     bucket = f"amazon-braket-{config['workspace_id']}"
-    return (
-        bucket,
-        folder_name,
-    )
+    return (bucket, folder_name)
 
 
 if __name__ == "__main__":

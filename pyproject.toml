@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quantum-linear-systems"
-version = "0.1.0"
+version = "0.1.1"
 description = "Quantum algorithms to solve linear systems of equations."
 authors = ["dmark04 <dmark04@web.de>"]
 license = "Apache-2.0"
