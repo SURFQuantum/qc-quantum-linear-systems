@@ -1,4 +1,5 @@
 """HHL implementation using Classiq."""
+
 import time
 from itertools import product
 from typing import Any
@@ -288,10 +289,7 @@ def classiq_hhl_implementation(
         params=qpe,
         is_inverse=True,
         release_by_inverse=True,
-        in_wires={
-            "PHASE_ESTIMATION": al_out["AMPLITUDE"],
-            "OUT": qpe_out["OUT"],
-        },
+        in_wires={"PHASE_ESTIMATION": al_out["AMPLITUDE"], "OUT": qpe_out["OUT"]},
     )
 
     model_hhl.sample()

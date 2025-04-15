@@ -1,4 +1,5 @@
 """Implementations of toy-models that can be imported by the algorithms."""
+
 import numpy as np
 from trackhhl.hamiltonians.simple_hamiltonian import SimpleHamiltonian
 from trackhhl.hamiltonians.simple_hamiltonian import upscale_pow2
