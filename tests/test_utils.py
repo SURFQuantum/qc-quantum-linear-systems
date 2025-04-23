@@ -1,4 +1,5 @@
 """Test utility functions."""
+
 import unittest
 
 import numpy as np

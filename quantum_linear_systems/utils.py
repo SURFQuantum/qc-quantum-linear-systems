@@ -1,4 +1,5 @@
 """Utility functions that can be imported by either implementation."""
+
 from typing import Any
 
 import numpy as np

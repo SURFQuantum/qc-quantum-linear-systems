@@ -1,4 +1,5 @@
 """Plotting functions that can be imported by either implementation."""
+
 from typing import List
 from typing import Tuple
 
