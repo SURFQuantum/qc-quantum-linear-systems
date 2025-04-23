@@ -3120,15 +3120,15 @@ dask = ["dask", "distributed"]
 
 [[package]]
 name = "qiskit-algorithms"
-version = "0.2.2"
+version = "0.3.1"
 description = "Qiskit Algorithms: A library of quantum computing algorithms"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "python_version <= \"3.11\""
 files = [
-    {file = "qiskit-algorithms-0.2.2.tar.gz", hash = "sha256:53829402d53a2c8ef84db5a348c071e497a3bf5b45a017b8bf748cf9d9997db0"},
-    {file = "qiskit_algorithms-0.2.2-py3-none-any.whl", hash = "sha256:695b2ddb8cf78a10e65131ffd37b9654dcc7d42a2b4ea85d9bfddf34e7f1229f"},
+    {file = "qiskit_algorithms-0.3.1-py3-none-any.whl", hash = "sha256:d6c31d88a1ed65a9c6382c233ef10ecb9562e726f7b1b7823a0d178d63d29a0a"},
+    {file = "qiskit_algorithms-0.3.1.tar.gz", hash = "sha256:cba9c573d47c0f9508745a5a2794298084ec4f8833781b426fa9b2cea0fca794"},
 ]
 
 [package.dependencies]
@@ -4251,4 +4251,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9, <3.12"
-content-hash = "fe8d3da2648b1ab1cd45cc9e1f09271314edb13d97c087277d76433e891dee09"
+content-hash = "0cbbf2ed9360a87c4ba74c4c67d90cfa37aeb7ee2bcdc2afd68d1a42a37f91ce"
