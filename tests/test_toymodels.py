@@ -1,4 +1,5 @@
 """Test ToyModel implementations."""
+
 import unittest
 
 from quantum_linear_systems.toymodels import ClassiqDemoExample

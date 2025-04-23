@@ -1,4 +1,5 @@
 """LinearSolver class."""
+
 from typing import Any
 from typing import Tuple
 

@@ -4,6 +4,7 @@ saved as a qasm file and then submitted to the quantum hardware.
 The results are then given to the classical part of the algorithm. This is looped over
 in a for loop.
 """
+
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library.n_local.real_amplitudes import RealAmplitudes

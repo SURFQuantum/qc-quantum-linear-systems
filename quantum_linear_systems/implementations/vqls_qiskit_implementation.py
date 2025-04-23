@@ -1,5 +1,6 @@
 """VQLS implementation using Qiskit and https://github.com/QuantumApplicationLab/vqls-
 prototype."""
+
 import time
 from typing import Tuple
 

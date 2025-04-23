@@ -1,5 +1,6 @@
 """Compare the Classiq and Qiskit implementations on different use-cases and plot the
 results."""
+
 import csv
 from datetime import datetime
 from typing import Any
