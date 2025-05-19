@@ -23,14 +23,13 @@ repos:
         args: [ --strict, --ignore-missing-imports, --allow-untyped-decorators, --allow-subclassing-any ]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.5
+    rev: v0.11.10
     hooks:
       - id: ruff
         args: [ --fix ]
       - id: ruff-format
   - repo: https://github.com/PyCQA/docformatter
-    # Don't autoupdate until https://github.com/PyCQA/docformatter/issues/293 is fixed rev: eb1df347edd128b30cd3368dddc3aa65edcfac38
-    rev: eb1df347edd128b30cd3368dddc3aa65edcfac38
+    rev: v1.7.7
     hooks:
       - id: docformatter
         args: [ --in-place, --black ]
