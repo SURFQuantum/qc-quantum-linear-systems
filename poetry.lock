@@ -337,13 +337,13 @@ files = [
 
 [[package]]
 name = "classiq"
-version = "0.75.0"
+version = "0.84.0"
 description = "Classiq's Python SDK for quantum computing"
 optional = false
 python-versions = "<3.13,>=3.9"
 groups = ["main"]
 files = [
-    {file = "classiq-0.75.0-py3-none-any.whl", hash = "sha256:0fcc06a045f0a8319af7947891c4b509efaabb0e7eb44a058e4e6bd457818153"},
+    {file = "classiq-0.84.0-py3-none-any.whl", hash = "sha256:d778671e07d937be96307ea203b28d1cfde734040b49a3875e635c446c638eeb"},
 ]
 
 [package.dependencies]
@@ -369,6 +369,7 @@ zstandard = ">=0.23.0,<0.24.0"
 
 [package.extras]
 analyzer-sdk = ["ipywidgets", "jupyterlab", "notebook"]
+chemistry = ["openfermion", "openfermionpyscf"]
 qml = ["torch", "torchvision"]
 
 [[package]]
@@ -4119,4 +4120,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9, <3.12"
-content-hash = "e7bfd991ea5e0e2816c781121688bb34166bfcf488e477f30f0631663b5918a8"
+content-hash = "8a5c8cad67df2b52754cde28794464bc351da0f87b37e4a2c3debf866036a3b1"
