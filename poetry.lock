@@ -2945,25 +2945,37 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "qiskit"
-version = "0.46.3"
-description = "Software for developing quantum computing programs"
+version = "2.1.0"
+description = "An open-source SDK for working with quantum computers at the level of extended quantum circuits, operators, and primitives."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "qiskit-0.46.3-py3-none-any.whl", hash = "sha256:5e29709d1003152cf823915ef625b9a70fa31d148c75b6d3777a288575fc76d0"},
-    {file = "qiskit-0.46.3.tar.gz", hash = "sha256:a042fed00387ec5cdadc5d2cd08eb7f2f6cd0939f488aba467762c098a321604"},
+    {file = "qiskit-2.1.0-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:da31bc33685722389a30fa26a22c254411b511718c6b05a8033dde53f65f491f"},
+    {file = "qiskit-2.1.0-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:4ebfd5f3dd9ed0d0bb59c192412ee9c51ac639914b1c3c76cf3fb67fe848e4a8"},
+    {file = "qiskit-2.1.0-cp39-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:b75b39bcf73e4faf6233911331e1087218242abaf46f48b2c8870174fffaf5e1"},
+    {file = "qiskit-2.1.0-cp39-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:763ea321d168a2e03b9b5710d35a2e71d44bde72fd7bd980437a172b6834b110"},
+    {file = "qiskit-2.1.0-cp39-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:3ad89c7c1a15dd5df1ccf4c725d82b2faeae364d58b73eee800b4cd73be9990b"},
+    {file = "qiskit-2.1.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3169a93a8edf0bb791315dcf0dc9d74519f49ec62bcb5d0ac4e5f63717e3982a"},
+    {file = "qiskit-2.1.0-cp39-abi3-win_amd64.whl", hash = "sha256:5755e482392d8c9f9491cde013ce54b2bf30b1c36cfa85c69051259650c7983d"},
+    {file = "qiskit-2.1.0.tar.gz", hash = "sha256:b25233d547779cbb4ee384548e0c5525599212140ceb371879b735b20df5fc9e"},
 ]
 
 [package.dependencies]
-qiskit-terra = "0.46.3"
+dill = ">=0.3"
+numpy = ">=1.17,<3"
+rustworkx = ">=0.15.0"
+scipy = ">=1.5"
+stevedore = ">=3.0.0"
+typing-extensions = "*"
 
 [package.extras]
-all = ["qiskit-terra[all]"]
-crosstalk-pass = ["qiskit-terra[crosstalk-pass]"]
-csp-layout-pass = ["qiskit-terra[csp-layout-pass]"]
-qasm3-import = ["qiskit-terra[qasm3-import]"]
-visualization = ["qiskit-terra[visualization]"]
+all = ["qiskit[crosstalk-pass,csp-layout-pass,qasm3-import,qpy-compat,visualization]"]
+crosstalk-pass = ["z3-solver (>=4.7)"]
+csp-layout-pass = ["python-constraint (>=1.4)"]
+qasm3-import = ["qiskit-qasm3-import (>=0.1.0)"]
+qpy-compat = ["symengine (>=0.11,<0.14)", "sympy (>1.3)"]
+visualization = ["Pillow (>=4.2.1)", "matplotlib (>=3.3)", "pydot", "pylatexenc (>=1.4)", "seaborn (>=0.9.0)", "sympy (>=1.3)"]
 
 [[package]]
 name = "qiskit-aer"
@@ -4119,4 +4131,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9, <3.12"
-content-hash = "e7bfd991ea5e0e2816c781121688bb34166bfcf488e477f30f0631663b5918a8"
+content-hash = "dfeeaa45fc3a5ed412f20515bbdb8b583418a4eae643fb689faf1acdba0c5b1c"
