@@ -42,13 +42,18 @@ class TestClassiqHHL(unittest.TestCase):
         q_sol, _, _, width, _ = solve_hhl_classiq(
             self.test_model.matrix_a,
             self.test_model.vector_b,
-            qpe_register_size=qpe_register,
+            # qpe_register_size=qpe_register,
             show_circuit=False,
         )
 
         self.assertEqual(width, 2 + qpe_register)
         print(self.test_model.classical_solution, q_sol)
         print(np.linalg.norm(self.test_model.classical_solution), np.linalg.norm(q_sol))
+        print(
+            self.test_model.classical_solution
+            / np.linalg.norm(self.test_model.classical_solution),
+            np.real(q_sol / np.linalg.norm(q_sol)),
+        )
         self.assertTrue(
             np.allclose(self.test_model.classical_solution, q_sol, atol=0.1)
         )

@@ -86,6 +86,8 @@ def solve_hhl_classiq(
 
     # SP params
     b_normalized = vector_b.tolist()
+    max_lambda = np.max(np.linalg.eigvals(matrix_a))
+    matrix_a = matrix_a / (max_lambda * 1.1)
 
     solution_register_size = int(np.log2(len(vector_b)))
     if qpe_register_size is None:
@@ -139,12 +141,10 @@ def solve_hhl_classiq(
         show(qprog_hhl)
     qasm_content = QuantumProgram.from_qprog(qprog_hhl).qasm
 
-    circuit_hhl = QuantumProgram.from_qprog(qprog_hhl)
-    circuit_width = (
-        circuit_hhl.data.width
-    )  # total number of qubits of the whole circuit
-    circuit_depth = circuit_hhl.transpiled_circuit.depth
-    cx_counts = circuit_hhl.transpiled_circuit.count_ops["cx"]
+    # circuit_hhl = QuantumProgram.from_qprog(qprog_hhl)
+    circuit_width = qprog_hhl.data.width  # total number of qubits of the whole circuit
+    circuit_depth = qprog_hhl.transpiled_circuit.depth
+    cx_counts = qprog_hhl.transpiled_circuit.count_ops["cx"]
 
     # Execute
     result = execute(qprog_hhl).result_value()
@@ -155,17 +155,33 @@ def solve_hhl_classiq(
     # phase_pos = list(
     #     result.physical_qubits_map["phase"]
     # )  # position of the “phase” register, and flips for endianness as we will use the indices to read directly from the string
-    qsol = [
-        np.round(parsed_state.amplitude / (1 / 2**precision), 5)
-        for solution in range(2**num_qubits)
-        for parsed_state in result.parsed_state_vector
-        if parsed_state["indicator"] == 1.0
-        and parsed_state["res"] == solution
-        and parsed_state["phase"]
-        == 0.0  # this takes the entries where the “phase” register is at state zero
-    ]
+    # qsol = [
+    #     np.round(parsed_state.amplitude / (1 / 2**precision), 5)
+    #     for solution in range(2**num_qubits)
+    #     for parsed_state in result.parsed_state_vector
+    #     if parsed_state["indicator"] == 1.0
+    #     and parsed_state["res"] == solution
+    #     and parsed_state["phase"]
+    #     == 0.0  # this takes the entries where the “phase” register is at state zero
+    # ]
+    from collections import defaultdict
+
+    solution_vector: defaultdict[int, complex] = defaultdict(complex)
+
+    for state in result.parsed_state_vector:
+        if state["indicator"] == 1.0:
+            res_index = int(state["res"])
+            solution_vector[res_index] += state.amplitude
+
+    # Normalize the solution vector
+    res_vector = np.array(
+        [solution_vector[i] for i in range(2**num_qubits)], dtype=complex
+    )
+    res_vector = res_vector * (max_lambda * 1.1)
+    # res_vector /= np.linalg.norm(res_vector)
+
     quantum_solution = postprocess_solution(
-        matrix_a=matrix_a, vector_b=vector_b, solution_x=np.array(qsol)
+        matrix_a=matrix_a, vector_b=vector_b, solution_x=res_vector
     )
 
     # return total_q, depth, cx_counts
